@@ -1,10 +1,17 @@
 import ast
+import dataclasses
 import pathlib
 from collections import namedtuple
+from typing import Optional
 
 from loguru import logger
 
-Import = namedtuple("Import", ["module", "name", "alias"])
+
+@dataclasses.dataclass
+class Import:
+    module: Optional[str] = None
+    name: Optional[str] = None
+    alias: Optional[str] = None
 
 
 def get_module_info_from_code(path):

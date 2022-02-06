@@ -4,6 +4,8 @@ import glob
 from loguru import logger
 
 from creosote import parsers
+from creosote.depsreader import DepsReader
+from creosote.resolvers import DepsResolver
 
 
 def parse_args():
@@ -24,11 +26,11 @@ def parse_args():
     )
     parser.add_argument(
         "-d",
-        "--dependencies",
-        dest="dependencies",
+        "--deps-file",
+        dest="deps_file",
         default="pyproject.toml",
         choices=["pyproject.toml"],
-        help="The requirement file to use.",
+        help="The file to read dependencies from.",
     )
 
     return parser.parse_args()
@@ -38,8 +40,16 @@ def main():
     args = parse_args()
     logger.debug(f"Arguments given: {args}")
 
-    imports = parsers.get_modules_from_code(args.paths)
-    logger.debug(f"Imports: {imports}")
+    modules = parsers.get_modules_from_code(args.paths)
+    logger.debug(f"Modules: {modules}")
+
+    deps_reader = DepsReader()
+    deps_reader.read(args.deps_file)
+    logger.debug(f"Packages: {deps_reader.packages}")
+
+    deps_resolver = DepsResolver()
+    deps_resolver.resolve(modules=modules, packages=deps_reader.packages)
+    logger.debug(f"Unused packages: {deps_resolver.unused_packages}")
 
 
 if __name__ == "__main__":
