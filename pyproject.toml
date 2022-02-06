@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "creosote"
+version = "0.1.0"
+description = "Prevent bloated virtual environments by identifing installed packages, unused by your code."
+authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.10, <3.11"  # do not use ^3.10
+distlib = "^0.3.4"
+loguru = "^0.6.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+flake8 = "^4.0.1"
+flake8-bugbear = "^22.1.11"
+flake8-bandit = "^2.1.2"
+mypy = "^0.931"
+pytest = "^7.0.0"
+
+[tool.poetry.scripts]
+creosote = "creosote.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
