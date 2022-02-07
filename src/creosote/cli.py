@@ -59,6 +59,8 @@ def main():
         if unused_packages:
             logger.error(f"Unused packages found: {', '.join(unused_packages)}")
             sys.exit(1)
+        else:
+            logger.info("No unused packages found.")
 
 
 if __name__ == "__main__":
