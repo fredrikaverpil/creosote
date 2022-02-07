@@ -1,6 +1,6 @@
 # creosote
 
-Prevent bloated virtual environments by identifing installed, but unused, dependencies.
+Identify unused production dependencies and avoid a bloated virtual environment.
 
 ## Quickstart
 
