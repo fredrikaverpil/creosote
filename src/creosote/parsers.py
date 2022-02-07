@@ -34,7 +34,7 @@ class PackageReader:
 
     @lru_cache
     def ignore_packages(self):
-        return ["python"]
+        return ["python", "distlib"]
 
     def wrap_in_obj(self, deps):
         packages = []
