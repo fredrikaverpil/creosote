@@ -22,6 +22,12 @@ def parse_args():
         help="Increase output verbosity.",
     )
     parser.add_argument(
+        "--porcelain",
+        dest="porcelain",
+        action="store_true",
+        help="Disable logging, print in a parsable format",
+    )
+    parser.add_argument(
         "-p",
         "--paths",
         dest="paths",
@@ -48,7 +54,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def configure_logger(verbose: bool):
+def configure_logger(verbose: bool, porcelain: bool):
+    if porcelain:
+        logger.remove()
+        logger.add(sys.stderr, level="CRITICAL")
+        return
+
     if not verbose:
         logger.remove()
         logger.add(sys.stderr, level="INFO")
@@ -57,7 +68,7 @@ def configure_logger(verbose: bool):
 def main():
     args = parse_args()
 
-    configure_logger(args.verbose)
+    configure_logger(verbose=args.verbose, porcelain=args.porcelain)
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found:")
@@ -71,9 +82,7 @@ def main():
     logger.info("Resolving...")
     if deps_reader.packages:
         deps_resolver = resolvers.DepsResolver(
-            imports=imports,
-            packages=deps_reader.packages,
-            venv=args.venv,
+            imports=imports, packages=deps_reader.packages, venv=args.venv,
         )
 
         deps_resolver.resolve()
@@ -83,7 +92,10 @@ def main():
             logger.debug(package)
 
         if unused_packages := deps_resolver.get_unused_package_names():
-            logger.error(f"Unused packages found: {', '.join(unused_packages)}")
+            if args.porcelain:
+                print("\n".join(unused_packages))
+            else:
+                logger.error(f"Unused packages found: {', '.join(unused_packages)}")
             sys.exit(1)
         else:
             logger.info("No unused packages found.")
