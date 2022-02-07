@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "creosote"
-version = "0.1.0"
+version = "0.1.0b1"
 description = "Prevent bloated virtual environments by identifing installed packages, unused by your code."
 authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
 license = "MIT"
