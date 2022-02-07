@@ -8,7 +8,7 @@ Prevent bloated virtual environments by identifing installed, but unused, depend
 # Install creosote in separate virtual environment
 $ pipx install creosote
 
-# Scan activated virtual environment for unused packages
+# Scan virtual environment for unused packages
 $ creosote -d pyproject.toml -v .venv -p path/to/folder/**/*.py
 
 # Get help
@@ -32,6 +32,7 @@ This library has borrowed its name from the [Monty Python scene about Mr. Creoso
 
 ## Future improvement ideas
 
+- Support nicer inputs for `--paths`, don't require `*.py`. Ideally, default the argument to `src`.
 - Use toml to parse pyproject.toml
 - Add tests
 - Add GitHub Action
