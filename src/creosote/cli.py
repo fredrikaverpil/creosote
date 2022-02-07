@@ -48,21 +48,27 @@ def parse_args():
     return parser.parse_args()
 
 
+def configure_logger(verbose: bool):
+    if not verbose:
+        logger.remove()
+        logger.add(sys.stderr, level="INFO")
+
+
 def main():
     args = parse_args()
 
-    if not args.verbose:
-        logger.remove()
-        logger.add(sys.stderr, level="INFO")
+    configure_logger(args.verbose)
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found:")
     for imp in imports:
         logger.debug(imp)
 
+    logger.info(f"Parsing {args.deps_file} for packages")
     deps_reader = parsers.PackageReader()
     deps_reader.read(args.deps_file)
 
+    logger.info("Resolving...")
     if deps_reader.packages:
         deps_resolver = resolvers.DepsResolver(
             imports=imports,
@@ -81,6 +87,7 @@ def main():
             sys.exit(1)
         else:
             logger.info("No unused packages found.")
+    logger.info("No packages found.")
 
 
 if __name__ == "__main__":
