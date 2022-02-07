@@ -5,19 +5,15 @@ Prevent bloated virtual environments by identifing installed, but unused, depend
 ## Quickstart
 
 ```bash
-# Activate your virtual environment
-$ . .venv/bin/activate
-
-# Install creosote in your virtual environment
-$ pip install creosote
+# Install creosote in separate virtual environment
+$ pipx install creosote
 
 # Scan activated virtual environment for unused packages
-$ creosote -p path/to/folder/**/*.py -d pyproject.toml
+$ creosote -d pyproject.toml -v .venv -p path/to/folder/**/*.py
+
+# Get help
+$ creosote --help
 ```
-
-## Future improvements
-
-- It would be great if creosote wouldn't have to rely on the activated virtual environment. This could also enable installing creosote with e.g. pipx, outside the virtual environment of interest.
 
 ## Ambition and history
 

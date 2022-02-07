@@ -16,6 +16,13 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Increase output verbosity.",
+    )
+    parser.add_argument(
+        "-p",
         "--paths",
         dest="paths",
         default=glob.glob("src/**/*.py"),
@@ -23,6 +30,7 @@ def parse_args():
         help=("One or more paths to Python files (glob pattern supported)."),
     )
     parser.add_argument(
+        "-d",
         "--deps-file",
         dest="deps_file",
         default="pyproject.toml",
@@ -30,6 +38,7 @@ def parse_args():
         help="The file to read dependencies from.",
     )
     parser.add_argument(
+        "-v",
         "--venv",
         dest="venv",
         default=".venv",
@@ -41,6 +50,10 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    if not args.verbose:
+        logger.remove()
+        logger.add(sys.stderr, level="INFO")
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found:")
@@ -63,13 +76,7 @@ def main():
         for package in deps_resolver.packages:
             logger.debug(package)
 
-        unused_packages = [
-            package.name
-            for package in deps_resolver.packages
-            if not package.associated_imports
-        ]
-
-        if unused_packages:
+        if unused_packages := deps_resolver.get_unused_package_names():
             logger.error(f"Unused packages found: {', '.join(unused_packages)}")
             sys.exit(1)
         else:

@@ -1,9 +1,8 @@
 import os
 import pathlib
-import site
+from typing import Optional
 
 from distlib import database
-from loguru import logger
 
 from creosote.models import Import, Package
 
@@ -18,6 +17,8 @@ class DepsResolver:
         self.imports = imports
         self.packages = packages
         self.venv = venv
+
+        self.unused_packages: Optional[list[Package]] = None
 
     @staticmethod
     def canonicalize_module_name(module_name: str):
@@ -65,11 +66,9 @@ class DepsResolver:
             if not imp.module and name in imp.name:
                 # import <imp.name>
                 package.associated_imports.append(imp)
-                self.imports.remove(imp)
             elif imp.name and name in imp.module:
                 # from <imp.name> import ...
                 package.associated_imports.append(imp)
-                self.imports.remove(imp)
 
     def populate_packages(self):
         for package in self.packages:
@@ -85,6 +84,17 @@ class DepsResolver:
             if package.module_name:
                 self.associate_imports_with_package(package, package.module_name)
 
+    def get_unused_packages(self):
+        self.unused_packages = [
+            package for package in self.packages if not package.associated_imports
+        ]
+
+    def get_unused_package_names(self):
+        if self.unused_packages:
+            return [package.name for package in self.unused_packages]
+        return None
+
     def resolve(self):
         self.populate_packages()
         self.associate()
+        self.get_unused_packages()
