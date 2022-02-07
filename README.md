@@ -29,3 +29,7 @@ This can work well in tandem with flake8 or pylint, which can warn in CI about u
 ## What's with the name "creosote"?
 
 This library has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
+
+## Future improvement ideas
+
+- Use toml to parse pyproject.toml
