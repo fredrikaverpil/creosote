@@ -23,7 +23,7 @@ class PackageReader:
             if "poetry.dependencies" in line:
                 record = True
                 continue
-            elif "[" in line:
+            elif line.startswith("["):
                 record = False
 
             if record is True and "=" in line:
@@ -79,7 +79,7 @@ def get_modules_from_code(paths):
     for path in paths:
         resolved_paths = pathlib.Path(".").glob(path)
         for resolved_path in resolved_paths:
-            logger.info(resolved_path)
+            logger.info(f"Parsing {resolved_path}")
             for imp in get_module_info_from_code(resolved_path):
                 imports.append(imp)
 

@@ -3,14 +3,21 @@ import pathlib
 import site
 
 from distlib import database
+from loguru import logger
 
 from creosote.models import Import, Package
 
 
 class DepsResolver:
-    def __init__(self, imports: list[Import], packages: list[Package]):
+    def __init__(
+        self,
+        imports: list[Import],
+        packages: list[Package],
+        venv: str,
+    ):
         self.imports = imports
         self.packages = packages
+        self.venv = venv
 
     @staticmethod
     def canonicalize_module_name(module_name: str):
@@ -24,14 +31,14 @@ class DepsResolver:
             return False
 
     def top_level_names(self, package):
-        for site_packages in site.getsitepackages():
-            site_path = pathlib.Path(site_packages)
-            glob_str = f"{package.name}*.dist-info/top_level.txt"
-            top_levels = site_path.glob(glob_str)
-            for top_level in top_levels:
-                with open(top_level, "r") as infile:
-                    lines = infile.readlines()
-                package.top_level_names = [line.strip() for line in lines]
+        package_name = package.name.replace("-", "_")
+        site_path = pathlib.Path(".")
+        glob_str = f"{self.venv}/**/{package_name}*.dist-info/top_level.txt"
+        top_levels = site_path.glob(glob_str)
+        for top_level in top_levels:
+            with open(top_level, "r") as infile:
+                lines = infile.readlines()
+            package.top_level_names = [line.strip() for line in lines]
 
     def package_to_module(self, package: Package):
         dp = database.DistributionPath(include_egg=True)

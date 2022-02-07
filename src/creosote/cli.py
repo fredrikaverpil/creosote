@@ -16,7 +16,6 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "-p",
         "--paths",
         dest="paths",
         default=glob.glob("src/**/*.py"),
@@ -24,12 +23,17 @@ def parse_args():
         help=("One or more paths to Python files (glob pattern supported)."),
     )
     parser.add_argument(
-        "-d",
         "--deps-file",
         dest="deps_file",
         default="pyproject.toml",
         choices=["pyproject.toml"],
         help="The file to read dependencies from.",
+    )
+    parser.add_argument(
+        "--venv",
+        dest="venv",
+        default=".venv",
+        help="Path to the virtual environment you want to scan.",
     )
 
     return parser.parse_args()
@@ -39,16 +43,25 @@ def main():
     args = parse_args()
 
     imports = parsers.get_modules_from_code(args.paths)
+    logger.debug("Imports found:")
+    for imp in imports:
+        logger.debug(imp)
 
     deps_reader = parsers.PackageReader()
     deps_reader.read(args.deps_file)
 
     if deps_reader.packages:
         deps_resolver = resolvers.DepsResolver(
-            imports=imports, packages=deps_reader.packages
+            imports=imports,
+            packages=deps_reader.packages,
+            venv=args.venv,
         )
 
         deps_resolver.resolve()
+
+        logger.debug("Packages:")
+        for package in deps_resolver.packages:
+            logger.debug(package)
 
         unused_packages = [
             package.name
