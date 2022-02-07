@@ -34,3 +34,4 @@ This library has borrowed its name from the [Monty Python scene about Mr. Creoso
 
 - Use toml to parse pyproject.toml
 - Add tests
+- Add GitHub Action
