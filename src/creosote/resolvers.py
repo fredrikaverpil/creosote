@@ -3,98 +3,81 @@ import pathlib
 import site
 
 from distlib import database
-from loguru import logger
+
+from creosote.models import Import, Package
 
 
 class DepsResolver:
-    def __init__(self):
-        self.imports_to_validate = []
-        self.unused_packages = []
-        self.map = {}
+    def __init__(self, imports: list[Import], packages: list[Package]):
+        self.imports = imports
+        self.packages = packages
 
     @staticmethod
-    def canonicalize_dep(dep):
-        return dep.replace("-", "_").replace(".", "_").strip()
+    def canonicalize_module_name(module_name: str):
+        return module_name.replace("-", "_").replace(".", "_").strip()
 
-    def is_importable(self, dep):
+    def is_importable(self, module_name: str):
         try:
-            __import__(self.canonicalize_dep(dep))
+            __import__(self.canonicalize_module_name(module_name))
             return True
         except ImportError:
             return False
 
-    def ignored_packages(self):
-        return ["python", "pip", "setuptools", "wheel"]
+    def top_level_names(self, package):
+        for site_packages in site.getsitepackages():
+            site_path = pathlib.Path(site_packages)
+            glob_str = f"{package.name}*.dist-info/top_level.txt"
+            top_levels = site_path.glob(glob_str)
+            for top_level in top_levels:
+                with open(top_level, "r") as infile:
+                    lines = infile.readlines()
+                package.top_level_names = [line.strip() for line in lines]
 
-    def remove_ignored_from_imports(self, imports, deps):
-        return [
-            pkg
-            for pkg in deps
-            if pkg not in imports and pkg not in self.ignored_packages()
-        ]
+    def package_to_module(self, package: Package):
+        dp = database.DistributionPath(include_egg=True)
+        dist = dp.get_distribution(package.name)
+        if dist is None:
+            # raise ModuleNotFoundError
+            return
+        module = package.name  # until we figure out something better
+        for filename, _, _ in dist.list_installed_files():
+            if filename.endswith((".py")):
+                parts = os.path.splitext(filename)[0].split(os.sep)
+                if len(parts) == 1:  # windows sep varies with distribution type
+                    parts = os.path.splitext(filename)[0].split("/")
+                if parts[-1].startswith("_") and not parts[-1].startswith("__"):
+                    continue  # ignore internals
+                elif filename.endswith(".py") and parts[-1] == "__init__":
+                    module = parts[-2]
+                    break
 
-    # def package_to_module(self, package):
-    #     dp = database.DistributionPath(include_egg=True)
-    #     dist = dp.get_distribution(package)
-    #     if dist is None:
-    #         raise ModuleNotFoundError
-    #     module = package  # until we figure out something better
-    #     for filename, _, _ in dist.list_installed_files():
-    #         if filename.endswith((".py")):
-    #             parts = os.path.splitext(filename)[0].split(os.sep)
-    #             if len(parts) == 1:  # windows sep varies with distribution type
-    #                 parts = os.path.splitext(filename)[0].split("/")
-    #             if parts[-1].startswith("_") and not parts[-1].startswith("__"):
-    #                 continue  # ignore internals
-    #             elif filename.endswith(".py") and parts[-1] == "__init__":
-    #                 module = parts[-2]
-    #                 break
+        package.module_name = module
 
-    #     return module
+    def associate_imports_with_package(self, package: Package, name: str):
+        for imp in self.imports.copy():
+            if not imp.module and name in imp.name:
+                # import <imp.name>
+                package.associated_imports.append(imp)
+                self.imports.remove(imp)
+            elif imp.name and name in imp.module:
+                # from <imp.name> import ...
+                package.associated_imports.append(imp)
+                self.imports.remove(imp)
 
-    def validate_through_import(self, deps):
-        for dep in deps:
-            logger.debug(f"Attempting to import {self.canonicalize_dep(dep)}")
-            if self.is_importable(dep):
-                self.unused_packages.append(dep)
-                self.imports_to_validate.remove(dep)
-                logger.debug(f"Successfully imported {dep}, meaning is is unused")
-            else:
-                logger.debug(f"Could not import {self.canonicalize_dep(dep)}")
+    def populate_packages(self):
+        for package in self.packages:
+            self.top_level_names(package)
+            self.package_to_module(package)
 
-    def validate_through_top_level(self, deps):
-        for dep in deps:
-            logger.debug(f"Trying to find importable name for {dep}")
-            for site_packages in site.getsitepackages():
-                site_path = pathlib.Path(site_packages)
-                glob_str = f"{dep}*.dist-info/top_level.txt"
-                top_levels = site_path.glob(glob_str)
-                for t in top_levels:
-                    with open(t, "r") as infile:
-                        lines = infile.readlines()
+    def associate(self):
+        for package in self.packages:
+            self.associate_imports_with_package(package, package.name)
+            if package.top_level_names:
+                for t in package.top_level_names:
+                    self.associate_imports_with_package(package, t)
+            if package.module_name:
+                self.associate_imports_with_package(package, package.module_name)
 
-                    stripped_lines = []
-                    for line in lines:
-                        stripped_lines.append(line.strip())
-
-                    self.imports_to_validate.remove(dep)
-                    for line in stripped_lines:
-                        self.imports_to_validate.append(line)
-                    logger.debug(self.imports_to_validate)
-                    self.validate_through_import(stripped_lines)
-
-    # def validate_through_package_to_module_conversion(self, deps):
-    #     for dep in deps:
-    #         module = self.package_to_module(dep)
-    #         self.validate_through_import(module)
-
-    def resolve(self, modules, packages):
-        self.imports_to_validate = self.remove_ignored_from_imports(
-            imports=modules, deps=packages
-        )
-        logger.debug(
-            f"After ignoring, these are the suspicious deps: {self.imports_to_validate}"
-        )
-        self.validate_through_import(deps=self.imports_to_validate.copy())
-
-        self.validate_through_top_level(deps=self.imports_to_validate.copy())
+    def resolve(self):
+        self.populate_packages()
+        self.associate()

@@ -1,11 +1,10 @@
 import argparse
 import glob
+import sys
 
 from loguru import logger
 
-from creosote import parsers
-from creosote.depsreader import DepsReader
-from creosote.resolvers import DepsResolver
+from creosote import parsers, resolvers
 
 
 def parse_args():
@@ -38,18 +37,28 @@ def parse_args():
 
 def main():
     args = parse_args()
-    logger.debug(f"Arguments given: {args}")
 
-    modules = parsers.get_modules_from_code(args.paths)
-    logger.debug(f"Modules: {modules}")
+    imports = parsers.get_modules_from_code(args.paths)
 
-    deps_reader = DepsReader()
+    deps_reader = parsers.PackageReader()
     deps_reader.read(args.deps_file)
-    logger.debug(f"Packages: {deps_reader.packages}")
 
-    deps_resolver = DepsResolver()
-    deps_resolver.resolve(modules=modules, packages=deps_reader.packages)
-    logger.debug(f"Unused packages: {deps_resolver.unused_packages}")
+    if deps_reader.packages:
+        deps_resolver = resolvers.DepsResolver(
+            imports=imports, packages=deps_reader.packages
+        )
+
+        deps_resolver.resolve()
+
+        unused_packages = [
+            package.name
+            for package in deps_resolver.packages
+            if not package.associated_imports
+        ]
+
+        if unused_packages:
+            logger.error(f"Unused packages found: {', '.join(unused_packages)}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
