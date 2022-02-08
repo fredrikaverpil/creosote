@@ -4,7 +4,7 @@ import sys
 
 from loguru import logger
 
-from creosote import parsers, resolvers
+from creosote import formatter, parsers, resolvers
 
 
 def parse_args():
@@ -22,10 +22,12 @@ def parse_args():
         help="Increase output verbosity.",
     )
     parser.add_argument(
-        "--porcelain",
-        dest="porcelain",
-        action="store_true",
-        help="Disable logging, print in a parsable format",
+        "-f",
+        "--format",
+        dest="format",
+        default="logger",
+        choices=["logger", "porcelain"],
+        help="Output format.",
     )
     parser.add_argument(
         "-p",
@@ -54,21 +56,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def configure_logger(verbose: bool, porcelain: bool):
-    if porcelain:
-        logger.remove()
-        logger.add(sys.stderr, level="CRITICAL")
-        return
-
-    if not verbose:
-        logger.remove()
-        logger.add(sys.stderr, level="INFO")
-
-
 def main():
     args = parse_args()
 
-    configure_logger(verbose=args.verbose, porcelain=args.porcelain)
+    formatter.configure_logger(verbose=args.verbose, format_=args.format)
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found:")
@@ -80,26 +71,18 @@ def main():
     deps_reader.read(args.deps_file)
 
     logger.info("Resolving...")
-    if deps_reader.packages:
-        deps_resolver = resolvers.DepsResolver(
-            imports=imports, packages=deps_reader.packages, venv=args.venv,
-        )
 
-        deps_resolver.resolve()
+    deps_resolver = resolvers.DepsResolver(
+        imports=imports, packages=deps_reader.packages or [], venv=args.venv
+    )
 
-        logger.debug("Packages:")
-        for package in deps_resolver.packages:
-            logger.debug(package)
+    deps_resolver.resolve()
 
-        if unused_packages := deps_resolver.get_unused_package_names():
-            if args.porcelain:
-                print("\n".join(unused_packages))
-            else:
-                logger.error(f"Unused packages found: {', '.join(unused_packages)}")
-            sys.exit(1)
-        else:
-            logger.info("No unused packages found.")
-    logger.info("No packages found.")
+    logger.debug("Packages:")
+    for package in deps_resolver.packages:
+        logger.debug(package)
+
+    formatter.print_results(deps_resolver=deps_resolver, format_=args.format)
 
 
 if __name__ == "__main__":
