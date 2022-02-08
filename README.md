@@ -33,6 +33,7 @@ This library has borrowed its name from the [Monty Python scene about Mr. Creoso
 ## Future improvement ideas
 
 - Support nicer inputs for `--paths`, don't require `*.py`. Ideally, default the argument to `src`.
+- Add CI: format, lint, publish
 - Add tests
 - Add GitHub Action
 - Add support for requirements.txt
