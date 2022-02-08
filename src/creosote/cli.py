@@ -1,6 +1,5 @@
 import argparse
 import glob
-import sys
 
 from loguru import logger
 
