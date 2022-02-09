@@ -200,6 +200,17 @@ win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 dev = ["colorama (>=0.3.4)", "docutils (==0.16)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "black (>=19.10b0)", "isort (>=5.1.1)", "Sphinx (>=4.1.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)"]
 
 [[package]]
+name = "loguru-mypy"
+version = "0.0.4"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6.0"
+
+[package.dependencies]
+typing-extensions = "*"
+
+[[package]]
 name = "mccabe"
 version = "0.6.1"
 description = "McCabe checker, plugin for flake8"
@@ -396,7 +407,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10, <3.11"  # do not use ^3.10
-content-hash = "c316f83c85d0cec5d67ca4acd918a36cd36dcbf3d7d4601cbda68bdde123534b"
+content-hash = "f12f0079c60624c6d1c55fdf6beaa8d594c0267c5737205c1550a7e31622413e"
 
 [metadata.files]
 atomicwrites = [
@@ -482,6 +493,10 @@ isort = [
 loguru = [
     {file = "loguru-0.6.0-py3-none-any.whl", hash = "sha256:4e2414d534a2ab57573365b3e6d0234dfb1d84b68b7f3b948e6fb743860a77c3"},
     {file = "loguru-0.6.0.tar.gz", hash = "sha256:066bd06758d0a513e9836fd9c6b5a75bfb3fd36841f4b996bc60b547a309d41c"},
+]
+loguru-mypy = [
+    {file = "loguru-mypy-0.0.4.tar.gz", hash = "sha256:1f1767d7737f1825295ce147f7e751f91837f5759b3c2f41801adc65691aeed4"},
+    {file = "loguru_mypy-0.0.4-py3-none-any.whl", hash = "sha256:98e044be509887a314e683a1e851813310b396be48388c1fe4de97a2eac99d4d"},
 ]
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
