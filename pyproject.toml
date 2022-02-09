@@ -17,6 +17,7 @@ flake8-bugbear = "^22.1.11"
 flake8-bandit = "^2.1.2"
 mypy = "^0.931"
 pytest = "^7.0.0"
+isort = "^5.10.1"
 
 [tool.poetry.scripts]
 creosote = "creosote.cli:main"
