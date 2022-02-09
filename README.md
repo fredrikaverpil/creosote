@@ -1,5 +1,7 @@
 # creosote
 
+[![check](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yaml/badge.svg)](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yaml)
+
 Identify unused production dependencies and avoid a bloated virtual environment.
 
 ## Quickstart
