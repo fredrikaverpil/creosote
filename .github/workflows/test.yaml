@@ -22,4 +22,4 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
 
       - run: poetry install
-      - run: poetry run pytest
+      - run: poetry run pytest -v
