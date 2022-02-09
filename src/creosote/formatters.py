@@ -20,6 +20,6 @@ def print_results(deps_resolver, format_: str):
             print("\n".join(unused_packages))
         else:
             logger.error(f"Unused packages found: {', '.join(unused_packages)}")
-        sys.exit(1)
+        # sys.exit(1)
     else:
         logger.info("No unused packages found.")
