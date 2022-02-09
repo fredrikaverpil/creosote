@@ -3,7 +3,7 @@ import glob
 
 from loguru import logger
 
-from creosote import formatter, parsers, resolvers
+from creosote import formatters, parsers, resolvers
 
 
 def parse_args():
@@ -58,7 +58,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    formatter.configure_logger(verbose=args.verbose, format_=args.format)
+    formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found:")
@@ -81,7 +81,7 @@ def main():
     for package in deps_resolver.packages:
         logger.debug(package)
 
-    formatter.print_results(deps_resolver=deps_resolver, format_=args.format)
+    formatters.print_results(deps_resolver=deps_resolver, format_=args.format)
 
 
 if __name__ == "__main__":
