@@ -1,12 +1,13 @@
 import argparse
 import glob
+import sys
 
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
@@ -52,11 +53,11 @@ def parse_args():
         help="Path to the virtual environment you want to scan.",
     )
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
-def main():
-    args = parse_args()
+def main(args_=None):
+    args = parse_args(args_)
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
@@ -85,4 +86,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
