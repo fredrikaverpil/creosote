@@ -21,10 +21,9 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
-      - run: |
-          poetry install
-          poetry run black --check --diff src
-          poetry run isort --check --diff src
+      - run: poetry install
+      - run: poetry run black --check --diff src
+      - run: poetry run isort --check --diff src
 
   lint:
     strategy:
@@ -43,9 +42,8 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
-      - run: |
-          poetry install
-          poetry run flake8 src
+      - run: poetry install
+      - run: poetry run flake8 src
 
   type:
     strategy:
@@ -64,6 +62,5 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
-      - run: |
-          poetry install
-          poetry run mypy src
+      - run: poetry install
+      - run: poetry run mypy src
