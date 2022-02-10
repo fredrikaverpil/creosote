@@ -6,8 +6,13 @@ import pytest
 @pytest.fixture
 def with_packages(capsys, request):
     with capsys.disabled():
-        subprocess.run(["poetry", "install", "--remove-untracked", "--quiet"])
-        subprocess.run(["poetry", "add", "--quiet"] + request.param)
+        subprocess.run(
+            ["poetry", "add"] + request.param,
+            stdout=subprocess.DEVNULL,
+        )
     yield
     with capsys.disabled():
-        subprocess.run(["poetry", "remove", "--quiet"] + request.param)
+        subprocess.run(
+            ["poetry", "remove"] + request.param,
+            stdout=subprocess.DEVNULL,
+        )
