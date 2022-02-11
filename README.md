@@ -17,6 +17,16 @@ $ creosote -d pyproject.toml -v .venv -p path/to/folder/**/*.py
 $ creosote --help
 ```
 
+## How this works
+
+Some data is required as input:
+
+- A list of production package names (can be fetched from e.g. `pyproject.toml`)
+- The path to the virtual environment
+- The path to one or more Python files
+
+The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all production package names. Finally, all imports are associated with their corresponding package name. If a package does not have any imports associated, it will be considered to be unused.
+
 ## Ambition and history
 
 The idea of a package like this was born from having gotten security vulnerability
