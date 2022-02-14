@@ -19,7 +19,7 @@ $ creosote --help
 
 ## Creosote as GitHub Action
 
-See [.github/workflows/action.yaml] for a working example.
+See [.github/workflows/action.yaml](.github/workflows/action.yaml) for a working example.
 
 ## How this works
 
