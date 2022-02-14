@@ -17,7 +17,9 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: fredrikaverpil/pipx-action@v1.2
+      - uses: fredrikaverpil/pipx-action@v1.3
+        with:
+          pipx-version: 1.0.0
       - run: pipx install poetry==${{ matrix.poetry-version }}
       - run: pipx install virtualenv
       - run: virtualenv .venv
