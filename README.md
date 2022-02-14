@@ -17,6 +17,10 @@ $ creosote -d pyproject.toml -v .venv -p path/to/folder/**/*.py
 $ creosote --help
 ```
 
+## Creosote as GitHub Action
+
+See [.github/workflows/action.yaml] for a working example.
+
 ## How this works
 
 Some data is required as input:
@@ -46,6 +50,5 @@ This library has borrowed its name from the [Monty Python scene about Mr. Creoso
 
 - Support nicer inputs for `--paths`, don't require `*.py`. Ideally, default the argument to `src`.
 - Add more tests
-- Add GitHub Action
 - Add support for requirements.txt
 - Use toml to parse pyproject.toml
