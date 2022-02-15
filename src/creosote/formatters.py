@@ -15,7 +15,8 @@ def configure_logger(verbose: bool, format_: str):
 
 
 def print_results(deps_resolver, format_: str):
-    if unused_packages := deps_resolver.get_unused_package_names():
+    unused_packages = deps_resolver.get_unused_package_names()
+    if unused_packages:
         if format_ == "porcelain":
             print("\n".join(unused_packages))
         else:
