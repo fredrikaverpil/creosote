@@ -14,7 +14,6 @@ class PackageReader:
 
     def _pyproject(self, deps_file: str, dev: bool):
         """Return dependencies from pyproject.toml."""
-        deps = []
         with open(deps_file, "r") as infile:
             contents = toml.loads(infile.read())
 
