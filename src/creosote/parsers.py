@@ -12,35 +12,53 @@ class PackageReader:
     def __init__(self):
         self.packages = None
 
-    @staticmethod
-    def _pyproject():
-        """Return production dependencies from pyproject.toml."""
+    def _pyproject(self, deps_file: str, dev: bool):
+        """Return dependencies from pyproject.toml."""
         deps = []
-        with open("pyproject.toml", "r") as infile:
-            # contents = infile.readlines()
+        with open(deps_file, "r") as infile:
             contents = toml.loads(infile.read())
 
         try:
-            deps = contents["tool"]["poetry"]["dependencies"]
+            if dev:
+                deps = contents["tool"]["poetry"]["dev-dependencies"]
+            else:
+                deps = contents["tool"]["poetry"]["dependencies"]
         except KeyError as e:
             raise Exception("Could not find expected toml property.") from e
 
         return sorted(deps.keys())
 
+    def _requirements(self, deps_file: str):
+        """Return dependencies from requirements.txt-format file."""
+        deps = []
+        with open(deps_file, "r") as infile:
+            contents = infile.readlines()
+
+        for line in contents:
+            if not line.startswith(" "):
+                deps.append(line[: line.find("=")])
+
+        return sorted(deps)
+
     @lru_cache(maxsize=None)
     def ignore_packages(self):
         return ["python"]
 
-    def wrap_in_obj(self, deps):
+    def packages_sans_ignored(self, deps):
         packages = []
         for dep in deps:
             if dep not in self.ignore_packages():
                 packages.append(Package(name=dep))
         return packages
 
-    def read(self, deps_file):
-        if deps_file == "pyproject.toml":
-            self.packages = self.wrap_in_obj(self._pyproject())
+    def read(self, deps_file: str, dev: bool):
+        if not pathlib.Path(deps_file).exists():
+            raise Exception(f"File {deps_file} does not exist")
+
+        if "pyproject.toml" in deps_file:
+            self.packages = self.packages_sans_ignored(self._pyproject(deps_file, dev))
+        elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
+            self.packages = self.packages_sans_ignored(self._requirements(deps_file))
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."

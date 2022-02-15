@@ -11,7 +11,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
-            "but unused, dependencies."
+            "but unused, dependencies"
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -19,15 +19,15 @@ def parse_args(args):
         "--verbose",
         dest="verbose",
         action="store_true",
-        help="Increase output verbosity.",
+        help="increase output verbosity",
     )
     parser.add_argument(
         "-f",
         "--format",
         dest="format",
-        default="logger",
-        choices=["logger", "porcelain"],
-        help="Output format.",
+        default="default",
+        choices=["default", "porcelain"],
+        help="output format",
     )
     parser.add_argument(
         "-p",
@@ -35,25 +35,38 @@ def parse_args(args):
         dest="paths",
         default=glob.glob("src"),
         nargs="*",
-        help=("One or more paths to Python files (glob pattern supported)."),
-    )
-    parser.add_argument(
-        "-d",
-        "--deps-file",
-        dest="deps_file",
-        default="pyproject.toml",
-        choices=["pyproject.toml"],
-        help="The file to read dependencies from.",
+        help=("one or more paths to Python files"),
     )
     parser.add_argument(
         "-v",
         "--venv",
         dest="venv",
         default=".venv",
-        help="Path to the virtual environment you want to scan.",
+        help="path to the virtual environment you want to scan",
     )
 
-    return parser.parse_args(args)
+    parser.add_argument(
+        "-d",
+        "--deps-file",
+        dest="deps_file",
+        metavar="PATH",
+        default="pyproject.toml",
+        help="path to the pyproject.toml, *.txt or *.in dependencies file",
+    )
+
+    parser.add_argument(
+        "--dev",
+        dest="dev",
+        action="store_true",
+        help="scan dev dependencies instead of prod dependencies",
+    )
+
+    parsed_args = parser.parse_args(args)
+
+    if "pyproject.toml" not in parsed_args.deps_file and parsed_args.dev:
+        raise Exception("Option --dev must be used with pyproject.toml")
+
+    return parsed_args
 
 
 def main(args_=None):
@@ -68,14 +81,12 @@ def main(args_=None):
 
     logger.info(f"Parsing {args.deps_file} for packages")
     deps_reader = parsers.PackageReader()
-    deps_reader.read(args.deps_file)
+    deps_reader.read(args.deps_file, args.dev)
 
     logger.info("Resolving...")
-
     deps_resolver = resolvers.DepsResolver(
         imports=imports, packages=deps_reader.packages or [], venv=args.venv
     )
-
     deps_resolver.resolve()
 
     logger.debug("Packages:")
