@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Optional
+from typing import List, Optional
 
 from distlib import database
 
@@ -10,15 +10,15 @@ from creosote.models import Import, Package
 class DepsResolver:
     def __init__(
         self,
-        imports: list[Import],
-        packages: list[Package],
+        imports: List[Import],
+        packages: List[Package],
         venv: str,
     ):
         self.imports = imports
         self.packages = packages
         self.venv = venv
 
-        self.unused_packages: Optional[list[Package]] = None
+        self.unused_packages: Optional[List[Package]] = None
 
     @staticmethod
     def canonicalize_module_name(module_name: str):
