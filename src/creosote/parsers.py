@@ -47,7 +47,8 @@ class PackageReader:
             )
 
         logger.info(
-            f"Found packages in {deps_file}: {', '.join([pkg.name for pkg in self.packages])}"
+            f"Found packages in {deps_file}: "
+            f"{', '.join([pkg.name for pkg in self.packages])}"
         )
 
 

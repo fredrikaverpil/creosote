@@ -4,16 +4,15 @@ from loguru import logger
 
 
 def configure_logger(verbose: bool, format_: str):
+    logger.remove()
+
     if format_ == "porcelain":
-        logger.remove()
         logger.add(sys.stderr, level="CRITICAL")
         return
-
-    if not verbose:
-        logger.remove()
+    else:
         logger.add(
             sys.stderr,
-            level="INFO",
+            level="DEBUG" if verbose else "INFO",
             colorize=True,
             format="<level>{message}</level>",
         )
