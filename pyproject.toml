@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "creosote"
-version = "0.1.0b1"
+version = "0.1.0b2"
 description = "Identify unused production dependencies and avoid a bloated virtual environment."
 authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
 license = "MIT"
