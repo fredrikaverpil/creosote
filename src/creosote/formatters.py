@@ -11,7 +11,12 @@ def configure_logger(verbose: bool, format_: str):
 
     if not verbose:
         logger.remove()
-        logger.add(sys.stderr, level="INFO")
+        logger.add(
+            sys.stderr,
+            level="INFO",
+            colorize=True,
+            format="<level>{message}</level>",
+        )
 
 
 def print_results(deps_resolver, format_: str):
