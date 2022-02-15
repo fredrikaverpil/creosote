@@ -9,6 +9,7 @@ license = "MIT"
 python = ">=3.7, <3.11"  # do not use ^3.10
 distlib = "^0.3.4"
 loguru = "^0.6.0"
+toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

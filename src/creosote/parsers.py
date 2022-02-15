@@ -2,6 +2,7 @@ import ast
 import pathlib
 from functools import lru_cache
 
+import toml
 from loguru import logger
 
 from creosote.models import Import, Package
@@ -14,23 +15,17 @@ class PackageReader:
     @staticmethod
     def _pyproject():
         """Return production dependencies from pyproject.toml."""
-        found_dependencies = []
+        deps = []
         with open("pyproject.toml", "r") as infile:
-            contents = infile.readlines()
+            # contents = infile.readlines()
+            contents = toml.loads(infile.read())
 
-        record = False
-        for line in contents:
-            if "poetry.dependencies" in line:
-                record = True
-                continue
-            elif line.startswith("["):
-                record = False
+        try:
+            deps = contents["tool"]["poetry"]["dependencies"]
+        except KeyError as e:
+            raise Exception("Could not find expected toml property.") from e
 
-            if record is True and "=" in line:
-                entry = line[: line.find("=")].strip()
-                found_dependencies.append(entry)
-
-        return sorted(found_dependencies)
+        return sorted(deps.keys())
 
     @lru_cache(maxsize=None)
     def ignore_packages(self):
@@ -50,6 +45,10 @@ class PackageReader:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
             )
+
+        logger.info(
+            f"Found packages in {deps_file}: {', '.join([pkg.name for pkg in self.packages])}"
+        )
 
 
 def get_module_info_from_code(path):
