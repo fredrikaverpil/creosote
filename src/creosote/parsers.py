@@ -32,7 +32,7 @@ class PackageReader:
 
         return sorted(found_dependencies)
 
-    @lru_cache
+    @lru_cache(maxsize=None)
     def ignore_packages(self):
         return ["python"]
 
