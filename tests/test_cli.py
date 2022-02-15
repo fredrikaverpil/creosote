@@ -17,6 +17,6 @@ def test_files_as_path(capsys, with_packages):
     )
 
     captured = capsys.readouterr()
-    expected_log = "PyYAML\ndistlib\nprotobuf\n"
+    expected_log = "PyYAML\ndistlib\nprotobuf\ntoml\n"
 
     assert captured.out == expected_log
