@@ -33,7 +33,7 @@ def parse_args(args):
         "-p",
         "--paths",
         dest="paths",
-        default=glob.glob("src/**/*.py"),
+        default=glob.glob("src"),
         nargs="*",
         help=("One or more paths to Python files (glob pattern supported)."),
     )

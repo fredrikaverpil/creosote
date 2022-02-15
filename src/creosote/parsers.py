@@ -74,14 +74,19 @@ def get_module_info_from_code(path):
 
 
 def get_modules_from_code(paths):
+    resolved_paths = []
     imports = []
 
     for path in paths:
-        resolved_paths = pathlib.Path(".").glob(path)
-        for resolved_path in resolved_paths:
-            logger.info(f"Parsing {resolved_path}")
-            for imp in get_module_info_from_code(resolved_path):
-                imports.append(imp)
+        if pathlib.Path(path).is_dir():
+            resolved_paths.extend(iter(pathlib.Path(path).glob("**/*.py")))
+        else:
+            resolved_paths.append(pathlib.Path(path).resolve())
+
+    for resolved_path in resolved_paths:
+        logger.info(f"Parsing {resolved_path}")
+        for imp in get_module_info_from_code(resolved_path):
+            imports.append(imp)
 
     dupes_removed = []
     for imp in imports:
