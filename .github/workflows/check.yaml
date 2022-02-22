@@ -23,10 +23,10 @@ jobs:
             ~/.cache/pypoetry/virtualenvs
             ~/.cache/pip
           key: ${{ matrix.os }}-py-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
-      - uses: abatilo/actions-poetry@v2.0.0
+      - uses: fredrikaverpil/pipx-action
         with:
-          poetry-version: ${{ matrix.poetry-version }}
-
+          pipx-version: "1.0"
+      - run: pipx install poetry==${{ matrix.poetry-version }}
       - run: poetry install
       - run: poetry run black --check --diff src
       - run: poetry run isort --check --diff src
