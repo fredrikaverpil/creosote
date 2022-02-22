@@ -34,3 +34,5 @@ jobs:
 
             _Note: there may be dependencies in the table above which were not updated as part of this PR.
             The reason is they require manual updating._
+
+            The PR was triggered from event: ${{ env.GITHUB_EVENT_NAME }}
