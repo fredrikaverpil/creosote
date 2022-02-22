@@ -25,7 +25,7 @@ jobs:
           key: ${{ matrix.os }}-py-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
       - uses: fredrikaverpil/pipx-action@v1.3
         with:
-          pipx-version: 1.0.0
+          pipx-version: "1.0"
       - run: pipx install poetry==${{ matrix.poetry-version }}
       - run: poetry install
       - run: poetry run pytest -v
