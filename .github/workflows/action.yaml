@@ -47,7 +47,14 @@ jobs:
 
 
       - run: ls ~/.local/pipx
+        if: runner.os != 'Windows'
       - run: ls ~/.local/bin
+        if: runner.os != 'Windows'
+
+      - run: ls ~\.local\pipx
+        if: runner.os == 'Windows'
+      - run: ls ~\.local\Scripts
+        if: runner.os == 'Windows'
 
       - run: poetry env info
       - run: creosote
