@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: fredrikaverpil/setup-pipx@vset-envs
+      - uses: fredrikaverpil/setup-pipx@set-envs
         with:
           pipx-version: "1.0"
       - uses: actions/cache@v2
