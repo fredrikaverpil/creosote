@@ -59,6 +59,7 @@ jobs:
       - run: |
           cd "C:\Program Files (x86)\pipx_bin\"
           dir
+        if: runner.os == 'Windows'
         shell: pwsh
 
       - run: poetry env info
