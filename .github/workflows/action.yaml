@@ -34,6 +34,8 @@ jobs:
             ~/.local/Scripts
           key: ${{ runner.os }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
 
+      - run: env
+
       - run: pipx install poetry==${{ matrix.poetry-version }}
         if: steps.cache.outputs.cache-hit != 'true'
 
@@ -43,7 +45,7 @@ jobs:
       - run: poetry install --no-dev
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - run: env
+
       - run: ls ~/.local/pipx
       - run: ls ~/.local/bin
 
