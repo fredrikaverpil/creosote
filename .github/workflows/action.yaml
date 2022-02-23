@@ -9,7 +9,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
-        poetry-version: [1.1.13]
+        pipx-version: ["1.0"]
+        poetry-version: ["1.1"]
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -18,18 +19,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/cache@v2
+        id: cache
         with:
           path: |
-            ~/.cache/pypoetry/virtualenvs
             ~/.cache/pip
-          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
+            ~/.cache/pypoetry/virtualenvs
+            ../pipx_venv
+            ~/.local/bin
+            ~/.local/Scripts
+          key: ${{ runner.os }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
       - uses: fredrikaverpil/setup-pipx@v1.3
         with:
           pipx-version: "1.0"
-      - run: pipx install virtualenv
+
       - run: pipx install poetry==${{ matrix.poetry-version }}
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - run: pipx install creosote
-      - run: virtualenv .venv
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - run: poetry install --no-dev
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - run: poetry env info
       - run: creosote
