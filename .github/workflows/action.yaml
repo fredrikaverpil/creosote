@@ -45,6 +45,7 @@ jobs:
       - run: poetry install --no-dev
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - run: pipx ensurepath
 
       - run: ls ~/.local/pipx
         if: runner.os != 'Windows'
