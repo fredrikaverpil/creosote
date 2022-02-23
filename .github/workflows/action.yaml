@@ -28,13 +28,11 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.cache/pypoetry/virtualenvs
-            ../pipx_venv
             ~/.local/pipx
             ~/.local/bin
-            ~/.local/Scripts
+            C:\Program Files (x86)\pipx
+            C:\Program Files (x86)\pipx_bin
           key: ${{ runner.os }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
-
-      - run: env
 
       - run: pipx install poetry==${{ matrix.poetry-version }}
         if: steps.cache.outputs.cache-hit != 'true'
@@ -46,24 +44,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - run: which pipx
-      - run: pipx ensurepath
       - run: which poetry
-      - run: which creosote
 
-      - run: ls ~/.local/pipx
-        if: runner.os != 'Windows'
-      - run: ls ~/.local/bin
-        if: runner.os != 'Windows'
-      - run: |
-          cd "C:\Program Files (x86)\pipx\"
-          dir
-        if: runner.os == 'Windows'
-        shell: pwsh
-      - run: |
-          cd "C:\Program Files (x86)\pipx_bin\"
-          dir
-        if: runner.os == 'Windows'
-        shell: pwsh
-
+      - run: pipx ensurepath
       - run: poetry env info
+
       - run: creosote
