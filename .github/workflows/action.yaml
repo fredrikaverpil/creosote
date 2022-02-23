@@ -2,6 +2,7 @@ name: action
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   action:
