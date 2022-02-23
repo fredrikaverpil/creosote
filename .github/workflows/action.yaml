@@ -42,5 +42,6 @@ jobs:
       - run: poetry install --no-dev
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - run: env
       - run: poetry env info
       - run: creosote
