@@ -47,6 +47,8 @@ jobs:
 
       - run: which pipx
       - run: pipx ensurepath
+      - run: which poetry
+      - run: which creosote
 
       - run: ls ~/.local/pipx
         if: runner.os != 'Windows'
@@ -63,9 +65,12 @@ jobs:
       - run: poetry env info
       - run: creosote
 
-      - run: ls ~\.local
+      - run: |
+          cd ~\.local
+          dir
         if: runner.os == 'Windows'
-      - run: ls ~\.local\pipx
-        if: runner.os == 'Windows'
-      - run: ls ~\.local\bin
+
+      - run: |
+          cd ~\.local\bin
+          dir
         if: runner.os == 'Windows'
