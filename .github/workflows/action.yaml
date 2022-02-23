@@ -11,7 +11,7 @@ jobs:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         pipx-version: ["1.0"]
-        poetry-version: ["1.1"]
+        poetry-version: ["1.1.13"]
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: fredrikaverpil/setup-pipx@v1.4
+      - uses: fredrikaverpil/setup-pipx@v1.5
         with:
           pipx-version: "1.0"
       - uses: actions/cache@v2
@@ -28,25 +28,13 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.cache/pypoetry/virtualenvs
-            ~/.local/pipx
-            ~/.local/bin
-            C:\Program Files (x86)\pipx
-            C:\Program Files (x86)\pipx_bin
-          key: ${{ runner.os }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
+            .venv_pipx
+          key: key1-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
 
       - run: pipx install poetry==${{ matrix.poetry-version }}
-        if: steps.cache.outputs.cache-hit != 'true'
-
-      - run: pipx install creosote
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - run: poetry install --no-dev
-        if: steps.cache.outputs.cache-hit != 'true'
 
-      - run: which pipx
-      - run: which poetry
-
-      - run: pipx ensurepath
-      - run: poetry env info
+      - run: pipx install creosote
 
       - run: creosote
