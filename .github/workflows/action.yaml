@@ -43,5 +43,8 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - run: env
+      - run: ls ~/.local/pipx
+      - run: ls ~/.local/bin
+
       - run: poetry env info
       - run: creosote
