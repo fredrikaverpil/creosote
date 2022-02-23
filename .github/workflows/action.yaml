@@ -29,6 +29,7 @@ jobs:
             ~/.cache/pip
             ~/.cache/pypoetry/virtualenvs
             ../pipx_venv
+            ~/.local/pipx
             ~/.local/bin
             ~/.local/Scripts
           key: ${{ runner.os }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
