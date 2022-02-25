@@ -3,7 +3,7 @@ version: 2
 updates:
   - package-ecosystem: "pip"
     allow:
-      - dependency-name: *
+      - dependency-name: "*"
         dependency-type: all
     directory: "/"
     schedule:
