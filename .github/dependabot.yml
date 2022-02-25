@@ -2,8 +2,10 @@ version: 2
 
 updates:
   - package-ecosystem: "pip"
+    allow:
+      - dependency-name: *
+        dependency-type: all
     directory: "/"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 1
-    target-branch: main
