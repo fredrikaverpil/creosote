@@ -9,6 +9,9 @@ updates:
     allow:
       - dependency-name: "*"
         dependency-type: development
+    commit-message:
+      prefix: "[dev]"
+      include: "scope"
 
   - package-ecosystem: "pip"
     directory: "/"
@@ -18,3 +21,6 @@ updates:
     allow:
       - dependency-name: "*"
         dependency-type: production
+    commit-message:
+      prefix: "[prod]"
+      include: "scope"
