@@ -2,10 +2,19 @@ version: 2
 
 updates:
   - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
     allow:
       - dependency-name: "*"
-        dependency-type: all
+        dependency-type: development
+
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 1
+    allow:
+      - dependency-name: "*"
+        dependency-type: production
