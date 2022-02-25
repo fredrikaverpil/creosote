@@ -4,23 +4,12 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    allow:
-      - dependency-name: "*"
-        dependency-type: development
-    commit-message:
-      prefix: "[dev]"
-      include: "scope"
-
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
       interval: "daily"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 3
     allow:
       - dependency-name: "*"
-        dependency-type: production
+        dependency-type: all
     commit-message:
       prefix: "[prod]"
+      prefix-development: "[dev]"
       include: "scope"
