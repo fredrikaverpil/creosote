@@ -76,7 +76,7 @@ class ImportVisitor(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         self._add_import(node.names, node.asname, module=[])
         
-    def visit_ImportFrom, node: ast.ImportFrom) -> None:
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         self._add_import(node.names, node.asname, module=node.module.split("."))
         
     def _add_import(self, names: list[ast.Name], asname: str, module: list[str]) -> None:
