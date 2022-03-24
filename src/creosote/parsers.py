@@ -69,7 +69,22 @@ class PackageReader:
         )
 
 
-def get_module_info_from_code(path):
+class ImportVisitor(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.imports = {}
+       
+    def visit_Import(self, node: ast.Import) -> None:
+        self._add_import(node.names, node.asname, module=[])
+        
+    def visit_ImportFrom, node: ast.ImportFrom) -> None:
+        self._add_import(node.names, node.asname, module=node.module.split("."))
+        
+    def _add_import(self, names: list[ast.Name], asname: str, module: list[str]) -> None:
+        for name in names:
+            self.imports.add(Import(module, name.name, asname))
+
+
+def get_module_info_from_code(path) -> Set[Import]:
     """Get imports, based on given filepath.
 
     Credit:
@@ -78,16 +93,9 @@ def get_module_info_from_code(path):
     with open(path) as fh:
         root = ast.parse(fh.read(), path)
 
-    for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
-        if isinstance(node, ast.Import):
-            module = []
-        elif isinstance(node, ast.ImportFrom):
-            module = node.module.split(".")
-        else:
-            continue
-
-        for n in node.names:
-            yield Import(module, n.name.split("."), n.asname)
+    visitor = ImportVisitor()
+    visitor.visit(root)
+    return visitor.imports
 
 
 def get_modules_from_code(paths):
