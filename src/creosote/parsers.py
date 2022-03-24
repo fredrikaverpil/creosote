@@ -71,7 +71,7 @@ class PackageReader:
 
 class ImportVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
-        self.imports = {}
+        self.imports = set()
        
     def visit_Import(self, node: ast.Import) -> None:
         self._add_import(node.names, node.asname, module=[])
