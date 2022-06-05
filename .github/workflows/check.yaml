@@ -1,7 +1,7 @@
 name: check
 
 on:
-  pull_request:
+  push:
   workflow_dispatch:
 
 jobs:
