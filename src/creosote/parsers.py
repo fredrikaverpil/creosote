@@ -39,7 +39,7 @@ class PackageReader:
 
         return sorted(deps)
 
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=None)  # noqa: B019
     def ignore_packages(self):
         return ["python"]
 
