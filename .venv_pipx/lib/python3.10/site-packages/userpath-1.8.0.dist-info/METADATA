@@ -1,0 +1,86 @@
+Metadata-Version: 2.1
+Name: userpath
+Version: 1.8.0
+Summary: Cross-platform tool for adding locations to the user PATH
+Project-URL: Funding, https://github.com/sponsors/ofek
+Project-URL: History, https://github.com/ofek/userpath/blob/master/HISTORY.rst
+Project-URL: Issues, https://github.com/ofek/userpath/issues
+Project-URL: Source, https://github.com/ofek/userpath
+Author-email: Ofek Lev <oss@ofek.dev>
+Keywords: path,user path
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Requires-Python: >=3.7
+Requires-Dist: click
+Description-Content-Type: text/markdown
+
+# userpath
+
+| | |
+| --- | --- |
+| CI/CD | [![CI - Test](https://github.com/ofek/userpath/actions/workflows/test.yml/badge.svg)](https://github.com/ofek/userpath/actions/workflows/test.yml) [![CD - Build](https://github.com/ofek/userpath/actions/workflows/build.yml/badge.svg)](https://github.com/ofek/userpath/actions/workflows/build.yml) |
+| Package | [![PyPI - Version](https://img.shields.io/pypi/v/userpath.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/userpath/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/userpath.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/userpath/) |
+| Meta | [![License - MIT](https://img.shields.io/badge/license-MIT-9400d3.svg)](https://spdx.org/licenses/) [![GitHub Sponsors](https://img.shields.io/github/sponsors/ofek?logo=GitHub%20Sponsors&style=social)](https://github.com/sponsors/ofek) |
+
+-----
+
+This is a tool for modifying a user's `PATH`.
+
+**Table of Contents**
+
+- [Installation](#installation)
+- [CLI](#cli)
+- [API](#api)
+- [License](#license)
+
+## Installation
+
+```console
+pip install userpath
+```
+
+## CLI
+
+```console
+$ userpath -h
+Usage: userpath [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
+
+Commands:
+  append   Appends to the user PATH
+  prepend  Prepends to the user PATH
+  verify   Checks if locations are in the user PATH
+```
+
+## API
+
+```pycon
+>>> import userpath
+>>> location = r'C:\Users\Ofek\Desktop\test'
+>>>
+>>> userpath.in_current_path(location)
+False
+>>> userpath.in_new_path(location)
+False
+>>> userpath.append(location)
+True
+>>> userpath.in_new_path(location)
+True
+>>> userpath.need_shell_restart(location)
+True
+```
+
+## License
+
+`userpath` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
