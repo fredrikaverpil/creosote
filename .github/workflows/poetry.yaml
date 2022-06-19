@@ -26,13 +26,11 @@ jobs:
           title: "Update poetry dependencies"
           body: |
 
-            ### Outdated dependencies:
+            Please review the changes to `poetry.lock` for the updated dependencies. Poetry found the following depdendencies to be outdated:
 
             ```bash
             ${{ env.POETRY_OUTDATED }}
             ```
-            
-            Please review [poetry.lock](poetry.lock) for the updated dependencies of this PR.
 
             _Note: there may be dependencies in the table above which were not updated as part of this PR.
             The reason is they require manual updating._
