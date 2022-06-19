@@ -21,6 +21,7 @@ jobs:
         with:
           delete-branch: true
           branch: poetry-update
+          add-paths: poetry.lock
           commit-message: "Update poetry dependencies"
           title: "Update poetry dependencies"
           body: |
