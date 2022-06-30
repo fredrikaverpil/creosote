@@ -26,24 +26,24 @@ jobs:
           commit-message: "Update poetry dependencies"
           title: "Update poetry dependencies"
           body: |
+            :warning: There is a risk that some production dependencies which are sub-dependencies of developer dependencies can be updated by this action. Always review `poetry.lock` carefully.
 
             ### Updated dependencies:
 
             ```bash
             ${{ env.POETRY_UPDATED }}
-            ```   
+            ```
 
-            ### Outdated dependencies _before_ PR:
+            ### Outdated dependencies _before_ this PR:
 
             ```bash
             ${{ env.POETRY_OUTDATED_BEFORE }}
             ```
 
-            ### Outdated dependencies _after_ PR:
+            ### Outdated dependencies _after_ this PR:
 
             ```bash
             ${{ env.POETRY_OUTDATED_AFTER }}
             ```
 
-            _Note: there may be dependencies in the table above which were not updated as part of this PR.
-            The reason is they require manual updating due to the way they are pinned._
+            :pencil2: There may be dependencies in the table above which were not updated as part of this PR. The reason is they require manual updating due to the way they are pinned._
