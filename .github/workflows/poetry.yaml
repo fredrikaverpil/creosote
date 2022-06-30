@@ -31,9 +31,9 @@ jobs:
       - run: poetry --version
 
       - uses: fredrikaverpil/poetry-update@v1.2
-        with:
-          show_outdated_command: "poetry show --outdated --only dev"
-          update_command: "poetry update --only dev"
+#         with:
+#           show_outdated_command: "poetry show --outdated --only dev"
+#           update_command: "poetry update --only dev"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
