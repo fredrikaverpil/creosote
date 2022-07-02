@@ -1,15 +1,15 @@
-version: 2
-
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 3
-    allow:
-      - dependency-name: "*"
-        dependency-type: all
-    commit-message:
-      prefix: "[prod]"
-      prefix-development: "[dev]"
-      include: "scope"
+# version: 2
+# 
+# updates:
+#   - package-ecosystem: "pip"
+#     directory: "/"
+#     schedule:
+#       interval: "daily"
+#     open-pull-requests-limit: 3
+#     allow:
+#       - dependency-name: "*"
+#         dependency-type: all
+#     commit-message:
+#       prefix: "[prod]"
+#       prefix-development: "[dev]"
+#       include: "scope"
