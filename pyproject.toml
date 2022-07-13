@@ -22,7 +22,7 @@ mypy = "~0"
 pytest = "^7.1.1"
 isort = "^5.10.1"
 loguru-mypy = "^0.0.4"
-types-toml = "^0.10.4"
+types-toml = "^0.10.8"
 
 [tool.poetry.scripts]
 creosote = "creosote.cli:main"
