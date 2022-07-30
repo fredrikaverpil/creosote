@@ -26,7 +26,7 @@ jobs:
           commit-message: "Update poetry dependencies"
           title: "Update poetry dependencies"
           body: |
-            :warning: There is a risk that some production dependencies which are sub-dependencies of developer dependencies can be updated by this action. Always review `poetry.lock` carefully.
+            :warning: Always review changes made to `poetry.lock` carefully.
 
             ### `poetry update` log:
             
