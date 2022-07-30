@@ -48,7 +48,7 @@ Some data is required as input:
 - The path to the virtual environment.
 - The path to one or more Python files (or a folder containing such files).
 
-The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names. Finally, all imports are associated with their corresponding package name. If a package does not have any imports associated, it will be considered to be unused.
+The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
 
 ## Ambition and history
 
