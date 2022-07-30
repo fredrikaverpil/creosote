@@ -44,9 +44,9 @@ creosote --help
 
 Some data is required as input:
 
-- A list of package names (fetched from e.g. `pyproject.toml`, `requirements_*.txt|.in`)
-- The path to the virtual environment
-- The path to one or more Python files
+- A list of package names (fetched from e.g. `pyproject.toml`, `requirements_*.txt|.in`).
+- The path to the virtual environment.
+- The path to one or more Python files (or a folder containing such files).
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names. Finally, all imports are associated with their corresponding package name. If a package does not have any imports associated, it will be considered to be unused.
 
