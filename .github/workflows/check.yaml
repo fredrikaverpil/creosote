@@ -10,7 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10"]
-        poetry-version: [1.1.13]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -23,11 +22,9 @@ jobs:
           path: |
             ~/.cache/pypoetry/virtualenvs
             ~/.cache/pip
-          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
+          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
       - uses: fredrikaverpil/setup-pipx@v1.3
-        with:
-          pipx-version: "1.0"
-      - run: pipx install poetry==${{ matrix.poetry-version }}
+      - run: pipx install poetry
       - run: poetry install
       - run: poetry run black --check --diff src
       - run: poetry run isort --check --diff src
