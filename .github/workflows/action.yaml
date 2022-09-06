@@ -25,10 +25,8 @@ jobs:
             ~/.cache/pip
             ~/.cache/pypoetry/virtualenvs
             .venv_pipx
-          key: key1-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}-pipx-${{ matrix.pipx-version }}-poetry-${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock') }}
-
+          key: key1-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
       - run: pipx install poetry
-
       - run: poetry install --without dev
 
       - run: pipx install creosote
