@@ -23,7 +23,6 @@ jobs:
             ~/.cache/pypoetry/virtualenvs
             ~/.cache/pip
           key: ${{ matrix.os }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      - uses: fredrikaverpil/setup-pipx@v1.5
       - run: pipx install poetry
       - run: poetry install
       - run: poetry run pytest -v
