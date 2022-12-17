@@ -15,15 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pip
-          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      - run: pipx install poetry
+      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install
       - run: poetry run black --check --diff src
       - run: poetry run isort --check --diff src
@@ -38,15 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pip
-          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      - run: pipx install poetry
+      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install
       - run: poetry run flake8 src
 
@@ -60,14 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pip
-          key: ${{ matrix.os }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      - run: pipx install poetry
+      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install
       - run: poetry run mypy src

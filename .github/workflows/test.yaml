@@ -18,12 +18,6 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      # - uses: actions/cache@v3
-      #   with:
-      #     path: |
-      #       ~/.cache/pypoetry/virtualenvs
-      #       ~/.cache/pip
-      #     key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
       - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install
       - run: poetry run pytest -v
