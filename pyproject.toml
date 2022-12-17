@@ -18,12 +18,12 @@ loguru = "^0.6.0"
 toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.6.0"
-ruff = "^0.0.185"
-mypy = "~0"
-pytest = "^7.1.1"
-loguru-mypy = "^0.0.4"
-types-toml = "^0.10.8"
+black = "*"
+ruff = "*"
+mypy = "*"
+pytest = "*"
+loguru-mypy = "*"
+types-toml = "*"
 
 [tool.poetry.scripts]
 creosote = "creosote.cli:main"
