@@ -9,6 +9,6 @@ def test_format_porcelain(capsys, with_packages):
     cli.main(["-f", "porcelain"])
 
     captured = capsys.readouterr()
-    expected_log = "PyYAML\nprotobuf\n"
+    expected_log = "protobuf\npyyaml\n"
 
     assert captured.out == expected_log
