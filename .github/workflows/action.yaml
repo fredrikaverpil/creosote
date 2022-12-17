@@ -18,16 +18,7 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/pypoetry/virtualenvs
-          key: key1-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
       - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install --without dev
-
       - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
-
       - run: creosote
