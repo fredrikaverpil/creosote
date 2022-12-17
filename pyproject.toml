@@ -34,30 +34,30 @@ line-length = 88  # black default
 select = [
     "E",  # pycodestyle (supersedes pep8)
     "W",  # pycodestyle warnings
-    "D",  # pydocstyle
+    # "D",  # pydocstyle
     "F",  # pyflakes
-    "UP", # pyupgrade
+    # "UP", # pyupgrade
     "S",  # flake8-bandit
     "B",  # flake8-bugbear
     "I",  # isort
     "N",  # pep8-naming
-    "ERA",  # eradicate
+    # "ERA",  # eradicate
     "C4",  # flake8-comprehensions
     "A",  # flake8-builtins
     "Q",  # flake8-quotes
     "YTT",  # flake8-2020
-    "ANN",  # flake8-annotations
+    # "ANN",  # flake8-annotations
     "BLE",  # flake8-blind-except
-    "FBT",  # flake8-boolean-trap
+    # "FBT",  # flake8-boolean-trap
     "C90",  # mccabe
     "T10",  # flake8-debugger
-    "EM",  # flake8-errmsg
+    # "EM",  # flake8-errmsg
     "ICN",  # flake8-import-conventions
-    "T20",  # flake8-print
-    "RET",  # flake8-return
+    # "T20",  # flake8-print
+    # "RET",  # flake8-return
     "SIM",  # flake8-simplify
     "TID",  # flake8-tidy-imports
-    "ARG",  # flake8-unused-arguments
+    # "ARG",  # flake8-unused-arguments
     "PDV",  # pandas-vet
     "PGH",  # pygrep-hooks
     "PLC",  # pylint
