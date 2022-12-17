@@ -5,24 +5,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  format:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10"]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        id: cpython_setup
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
-      - run: poetry install
-      - run: poetry run black --check --diff src
-      - run: poetry run isort --check --diff src
-
   lint:
     strategy:
       fail-fast: false
@@ -38,7 +20,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: poetry install
-      - run: poetry run flake8 src
+      - run: poetry run ruff src tests
+      - run: poetry run black --check --diff src
 
   type:
     strategy:
