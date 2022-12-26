@@ -12,7 +12,7 @@ readme = "README.md"
 repository = "https://github.com/fredrikaverpil/creosote"
 
 [tool.poetry.dependencies]
-python = ">=3.7, <3.11"  # do not use ^3.10
+python = ">=3.7, <3.12"
 distlib = "^0.3.4"
 loguru = "^0.6.0"
 toml = "^0.10.2"
