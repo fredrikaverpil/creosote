@@ -1,6 +1,7 @@
 # creosote
 
-[![check](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yaml/badge.svg)](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yaml) [![test](https://github.com/fredrikaverpil/creosote/actions/workflows/test.yaml/badge.svg)](https://github.com/fredrikaverpil/creosote/actions/workflows/test.yaml)
+[![check](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yml/badge.svg)](https://github.com/fredrikaverpil/creosote/actions/workflows/check.yml)
+[![test](https://github.com/fredrikaverpil/creosote/actions/workflows/test.yml/badge.svg)](https://github.com/fredrikaverpil/creosote/actions/workflows/test.yml)
 
 Identify unused dependencies and avoid a bloated virtual environment.
 
