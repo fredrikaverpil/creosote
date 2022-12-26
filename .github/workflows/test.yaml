@@ -41,3 +41,35 @@ jobs:
 
       - run: poetry install
       - run: poetry run pytest -v
+
+  action:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        id: cpython_setup
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
+
+      - uses: actions/cache@v3
+        id: cache-poetry
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/pypoetry/virtualenvs
+            ~/.cache/pypoetry/cache
+            ~/.cache/pypoetry/artifacts
+          key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+
+      - run: poetry install --without dev
+      - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
+      - run: creosote
