@@ -12,6 +12,13 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        id: cpython_setup
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
+
       - name: Build package
         run: poetry build
 
