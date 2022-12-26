@@ -78,7 +78,7 @@ Yes! For `pyproject.toml`, just provide the `--dev` argument.
 
 ### Can I use this as a GitHub Action?
 
-Yes! See [.github/workflows/action.yaml](.github/workflows/action.yaml) for a working example.
+Yes! See the `action` job in [.github/workflows/test.yml](.github/workflows/test.yml) for a working example.
 
 ### What's with the name "creosote"?
 
