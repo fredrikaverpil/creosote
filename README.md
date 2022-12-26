@@ -82,3 +82,9 @@ Yes! See [.github/workflows/action.yaml](.github/workflows/action.yaml) for a wo
 ### What's with the name "creosote"?
 
 This library has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
+
+
+### Releasing
+
+1. Bump version with Poetry, e.g. `poetry bump minor`.
+2. GitHub Action will run automatically on creating [a release](https://github.com/fredrikaverpil/creosote/releases).
