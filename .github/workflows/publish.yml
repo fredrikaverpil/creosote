@@ -1,4 +1,4 @@
-name: check
+name: publish
 
 on:
   release:
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  pypi:
     runs-on: ubuntu-latest
     steps:
       - name: Publish package
