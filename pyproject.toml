@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "creosote"
-version = "1.0.1"
+version = "1.1.0"
 description = "Identify unused dependencies and avoid a bloated virtual environment."
 authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
 license = "MIT"
