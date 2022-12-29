@@ -7,10 +7,6 @@ on:
     branches:
       - main
 
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   pytest:
     strategy:
@@ -25,22 +21,18 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
 
       - uses: actions/cache@v3
-        id: cache-poetry
+        id: cache-pip
         env:
           SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
         with:
           path: |
             ~/.cache/pip
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pypoetry/cache
-            ~/.cache/pypoetry/artifacts
-          key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: pip-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}
 
-      - run: poetry install
-      - run: poetry run pytest -v
+      - run: pip install '.[test]'
+      - run: pytest -v
 
   action:
     strategy:
@@ -56,20 +48,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
-
-      - uses: actions/cache@v3
-        id: cache-poetry
-        env:
-          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pypoetry/cache
-            ~/.cache/pypoetry/artifacts
-          key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-
-      - run: poetry install --without dev
+      - run: pip install .
       - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
       - run: creosote

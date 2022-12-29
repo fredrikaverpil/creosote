@@ -17,10 +17,9 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
 
       - name: Build package
-        run: poetry build
+        run: pip wheel --no-deps --use-pep517 --wheel-dir=dist .
 
       - name: Publish package
         if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags')
