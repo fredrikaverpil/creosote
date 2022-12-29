@@ -1,31 +1,54 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "creosote"
-version = "1.0.2"
-description = "Identify unused dependencies and avoid a bloated virtual environment."
-authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
-license = "MIT"
+version = "1.0.3"
+description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 readme = "README.md"
-repository = "https://github.com/fredrikaverpil/creosote"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "distlib>=0.3.4,<0.4",
+    "loguru>=0.6.0,<0.7",
+    "toml>=0.10.2,<0.11",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.7, <3.12"
-distlib = "^0.3.4"
-loguru = "^0.6.0"
-toml = "^0.10.2"
+[project.optional-dependencies]
+# PEP-440
+lint = [
+  "black",
+  "ruff",
+]
+types = [
+  "mypy",
+  "loguru-mypy",
+  "types-toml",
+]
+test = [
+    "pytest"
+]
+dev = [
+    "creosote[lint,types,test]",
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "*"
-ruff = "*"
-mypy = "*"
-pytest = "*"
-loguru-mypy = "*"
-types-toml = "*"
-
-[tool.poetry.scripts]
+[project.scripts]
 creosote = "creosote.cli:main"
 
 [tool.ruff]
