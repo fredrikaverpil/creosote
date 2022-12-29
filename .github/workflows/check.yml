@@ -7,10 +7,6 @@ on:
     branches:
       - main
 
-concurrency:
-  group: check-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   lint:
     strategy:
@@ -25,23 +21,19 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
 
       - uses: actions/cache@v3
-        id: cache-poetry
+        id: cache-pip
         env:
           SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
         with:
           path: |
             ~/.cache/pip
-            ~/.cache/pypoetry/virtualenvs
-            ~/.cache/pypoetry/cache
-            ~/.cache/pypoetry/artifacts
-          key: poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: pip-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}
 
-      - run: poetry install
-      - run: poetry run ruff src tests
-      - run: poetry run black --check --diff src
+      - run: pip install '.[lint]'
+      - run: ruff src tests
+      - run: black --check --diff src
 
   type:
     strategy:
@@ -56,6 +48,6 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
-      - run: poetry install
-      - run: poetry run mypy src
+
+      - run: pip install '.[types]'
+      - run: mypy src
