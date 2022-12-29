@@ -106,3 +106,28 @@ module = [
     "distlib.*",
 ]
 ignore_missing_imports = true
+
+# Dummy Poetry config below, used by tests
+
+[tool.poetry]
+name = "creosote"
+version = "1.0.2"
+description = "Identify unused dependencies and avoid a bloated virtual environment."
+authors = ["Fredrik Averpil <fredrik.averpil@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/fredrikaverpil/creosote"
+
+[tool.poetry.dependencies]
+python = ">=3.7, <3.12"
+distlib = "^0.3.4"
+loguru = "^0.6.0"
+toml = "^0.10.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+ruff = "*"
+mypy = "*"
+pytest = "*"
+loguru-mypy = "*"
+types-toml = "*"
