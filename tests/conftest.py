@@ -7,12 +7,12 @@ import pytest
 def with_packages(capsys, request):
     with capsys.disabled():
         subprocess.run(
-            ["pip", "install"] + request.param,
+            ["poetry", "add"] + request.param,
             stdout=subprocess.DEVNULL,
         )
     yield
     with capsys.disabled():
         subprocess.run(
-            ["pip", "install"] + request.param,
+            ["poetry", "remove"] + request.param,
             stdout=subprocess.DEVNULL,
         )
