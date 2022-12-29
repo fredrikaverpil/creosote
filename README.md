@@ -88,4 +88,4 @@ This library has borrowed its name from the [Monty Python scene about Mr. Creoso
 ### Releasing
 
 1. Bump version in `pyproject.toml`.
-2. GitHub Action will run automatically on creating [a release](https://github.com/fredrikaverpil/creosote/releases).
+2. GitHub Action will run automatically on creating [a release](https://github.com/fredrikaverpil/creosote/releases) and deploy the release onto PyPi.
