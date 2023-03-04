@@ -63,7 +63,7 @@ class DepsResolver:
 
     def associate_imports_with_package(self, package: Package, name: str):
         for imp in self.imports.copy():
-            if not imp.module and name in imp.name:
+            if not imp.module and name in imp.name:  # noqa: SIM114
                 # import <imp.name>
                 package.associated_imports.append(imp)
             elif imp.name and name in imp.module:
