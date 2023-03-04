@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "creosote"
-version = "1.0.3"
+version = "2.0.0"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 readme = "README.md"
 requires-python = ">=3.7"
@@ -26,6 +26,7 @@ classifiers = [
 ]
 dependencies = [
     "distlib>=0.3.4,<0.4",
+    "dotty-dict>=1.3.1,<1.4",
     "loguru>=0.6.0,<0.7",
     "toml>=0.10.2,<0.11",
 ]
@@ -104,6 +105,7 @@ python_version = "3.10"
 [[tool.mypy.overrides]]
 module = [
     "distlib.*",
+    "dotty_dict.*",
 ]
 ignore_missing_imports = true
 
