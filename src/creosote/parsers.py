@@ -20,7 +20,7 @@ class PackageReader:
 
         section_deps = []
         for dep in section_contents:
-            parsed_dep = self.dependency_without_version_constraint(dep)
+            parsed_dep = self.parse_dep_string(dep)
             section_deps.append(parsed_dep)
         return section_deps
 
@@ -68,11 +68,19 @@ class PackageReader:
             contents = infile.readlines()
 
         for line in contents:
-            if not line.startswith(" "):
-                dep = self.dependency_without_version_constraint(line)
-                deps.append(dep)
+            if line.startswith("#") or line.startswith(" "):
+                continue
+            parsed_dep = self.parse_dep_string(line)
+            deps.append(parsed_dep)
 
         return sorted(deps)
+
+    @staticmethod
+    def parse_dep_string(dep: str):
+        if "@" in dep:
+            return PackageReader.dependency_without_direct_reference(dep)
+        else:
+            return PackageReader.dependency_without_version_constraint(dep)
 
     @staticmethod
     def dependency_without_version_constraint(dependency_string: str):
@@ -81,6 +89,18 @@ class PackageReader:
         See PEP-404 for variations.
         """
         match = re.match(r"([\w\-\_\.]*)[>|=|<|~]*", dependency_string)
+        if match and match.groups():
+            dep = match.groups()[0]
+            return dep
+
+    @staticmethod
+    def dependency_without_direct_reference(dependency_string: str):
+        """Return dependency name without direct reference.
+
+        See PEP-508 for variations.
+        """
+        # return dependency_string.split("@")[0].strip()
+        match = re.match(r"([\w\-\_\.]*)\s*@\s*", dependency_string)
         if match and match.groups():
             dep = match.groups()[0]
             return dep
