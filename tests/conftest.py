@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.fixture
-def with_packages(capsys, request):
+def with_poetry_packages(capsys, request):
     with capsys.disabled():
         subprocess.run(
             ["poetry", "add"] + request.param,

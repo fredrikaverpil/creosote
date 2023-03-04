@@ -13,16 +13,16 @@ Install creosote in separate virtual environment (using e.g. [pipx](https://gith
 pipx install creosote
 ```
 
-Scan virtual environment for unused packages:
+Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/) and `requirements.txt` files are also supported):
 
 ```bash
-creosote --deps-file pyproject.toml --venv .venv --paths src
+creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.dependencies
 ```
 
-Example output:
+Example output (using Poetry dependency definition):
 
 ```bash
-$ creosote
+$ creosote --venv .venv --paths src --deps-file pyproject.toml --sections tool.poetry.dependencies
 Parsing src/creosote/formatters.py
 Parsing src/creosote/models.py
 Parsing src/creosote/resolvers.py
@@ -45,9 +45,10 @@ creosote --help
 
 Some data is required as input:
 
-- A list of package names (fetched from e.g. `pyproject.toml`, `requirements_*.txt|.in`).
-- The path to the virtual environment.
-- The path to one or more Python files (or a folder containing such files).
+- The path to the virtual environment (`--venv`).
+- The path to one or more Python files, or a folder containing such files (`--paths`).
+- A list of package names, fetched from e.g. `pyproject.toml`, `requirements_*.txt|.in` (`--deps-file`).
+- One or more toml sections to parse, e.g. `project.dependencies` (`--sections`).
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
 
@@ -72,9 +73,25 @@ Yes, kind of. There is no way to tell which part of `requirements.txt` specifies
 
 If you are using [pip-tools](https://github.com/jazzband/pip-tools), you can provide a `*.in` file.
 
-### Can I scan for pyproject's dev-dependencies?
+### Can I scan for PEP-621 dependencies?
 
-Yes! For `pyproject.toml`, just provide the `--dev` argument.
+Yes! Just provide `-sections project.dependencies`.
+
+### Can I scan for PEP-621 optional dependencies?
+
+Yes! Just provide `-sections project.optional-dependencies.<GROUP>` where `<GROUP>` is your dependency group name, e.g. `-s project.optional-dependencies.lint`.
+
+### Can I scan for Poetry's dev-dependencies?
+
+Yes! Just provide `-sections tool.poetry.dev-dependencies`.
+
+### Can I scan for Poetry's dependency groups?
+
+Yes! Just provide `-sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `-s tool.poetry.group.lint.dependencies`.
+
+### Can I scan for multiple toml sections?
+
+Yes! Just provide each section after the `--sections` parameter, e.g. `--sections project.optional-dependencies.test project.optional-dependencies.lint`.
 
 ### Can I use this as a GitHub Action?
 

@@ -6,26 +6,62 @@ import toml
 from loguru import logger
 
 from creosote.models import Import, Package
+from dotty_dict import dotty
+import re
 
 
 class PackageReader:
     def __init__(self):
         self.packages = None
 
-    def _pyproject(self, deps_file: str, dev: bool):
+    def _pyproject_pep621(self, section_contents: dict):
+        if not isinstance(section_contents, list):
+            raise TypeError("Unexpected dependency format, list expected.")
+
+        section_deps = []
+        for dep in section_contents:
+            match = re.match(r"([\w\-\_]*)[>=|==|>=]*", dep)
+            if match and match.groups():
+                dep = match.groups()[0]
+                section_deps.append(dep)
+        return section_deps
+
+    def _pyproject_poetry(self, section_contents: dict):
+        if not isinstance(section_contents, dict):
+            raise TypeError("Unexpected dependency format, dict expected.")
+        return section_contents.keys()
+
+    def _pyproject(self, deps_file: str, sections: list):
         """Return dependencies from pyproject.toml."""
         with open(deps_file, "r") as infile:
             contents = toml.loads(infile.read())
 
-        try:
-            if dev:
-                deps = contents["tool"]["poetry"]["dev-dependencies"]
-            else:
-                deps = contents["tool"]["poetry"]["dependencies"]
-        except KeyError as e:
-            raise Exception("Could not find expected toml property.") from e
+        dotty_contents = dotty(contents)
+        deps = []
 
-        return sorted(deps.keys())
+        for section in sections:
+            try:
+                section_contents = dotty_contents[section]
+            except KeyError as err:
+                raise KeyError(f"Could not find toml section {section}.") from err
+            section_deps = []
+
+            if section.startswith("project"):
+                section_deps = self._pyproject_pep621(section_contents)
+            elif section.startswith("tool.poetry"):
+                section_deps = self._pyproject_poetry(section_contents)
+            else:
+                raise TypeError("Unsupported dependency format.")
+
+            if not section_deps:
+                logger.warning(f"No dependencies found in section {section}")
+            else:
+                logger.info(
+                    f"Dependencies found in {section}: {', '.join(section_deps)}"
+                )
+                deps.extend(section_deps)
+
+        return sorted(deps)
 
     def _requirements(self, deps_file: str):
         """Return dependencies from requirements.txt-format file."""
@@ -50,12 +86,14 @@ class PackageReader:
                 packages.append(Package(name=dep))
         return packages
 
-    def read(self, deps_file: str, dev: bool):
+    def read(self, deps_file: str, sections: list):
         if not pathlib.Path(deps_file).exists():
             raise Exception(f"File {deps_file} does not exist")
 
         if "pyproject.toml" in deps_file:
-            self.packages = self.packages_sans_ignored(self._pyproject(deps_file, dev))
+            self.packages = self.packages_sans_ignored(
+                self._pyproject(deps_file, sections)
+            )
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
             self.packages = self.packages_sans_ignored(self._requirements(deps_file))
         else:

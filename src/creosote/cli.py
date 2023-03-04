@@ -51,20 +51,20 @@ def parse_args(args):
         dest="deps_file",
         metavar="PATH",
         default="pyproject.toml",
-        help="path to the pyproject.toml, *.txt or *.in dependencies file",
+        help="path to the pyproject.toml, requirements[.txt|.in] file",
     )
 
     parser.add_argument(
-        "--dev",
-        dest="dev",
-        action="store_true",
-        help="scan dev dependencies instead of prod dependencies",
+        "-s",
+        "--sections",
+        dest="sections",
+        metavar="SECTION",
+        nargs="*",
+        default=["project.dependencies"],
+        help="pyproject.toml section(s) to scan for dependencies",
     )
 
     parsed_args = parser.parse_args(args)
-
-    if "pyproject.toml" not in parsed_args.deps_file and parsed_args.dev:
-        raise Exception("Option --dev must be used with pyproject.toml")
 
     return parsed_args
 
@@ -81,7 +81,7 @@ def main(args_=None):
 
     logger.info(f"Parsing {args.deps_file} for packages")
     deps_reader = parsers.PackageReader()
-    deps_reader.read(args.deps_file, args.dev)
+    deps_reader.read(args.deps_file, args.sections)
 
     logger.info("Resolving...")
     deps_resolver = resolvers.DepsResolver(
