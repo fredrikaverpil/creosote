@@ -75,19 +75,19 @@ If you are using [pip-tools](https://github.com/jazzband/pip-tools), you can pro
 
 ### Can I scan for PEP-621 dependencies?
 
-Yes! Just provide `-sections project.dependencies`.
+Yes! Just provide `--sections project.dependencies`.
 
 ### Can I scan for PEP-621 optional dependencies?
 
-Yes! Just provide `-sections project.optional-dependencies.<GROUP>` where `<GROUP>` is your dependency group name, e.g. `-s project.optional-dependencies.lint`.
+Yes! Just provide `--sections project.optional-dependencies.<GROUP>` where `<GROUP>` is your dependency group name, e.g. `-s project.optional-dependencies.lint`.
 
 ### Can I scan for Poetry's dev-dependencies?
 
-Yes! Just provide `-sections tool.poetry.dev-dependencies`.
+Yes! Just provide `--sections tool.poetry.dev-dependencies`.
 
 ### Can I scan for Poetry's dependency groups?
 
-Yes! Just provide `-sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `-s tool.poetry.group.lint.dependencies`.
+Yes! Just provide `--sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `-s tool.poetry.group.lint.dependencies`.
 
 ### Can I scan for multiple toml sections?
 
