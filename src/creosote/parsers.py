@@ -20,10 +20,8 @@ class PackageReader:
 
         section_deps = []
         for dep in section_contents:
-            match = re.match(r"([\w\-\_]*)[>=|==|>=]*", dep)
-            if match and match.groups():
-                dep = match.groups()[0]
-                section_deps.append(dep)
+            parsed_dep = self.dependency_without_version_constraint(dep)
+            section_deps.append(parsed_dep)
         return section_deps
 
     def _pyproject_poetry(self, section_contents: dict):
@@ -71,9 +69,16 @@ class PackageReader:
 
         for line in contents:
             if not line.startswith(" "):
-                deps.append(line[: line.find("=")])
+                dep = self.dependency_without_version_constraint(line)
+                deps.append(dep)
 
         return sorted(deps)
+
+    def dependency_without_version_constraint(self, dependency_string: str):
+        match = re.match(r"([\w\-\_]*)[>=|==|>=]*", dependency_string)
+        if match and match.groups():
+            dep = match.groups()[0]
+            return dep
 
     @lru_cache(maxsize=None)  # noqa: B019
     def ignore_packages(self):
