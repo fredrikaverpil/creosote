@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "creosote"
-version = "2.0.0"
+version = "2.0.1"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 readme = "README.md"
 requires-python = ">=3.7"
@@ -14,7 +14,6 @@ authors = [
   { name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
