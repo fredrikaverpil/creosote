@@ -1,13 +1,13 @@
 import ast
 import pathlib
+import re
 from functools import lru_cache
 
 import toml
+from dotty_dict import dotty
 from loguru import logger
 
 from creosote.models import Import, Package
-from dotty_dict import dotty
-import re
 
 
 class PackageReader:
