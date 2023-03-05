@@ -51,6 +51,22 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pip install .
       - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
-      - run: creosote
+
+      - name: run creosote (linux/macos)
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          echo "VIRTUAL_ENV: $VIRTUAL_ENV"
+          pip install .
+          creosote --venv .venv
+
+      - name: run creosote (windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          python -m venv .venv
+          .venv/Scripts/Activate.ps1
+          Write-Host "VIRTUAL_ENV: $env:VIRTUAL_ENV"
+          pip install .
+          creosote --venv .venv
