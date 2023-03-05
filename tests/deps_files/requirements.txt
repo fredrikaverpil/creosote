@@ -1,0 +1,3 @@
+idna @ git+https://git@github.com/kjd/idna.git@master
+requests
+boto3>=1.26.0

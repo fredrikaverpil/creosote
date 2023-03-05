@@ -14,7 +14,7 @@ class PackageReader:
     def __init__(self):
         self.packages = None
 
-    def _pyproject_pep621(self, section_contents: dict):
+    def pyproject_pep621(self, section_contents: dict):
         if not isinstance(section_contents, list):
             raise TypeError("Unexpected dependency format, list expected.")
 
@@ -24,12 +24,12 @@ class PackageReader:
             section_deps.append(parsed_dep)
         return section_deps
 
-    def _pyproject_poetry(self, section_contents: dict):
+    def pyproject_poetry(self, section_contents: dict):
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
 
-    def _pyproject(self, deps_file: str, sections: list):
+    def pyproject(self, deps_file: str, sections: list):
         """Return dependencies from pyproject.toml."""
         with open(deps_file, "r") as infile:
             contents = toml.loads(infile.read())
@@ -45,23 +45,20 @@ class PackageReader:
             section_deps = []
 
             if section.startswith("project"):
-                section_deps = self._pyproject_pep621(section_contents)
+                section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
-                section_deps = self._pyproject_poetry(section_contents)
+                section_deps = self.pyproject_poetry(section_contents)
             else:
                 raise TypeError("Unsupported dependency format.")
 
             if not section_deps:
                 logger.warning(f"No dependencies found in section {section}")
             else:
-                logger.info(
-                    f"Dependencies found in {section}: {', '.join(section_deps)}"
-                )
                 deps.extend(section_deps)
 
         return sorted(deps)
 
-    def _requirements(self, deps_file: str):
+    def requirements(self, deps_file: str):
         """Return dependencies from requirements.txt-format file."""
         deps = []
         with open(deps_file, "r") as infile:
@@ -122,10 +119,10 @@ class PackageReader:
 
         if "pyproject.toml" in deps_file:
             self.packages = self.packages_sans_ignored(
-                self._pyproject(deps_file, sections)
+                self.pyproject(deps_file, sections)
             )
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            self.packages = self.packages_sans_ignored(self._requirements(deps_file))
+            self.packages = self.packages_sans_ignored(self.requirements(deps_file))
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
