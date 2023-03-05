@@ -96,7 +96,6 @@ class PackageReader:
 
         See PEP-508 for variations.
         """
-        # return dependency_string.split("@")[0].strip()
         match = re.match(r"([\w\-\_\.]*)\s*@\s*", dependency_string)
         if match and match.groups():
             dep = match.groups()[0]
