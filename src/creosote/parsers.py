@@ -105,7 +105,7 @@ class PackageReader:
     def ignore_packages(self):
         return ["python"]
 
-    def packages_sans_ignored(self, deps):
+    def filter_ignored_dependencies(self, deps):
         packages = []
         for dep in deps:
             if dep not in self.ignore_packages():
@@ -117,11 +117,13 @@ class PackageReader:
             raise Exception(f"File {deps_file} does not exist")
 
         if "pyproject.toml" in deps_file:
-            self.packages = self.packages_sans_ignored(
+            self.packages = self.filter_ignored_dependencies(
                 self.pyproject(deps_file, sections)
             )
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            self.packages = self.packages_sans_ignored(self.requirements(deps_file))
+            self.packages = self.filter_ignored_dependencies(
+                self.requirements(deps_file)
+            )
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
