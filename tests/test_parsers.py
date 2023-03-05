@@ -26,7 +26,7 @@ def test_dependency_without_version_constraint(dependency_string, expected_packa
         ("pip @ file:///localbuilds/pip-1.3.1.zip", "pip"),
         ("pip @ https://github.com/pypa/pip.git", "pip"),
         ("pip @ git+https://github.com/pypa/pip.git", "pip"),
-        ("pip @ git+ssh://github.com/pypa/pip.git", "pip"),
+        ("pip @ git+ssh://git@github.com/pypa/pip.git", "pip"),
     ],
 )
 def test_pyproject_directref_package_name(dependency_string, expected_package):
