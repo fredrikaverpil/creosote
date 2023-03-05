@@ -74,8 +74,13 @@ class PackageReader:
 
         return sorted(deps)
 
-    def dependency_without_version_constraint(self, dependency_string: str):
-        match = re.match(r"([\w\-\_]*)[>=|==|>=]*", dependency_string)
+    @staticmethod
+    def dependency_without_version_constraint(dependency_string: str):
+        """Return dependency name without version constraint.
+
+        See PEP-404 for variations.
+        """
+        match = re.match(r"([\w\-\_\.]*)[>|=|<|~]*", dependency_string)
         if match and match.groups():
             dep = match.groups()[0]
             return dep
