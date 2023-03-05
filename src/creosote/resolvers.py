@@ -1,8 +1,10 @@
 import os
 import pathlib
+from pathlib import Path
 from typing import List, Optional
 
 from distlib import database
+from loguru import logger
 
 from creosote.models import Import, Package
 
@@ -71,8 +73,17 @@ class DepsResolver:
                 package.associated_imports.append(imp)
 
     def populate_packages(self):
+        venv_exists = Path(self.venv).exists()
+
+        if not venv_exists:
+            logger.warning(
+                f"Virtual environment '{self.venv}' does not exist, "
+                "cannot resolve top-level names. This may lead to incorrect results."
+            )
+
         for package in self.packages:
-            self.top_level_names(package)
+            if venv_exists:
+                self.top_level_names(package)
             self.package_to_module(package)
 
     def associate(self):
