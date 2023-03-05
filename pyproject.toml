@@ -99,7 +99,7 @@ ignore = []
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.7"
 
 [[tool.mypy.overrides]]
 module = [
