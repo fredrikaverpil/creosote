@@ -148,7 +148,7 @@ def get_module_info_from_code(path):
         if isinstance(node, ast.Import):
             module = []
         elif isinstance(node, ast.ImportFrom):
-            module = node.module.split(".")
+            module = node.module.split(".") if node.module else []
         else:
             continue
 
