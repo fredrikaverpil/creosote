@@ -6,6 +6,7 @@ from functools import lru_cache
 import toml
 from dotty_dict import dotty
 from loguru import logger
+from pip_requirements_parser import RequirementsFile
 
 from creosote.models import Import, Package
 
@@ -58,19 +59,10 @@ class PackageReader:
 
         return sorted(deps)
 
+
     def requirements(self, deps_file: str):
         """Return dependencies from requirements.txt-format file."""
-        deps = []
-        with open(deps_file, "r") as infile:
-            contents = infile.readlines()
-
-        for line in contents:
-            if line.startswith("#") or line.startswith(" "):
-                continue
-            parsed_dep = self.parse_dep_string(line)
-            deps.append(parsed_dep)
-
-        return sorted(deps)
+        return sorted([dep.name for dep in RequirementsFile.from_file(deps_file).requirements])
 
     @staticmethod
     def parse_dep_string(dep: str):

@@ -35,7 +35,7 @@ def parse_args(args):
         dest="paths",
         default=glob.glob("src"),
         nargs="*",
-        help=("one or more paths to Python files"),
+        help="one or more paths to Python files",
     )
     parser.add_argument(
         "-v",

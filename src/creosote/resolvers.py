@@ -35,8 +35,8 @@ class DepsResolver:
 
     def top_level_names(self, package):
         package_name = package.name.replace("-", "_")
-        site_path = pathlib.Path(".")
-        glob_str = f"{self.venv}/**/{package_name}*.dist-info/top_level.txt"
+        site_path = pathlib.Path(self.venv)
+        glob_str = f"**/{package_name}*.dist-info/top_level.txt"
         top_levels = site_path.glob(glob_str)
         for top_level in top_levels:
             with open(top_level, "r") as infile:

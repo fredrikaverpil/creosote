@@ -27,6 +27,7 @@ dependencies = [
     "distlib>=0.3.4,<0.4",
     "dotty-dict>=1.3.1,<1.4",
     "loguru>=0.6.0,<0.7",
+    "pip-requirements-parser>=32.0.1,<33.1",
     "toml>=0.10.2,<0.11",
 ]
 
