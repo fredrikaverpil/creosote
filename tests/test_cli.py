@@ -39,7 +39,7 @@ def test_pyproject_pep621(capsys):
     )
 
     captured = capsys.readouterr()
-    expected_log = "distlib\ndotty-dict\ntoml\n"
+    expected_log = "distlib\ndotty-dict\npip-requirements-parser\ntoml\n"
 
     assert captured.out == expected_log
 
@@ -79,6 +79,6 @@ def test_requirementstxt_directrefs(capsys, with_requirements_txt_packages):
     )
 
     captured = capsys.readouterr()
-    expected_log = "boto3\nidna\nrequests\n"
+    expected_log = "black\nboto3\nidna\nrequests\n"
 
     assert captured.out == expected_log
