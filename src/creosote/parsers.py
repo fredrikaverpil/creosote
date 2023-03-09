@@ -62,7 +62,8 @@ class PackageReader:
 
     def requirements(self, deps_file: str):
         """Return dependencies from requirements.txt-format file."""
-        return sorted([dep.name for dep in RequirementsFile.from_file(deps_file).requirements])
+        deps = RequirementsFile.from_file(deps_file).requirements
+        return sorted([dep.name for dep in deps if dep.name is not None])
 
     @staticmethod
     def parse_dep_string(dep: str):
