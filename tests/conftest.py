@@ -32,7 +32,9 @@ def with_poetry_packages(_stash_away_project_toml, capsys, request):
                 stdout=subprocess.DEVNULL,
             )
             pathlib.Path("poetry.lock").unlink()
-            Path(repo_root / "pyproject.toml").rename(deps_files / "pyproject.poetry.toml")
+            Path(repo_root / "pyproject.toml").rename(
+                deps_files / "pyproject.poetry.toml"
+            )
 
 
 @pytest.fixture()
@@ -54,7 +56,9 @@ def with_pyproject_pep621_packages(_stash_away_project_toml, capsys, request):
                 ["pip", "uninstall", "-y", *request.param],
                 stdout=subprocess.DEVNULL,
             )
-            Path(repo_root / "pyproject.toml").rename(deps_files / "pyproject.pep621.toml")
+            Path(repo_root / "pyproject.toml").rename(
+                deps_files / "pyproject.pep621.toml"
+            )
 
 
 @pytest.fixture()
