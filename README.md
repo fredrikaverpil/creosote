@@ -59,9 +59,7 @@ reports about production dependencies (shipped into production) which turned out
 even be in use.
 
 The goal would be to be able to run this tool in CI, which will catch cases where the developer
-forgets to remove unused packages. A example of such a case could be when doing refactorings.
-
-This can work well in tandem with flake8 or pylint, which can warn in CI about unused imports.
+forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
 
 Note: The creosote tool supports identifying both unused production dependencies and developer dependencies.
 
