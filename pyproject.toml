@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "creosote"
-version = "2.1.1"
+version = "2.2.0"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 readme = "README.md"
 requires-python = ">=3.7"
