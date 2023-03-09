@@ -109,5 +109,6 @@ python_version = "3.7"
 module = [
     "distlib.*",
     "dotty_dict.*",
+    "pip_requirements_parser.*"
 ]
 ignore_missing_imports = true
