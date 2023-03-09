@@ -59,7 +59,6 @@ class PackageReader:
 
         return sorted(deps)
 
-
     def requirements(self, deps_file: str):
         """Return dependencies from requirements.txt-format file."""
         deps = RequirementsFile.from_file(deps_file).requirements
