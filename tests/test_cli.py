@@ -64,6 +64,25 @@ def test_pyproject_pep621_directrefs(capsys, with_pyproject_pep621_packages):
     assert captured.out == expected_log
 
 
+@pytest.mark.parametrize("with_poetry_packages", [["gitpython"]], indirect=True)
+def test_pyproject_case_sensitive_top_level_filepaths(capsys, with_poetry_packages):
+    cli.main(
+        [
+            "-p",
+            "src",
+            "-f",
+            "porcelain",
+            "-s",
+            "tool.poetry.dependencies",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    expected_log = "gitpython\n"
+
+    assert captured.out == expected_log
+
+
 @pytest.mark.parametrize("with_requirements_txt_packages", [["idna"]], indirect=True)
 def test_requirementstxt_directrefs(capsys, with_requirements_txt_packages):
     cli.main(
