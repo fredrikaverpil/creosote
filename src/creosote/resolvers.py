@@ -21,7 +21,7 @@ class DepsResolver:
         self.packages = packages
         self.venv = venv
 
-        self.map_package_name_to_top_level_import
+        self.map_package_to_import_via_top_level_txt_file
         self.top_level_package_pattern = re.compile(
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
         )
@@ -50,11 +50,11 @@ class DepsResolver:
         venv_path = pathlib.Path(self.venv)
         glob_str = "**/*.dist-info/top_level.txt"
         top_level_filepaths = venv_path.glob(glob_str)
-        self.top_level_filepaths = list(top_level_filepaths)
+        self.top_level_filepaths = sorted(top_level_filepaths)
         for top_level_filepath in self.top_level_filepaths:
             logger.debug(f"Found {top_level_filepath}")
 
-    def map_package_name_to_top_level_import(self, package: Package):
+    def map_package_to_import_via_top_level_txt_file(self, package: Package):
         package_name = self.canonicalize_module_name(package.name)
 
         for top_level_filepath in self.top_level_filepaths:
@@ -74,9 +74,8 @@ class DepsResolver:
     def map_package_to_module_via_distlib(self, package: Package):
         """Fallback to distlib if we can't find the top_level.txt file.
 
-        Note:
-            It's possible that this function is completely redundant
-            and can be removed...
+        It seems this brings very little value right now, but I'll
+        leave it in for now...
         """
         logger.debug("Performing fallback module name resolution...")
 
@@ -99,18 +98,17 @@ class DepsResolver:
                     break
 
         logger.debug(f"Found module name for {package.name}: {module}")
-        package.module_name = module
+        package.distlib_db_import_name = module
 
-    def associate_imports_with_package(self, package: Package, name: str):
-        for imp in self.imports.copy():
-            if not imp.module and name in imp.name:  # noqa: SIM114
-                # import <imp.name>
-                package.associated_imports.append(imp)
-            elif imp.name and name in imp.module:
-                # from <imp.name> import ...
-                package.associated_imports.append(imp)
+    def gather_import_info(self):
+        """Populate Package object with import naming info.
 
-    def populate_packages(self):
+        There are three strategies from where the import name can be
+        found:
+            1. In the top_level.txt file in the venv.
+            2. From the distlib database.
+            3. Simply just canonicalize the package name.
+        """
         venv_exists = Path(self.venv).exists()
 
         if not venv_exists:
@@ -121,19 +119,42 @@ class DepsResolver:
 
         for package in self.packages:
             if venv_exists:
-                self.map_package_name_to_top_level_import(package)
+                self.map_package_to_import_via_top_level_txt_file(package)
+
             self.map_package_to_module_via_distlib(package)
 
-    def associate(self):
-        """Associate package name with import (module) name"""
+            package.canonicalized_package_name = self.canonicalize_module_name(
+                package.name
+            )
+
+    def associate_package_with_import(self, package: Package, name: str):
+        for imp in self.imports.copy():
+            if not imp.module and name in imp.name:  # noqa: SIM114
+                # import <imp.name>
+                package.associated_imports.append(imp)
+            elif imp.name and name in imp.module:
+                # from <imp.name> import ...
+                package.associated_imports.append(imp)
+
+    def associate_packages_with_imports(self):
+        """Associate package name with import (module) name.
+
+        The AST has found imports from the source code. This function
+        will now attempt to associate these imports with the Package
+        data, gathered from the venv, distlib, or canonicalization.
+        """
         for package in self.packages:
-            self.associate_imports_with_package(package, package.name)
             if package.top_level_import_names:
-                for import_name in package.top_level_import_names:
-                    self.associate_imports_with_package(package, import_name)
-            if package.module_name:
-                # fallback to module name
-                self.associate_imports_with_package(package, package.module_name)
+                for top_level_import_name in package.top_level_import_names:
+                    self.associate_package_with_import(package, top_level_import_name)
+            elif package.distlib_db_import_name:
+                self.associate_package_with_import(
+                    package, package.distlib_db_import_name
+                )
+            elif package.canonicalized_package_name:
+                self.associate_package_with_import(
+                    package, package.canonicalized_package_name
+                )
 
     def get_unused_packages(self):
         self.unused_packages = [
@@ -147,7 +168,6 @@ class DepsResolver:
 
     def resolve(self):
         self.gather_top_level_filepaths()
-        self.populate_packages()
-        self.associate()
-        self.get_unused_packages()
+        self.gather_import_info()
+        self.associate_packages_with_imports()
         self.get_unused_packages()
