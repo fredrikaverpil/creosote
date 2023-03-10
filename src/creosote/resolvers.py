@@ -71,9 +71,18 @@ class DepsResolver:
                     return
         logger.debug(f"Did not find a top_level.txt file for package {package_name}")
 
-    def package_to_module(self, package: Package):
+    def map_package_to_module_via_distlib(self, package: Package):
+        """Fallback to distlib if we can't find the top_level.txt file.
+
+        Note:
+            It's possible that this function is completely redundant
+            and can be removed...
+        """
+        logger.debug("Performing fallback module name resolution...")
+
         dp = database.DistributionPath(include_egg=True)
         dist = dp.get_distribution(package.name)
+
         if dist is None:
             # raise ModuleNotFoundError
             return
@@ -89,6 +98,7 @@ class DepsResolver:
                     module = parts[-2]
                     break
 
+        logger.debug(f"Found module name for {package.name}: {module}")
         package.module_name = module
 
     def associate_imports_with_package(self, package: Package, name: str):
@@ -112,7 +122,7 @@ class DepsResolver:
         for package in self.packages:
             if venv_exists:
                 self.map_package_name_to_top_level_import(package)
-            self.package_to_module(package)
+            self.map_package_to_module_via_distlib(package)
 
     def associate(self):
         for package in self.packages:
@@ -121,6 +131,7 @@ class DepsResolver:
                 for t in package.top_level_import_names:
                     self.associate_imports_with_package(package, t)
             if package.module_name:
+                # fallback to module name
                 self.associate_imports_with_package(package, package.module_name)
 
     def get_unused_packages(self):
