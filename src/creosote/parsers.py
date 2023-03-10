@@ -2,9 +2,10 @@ import ast
 import pathlib
 import re
 from functools import lru_cache
+from typing import Any, Dict, List
 
 import toml
-from dotty_dict import dotty
+from dotty_dict import Dotty, dotty
 from loguru import logger
 from pip_requirements_parser import RequirementsFile
 
@@ -15,7 +16,7 @@ class PackageReader:
     def __init__(self):
         self.packages = []
 
-    def pyproject_pep621(self, section_contents: dict):
+    def pyproject_pep621(self, section_contents: List[str]):
         if not isinstance(section_contents, list):
             raise TypeError("Unexpected dependency format, list expected.")
 
@@ -25,17 +26,17 @@ class PackageReader:
             section_deps.append(parsed_dep)
         return section_deps
 
-    def pyproject_poetry(self, section_contents: dict):
+    def pyproject_poetry(self, section_contents: Dict[str, Any]):
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
 
-    def pyproject(self, deps_file: str, sections: list):
+    def pyproject(self, deps_file: str, sections: List[str]):
         """Return dependencies from pyproject.toml."""
         with open(deps_file, "r") as infile:
             contents = toml.loads(infile.read())
 
-        dotty_contents = dotty(contents)
+        dotty_contents: Dotty = dotty(contents)
         deps = []
 
         for section in sections:
@@ -45,9 +46,11 @@ class PackageReader:
                 raise KeyError(f"Could not find toml section {section}.") from err
             section_deps = []
 
-            if section.startswith("project"):
+            if section.startswith("project") and isinstance(section_contents, list):
                 section_deps = self.pyproject_pep621(section_contents)
-            elif section.startswith("tool.poetry"):
+            elif section.startswith("tool.poetry") and isinstance(
+                section_contents, dict
+            ):
                 section_deps = self.pyproject_poetry(section_contents)
             else:
                 raise TypeError("Unsupported dependency format.")
@@ -104,11 +107,11 @@ class PackageReader:
                 packages.append(Package(name=dep))
         return packages
 
-    def read(self, deps_file: str, sections: list):
+    def read(self, deps_file: str, sections: List[str]):
         if not pathlib.Path(deps_file).exists():
             raise Exception(f"File {deps_file} does not exist")
 
-        if "pyproject.toml" in deps_file:
+        if deps_file.endswith(".toml"):  # pyproject.toml expected
             self.packages = self.filter_ignored_dependencies(
                 self.pyproject(deps_file, sections)
             )
