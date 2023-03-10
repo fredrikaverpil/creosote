@@ -61,7 +61,7 @@ class DepsResolver:
             matches = self.top_level_package_pattern.findall(str(top_level_filepath))
             for top_level_package in matches:
                 if top_level_package.lower() == package_name.lower():
-                    with open(top_level_filepath, "r") as infile:
+                    with open(top_level_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
                     package.top_level_import_names = [line.strip() for line in lines]
                     import_names = ",".join(package.top_level_import_names)

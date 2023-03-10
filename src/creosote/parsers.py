@@ -33,7 +33,7 @@ class PackageReader:
 
     def pyproject(self, deps_file: str, sections: List[str]):
         """Return dependencies from pyproject.toml."""
-        with open(deps_file, "r") as infile:
+        with open(deps_file, "r", encoding="utf-8") as infile:
             contents = toml.loads(infile.read())
 
         dotty_contents: Dotty = dotty(contents)
@@ -141,7 +141,7 @@ def get_module_info_from_code(path):
     Credit:
         https://stackoverflow.com/a/9049549/2448495
     """
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         root = ast.parse(fh.read(), path)
 
     for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
