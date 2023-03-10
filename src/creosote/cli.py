@@ -87,23 +87,27 @@ def main(args_=None):
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
     imports = parsers.get_modules_from_code(args.paths)
-    logger.debug("Imports found:")
+    logger.debug("Imports found in code (provided by --paths):")
     for imp in imports:
-        logger.debug(imp)
+        logger.debug(f"- {imp}")
 
     logger.info(f"Parsing {args.deps_file} for packages")
     deps_reader = parsers.PackageReader()
     deps_reader.read(args.deps_file, args.sections)
 
-    logger.info("Resolving...")
+    logger.debug(f"Packages found in {args.deps_file} (provided by --deps-file):")
+    for package in deps_reader.packages:
+        logger.debug(f"- {package}")
+
+    logger.info("Resolving package<->import name... (uses venv provided by --venv):")
     deps_resolver = resolvers.DepsResolver(
         imports=imports, packages=deps_reader.packages or [], venv=args.venv
     )
     deps_resolver.resolve()
 
-    logger.debug("Packages:")
+    logger.debug(f"Packages found in {args.deps_file}:")
     for package in deps_resolver.packages:
-        logger.debug(package)
+        logger.debug(f"- {package}")
 
     formatters.print_results(deps_resolver=deps_resolver, format_=args.format)
 

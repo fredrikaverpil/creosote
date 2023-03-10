@@ -2,6 +2,8 @@ import sys
 
 from loguru import logger
 
+from creosote.resolvers import DepsResolver
+
 
 def configure_logger(verbose: bool, format_: str):
     logger.remove()
@@ -18,7 +20,7 @@ def configure_logger(verbose: bool, format_: str):
         )
 
 
-def print_results(deps_resolver, format_: str):
+def print_results(deps_resolver: DepsResolver, format_: str):
     unused_packages = deps_resolver.get_unused_package_names()
     if unused_packages:
         if format_ == "porcelain":
