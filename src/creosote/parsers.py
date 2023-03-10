@@ -2,7 +2,7 @@ import ast
 import pathlib
 import re
 from functools import lru_cache
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 import toml
 from dotty_dict import Dotty, dotty
@@ -54,7 +54,7 @@ class PackageReader:
                 section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
                 logger.info("Detected Poetry toml section")
-                section_deps = self.pyproject_poetry(section_contents)
+                section_deps = self.pyproject_poetry(cast(dict, section_contents))
             else:
                 raise TypeError("Unsupported dependency format.")
 
