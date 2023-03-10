@@ -40,7 +40,8 @@ test = ["pytest"]
 dev = ["creosote[lint,types,test]"]
 
 [project.urls]
-Homepage = "https://github.com/fredrikaverpil/creosote"
+Source = "https://github.com/fredrikaverpil/creosote"
+Tracker = "https://github.com/fredrikaverpil/creosote/issues"
 
 [project.scripts]
 creosote = "creosote.cli:main"
