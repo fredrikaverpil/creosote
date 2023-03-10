@@ -46,10 +46,15 @@ class PackageReader:
                 raise KeyError(f"Could not find toml section {section}.") from err
             section_deps = []
 
-            if section.startswith("project") and isinstance(section_contents, list):
+            if isinstance(section_contents, list) and section.startswith("project"):
+                # assume PEP-621
                 section_deps = self.pyproject_pep621(section_contents)
-            elif section.startswith("tool.poetry") and isinstance(
-                section_contents, dict
+            if isinstance(section_contents, list) and section.startswith("packages"):
+                # assume pipenv/Pipfile
+                section_deps = self.pyproject_pep621(section_contents)
+            elif isinstance(section_contents, dict) and section.startswith(
+                "tool.poetry"
+                # assume poetry
             ):
                 section_deps = self.pyproject_poetry(section_contents)
             else:
