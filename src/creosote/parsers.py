@@ -44,8 +44,10 @@ class PackageReader:
                 section_contents = dotty_contents[section]
             except KeyError as err:
                 raise KeyError(f"Could not find toml section {section}.") from err
-            section_deps = []
 
+            logger.debug(f"{sections}: {section_contents}")
+
+            section_deps = []
             if section.startswith("project"):
                 logger.info(f"Detected PEP-621 toml section in {deps_file}")
                 section_deps = self.pyproject_pep621(section_contents)
