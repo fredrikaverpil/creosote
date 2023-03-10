@@ -86,7 +86,7 @@ def main(args_=None):
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
-    logger.debug("Creosote version: {version}")
+    logger.debug(f"Creosote version: {__version__}")
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found in code (provided by --paths):")
