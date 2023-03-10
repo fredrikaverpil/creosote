@@ -13,7 +13,7 @@ from creosote.models import Import, Package
 
 class PackageReader:
     def __init__(self):
-        self.packages = None
+        self.packages = []
 
     def pyproject_pep621(self, section_contents: dict):
         if not isinstance(section_contents, list):
