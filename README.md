@@ -79,13 +79,21 @@ Yes! Just provide `--sections project.dependencies`.
 
 Yes! Just provide `--sections project.optional-dependencies.<GROUP>` where `<GROUP>` is your dependency group name, e.g. `--sections project.optional-dependencies.lint`.
 
-### Can I scan for Poetry's dev-dependencies?
+### Can I scan for Poetry's dependencies?
 
-Yes! Just provide `--sections tool.poetry.dev-dependencies`.
+Yes, see below!
 
-### Can I scan for Poetry's dependency groups?
+#### Main dependencies
 
-Yes! Just provide `--sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `--sections tool.poetry.group.lint.dependencies`.
+Just provide `--sections tool.poetry.dependencies`.
+
+#### Dev-dependencies?
+
+Just provide `--sections tool.poetry.dev-dependencies`.
+
+#### Dependency groups?
+
+Just provide `--sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `--sections tool.poetry.group.lint.dependencies`.
 
 ### Can I scan for multiple toml sections?
 
