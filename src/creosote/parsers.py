@@ -165,7 +165,7 @@ def get_modules_from_code(paths):
             resolved_paths.append(pathlib.Path(path).resolve())
 
     for resolved_path in resolved_paths:
-        logger.info(f"Parsing {resolved_path}")
+        logger.debug(f"Parsing {resolved_path}")
         for imp in get_module_info_from_code(resolved_path):
             imports.append(imp)
 
