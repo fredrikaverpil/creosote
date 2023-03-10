@@ -95,6 +95,25 @@ Yes! Just provide each section after the `--sections` parameter, e.g. `--section
 
 Yes! See the `action` job in [.github/workflows/test.yml](.github/workflows/test.yml) for a working example.
 
+### Can I use this with pre-commit?
+
+While there is no formal support for pre-commit (at least not now), you can configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it
+with `pipx`). Example below:
+
+```
+# .pre-commit-config.yaml
+
+repos:
+  - repo: local
+    hooks:
+      - id: system
+        name: creosote
+        entry: creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.dependencies
+        pass_filenames: false
+        files: \.(py|toml|txt|in|lock)$
+        language: system
+```
+
 ### What's with the name "creosote"?
 
 This library has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
