@@ -1,5 +1,6 @@
 import os
 import pathlib
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -19,7 +20,11 @@ class DepsResolver:
         self.imports = imports
         self.packages = packages
         self.venv = venv
+
         self.map_package_name_to_top_level_import
+        self.top_level_package_pattern = re.compile(
+            r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
+        )
 
         self.unused_packages: Optional[List[Package]] = None
 
@@ -46,20 +51,24 @@ class DepsResolver:
         glob_str = "**/*.dist-info/top_level.txt"
         top_level_filepaths = venv_path.glob(glob_str)
         self.top_level_filepaths = list(top_level_filepaths)
-        for top_level_filepath in sorted(self.top_level_filepaths):
+        for top_level_filepath in self.top_level_filepaths:
             logger.debug(f"Found {top_level_filepath}")
 
     def map_package_name_to_top_level_import(self, package: Package):
-        """"""
-        package_name = package.name.replace("-", "_")
+        package_name = self.canonicalize_module_name(package.name)
+
         for top_level_filepath in self.top_level_filepaths:
-            if package_name.lower() in str(top_level_filepath).lower():
-                with open(top_level_filepath, "r") as infile:
-                    lines = infile.readlines()
-                package.top_level_import_names = [line.strip() for line in lines]
-                import_names = ",".join(package.top_level_import_names)
-                logger.debug(f"Mapped package/import: {package_name}/{import_names}")
-                return
+            matches = self.top_level_package_pattern.findall(str(top_level_filepath))
+            for top_level_package in matches:
+                if top_level_package.lower() == package_name.lower():
+                    with open(top_level_filepath, "r") as infile:
+                        lines = infile.readlines()
+                    package.top_level_import_names = [line.strip() for line in lines]
+                    import_names = ",".join(package.top_level_import_names)
+                    logger.debug(
+                        f"Mapped package/import: {package_name}/{import_names}"
+                    )
+                    return
         logger.debug(f"Did not find a top_level.txt file for package {package_name}")
 
     def package_to_module(self, package: Package):
@@ -128,4 +137,5 @@ class DepsResolver:
         self.gather_top_level_filepaths()
         self.populate_packages()
         self.associate()
+        self.get_unused_packages()
         self.get_unused_packages()
