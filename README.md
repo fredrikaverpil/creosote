@@ -134,6 +134,22 @@ repos:
         language: system
 ```
 
+### 💡 Install in-development builds
+
+You can run in-development versions of Creosote. Examples below:
+
+```bash
+# Creosote build from main branch
+$ pipx install --suffix=@main --force git+https://github.com/fredrikaverpil/creosote.git
+$ creosote@main --venv .venv ...
+$ pipx uninstall creosote@main
+
+# Creosote build from PR #123
+$ pipx install --suffix=@123 --force git+https://github.com/fredrikaverpil/creosote.git@refs/pull/123/head
+$ creosote@123 --venv .venv ...
+$ pipx uninstall creosote@123
+```
+
 ### What's with the name "creosote"?
 
 This library has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
