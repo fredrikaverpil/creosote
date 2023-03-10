@@ -35,13 +35,21 @@ class DepsResolver:
 
     def top_level_names(self, package):
         package_name = package.name.replace("-", "_")
+        logger.debug(f"Fetching the import name, based on package name: {package_name}")
         site_path = pathlib.Path(self.venv)
-        glob_str = f"**/{package_name}*.dist-info/top_level.txt"
-        top_levels = site_path.glob(glob_str)
+        glob_str = "**/*.dist-info/top_level.txt"
+        top_levels = site_path.glob(glob_str)  # TODO: not performant!
+
         for top_level in top_levels:
-            with open(top_level, "r") as infile:
-                lines = infile.readlines()
-            package.top_level_names = [line.strip() for line in lines]
+            if package_name.lower() in str(top_level).lower():  # TODO: not good enough
+                with open(top_level, "r") as infile:
+                    lines = infile.readlines()
+                package.top_level_names = [line.strip() for line in lines]
+                logger.debug(
+                    f"Mapped package name '{package_name}' to import name(s): "
+                    f"{','.join(package.top_level_names)}"
+                )
+                continue
 
     def package_to_module(self, package: Package):
         dp = database.DistributionPath(include_egg=True)
