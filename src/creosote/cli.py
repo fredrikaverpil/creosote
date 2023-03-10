@@ -5,6 +5,7 @@ import sys
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
+from creosote.__about__ import __version__
 
 
 def parse_args(args):
@@ -14,6 +15,13 @@ def parse_args(args):
             "but unused, dependencies"
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        dest="version",
+        action="store_true",
+        help="show version and exit",
     )
     parser.add_argument(
         "--verbose",
@@ -71,6 +79,10 @@ def parse_args(args):
 
 def main(args_=None):
     args = parse_args(args_)
+
+    if args.version:
+        print(__version__)
+        sys.exit(0)
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
