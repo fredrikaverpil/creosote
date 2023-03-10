@@ -105,10 +105,10 @@ Yes! See the `action` job in [.github/workflows/test.yml](.github/workflows/test
 
 ### Can I use this with pre-commit?
 
-While there is no formal support for pre-commit (at least not now), you can configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it
+While there is no formal support for [pre-commit](https://pre-commit.com) (at least not now), you can configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it
 with `pipx`). Example below:
 
-```
+```yaml
 # .pre-commit-config.yaml
 
 repos:
