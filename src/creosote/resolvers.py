@@ -19,6 +19,7 @@ class DepsResolver:
         self.imports = imports
         self.packages = packages
         self.venv = venv
+        self.map_package_name_to_top_level_import
 
         self.unused_packages: Optional[List[Package]] = None
 
@@ -33,23 +34,33 @@ class DepsResolver:
         except ImportError:
             return False
 
-    def top_level_names(self, package):
-        package_name = package.name.replace("-", "_")
-        logger.debug(f"Fetching the import name, based on package name: {package_name}")
-        site_path = pathlib.Path(self.venv)
-        glob_str = "**/*.dist-info/top_level.txt"
-        top_levels = site_path.glob(glob_str)  # TODO: not performant!
+    def gather_top_level_filepaths(self):
+        """Gathers all top_level.txt filepaths in the venv.
 
-        for top_level in top_levels:
-            if package_name.lower() in str(top_level).lower():  # TODO: not good enough
-                with open(top_level, "r") as infile:
+        Note:
+            The path may contain case sensitive variations of the
+            package name, like e.g. GitPython for gitpython.
+        """
+        logger.debug("Gathering all top_level.txt files in venv...")
+        venv_path = pathlib.Path(self.venv)
+        glob_str = "**/*.dist-info/top_level.txt"
+        top_level_filepaths = venv_path.glob(glob_str)
+        self.top_level_filepaths = list(top_level_filepaths)
+        for top_level_filepath in sorted(self.top_level_filepaths):
+            logger.debug(f"Found {top_level_filepath}")
+
+    def map_package_name_to_top_level_import(self, package: Package):
+        """"""
+        package_name = package.name.replace("-", "_")
+        for top_level_filepath in self.top_level_filepaths:
+            if package_name.lower() in str(top_level_filepath).lower():
+                with open(top_level_filepath, "r") as infile:
                     lines = infile.readlines()
-                package.top_level_names = [line.strip() for line in lines]
-                logger.debug(
-                    f"Mapped package name '{package_name}' to import name(s): "
-                    f"{','.join(package.top_level_names)}"
-                )
-                continue
+                package.top_level_import_names = [line.strip() for line in lines]
+                import_names = ",".join(package.top_level_import_names)
+                logger.debug(f"Mapped package/import: {package_name}/{import_names}")
+                return
+        logger.debug(f"Did not find a top_level.txt file for package {package_name}")
 
     def package_to_module(self, package: Package):
         dp = database.DistributionPath(include_egg=True)
@@ -91,14 +102,14 @@ class DepsResolver:
 
         for package in self.packages:
             if venv_exists:
-                self.top_level_names(package)
+                self.map_package_name_to_top_level_import(package)
             self.package_to_module(package)
 
     def associate(self):
         for package in self.packages:
             self.associate_imports_with_package(package, package.name)
-            if package.top_level_names:
-                for t in package.top_level_names:
+            if package.top_level_import_names:
+                for t in package.top_level_import_names:
                     self.associate_imports_with_package(package, t)
             if package.module_name:
                 self.associate_imports_with_package(package, package.module_name)
@@ -114,6 +125,7 @@ class DepsResolver:
         return None
 
     def resolve(self):
+        self.gather_top_level_filepaths()
         self.populate_packages()
         self.associate()
         self.get_unused_packages()
