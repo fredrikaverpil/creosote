@@ -47,10 +47,13 @@ class PackageReader:
             section_deps = []
 
             if section.startswith("project"):
-                # assume PEP-621
+                logger.info("Detected PEP-621 toml section")
+                section_deps = self.pyproject_pep621(section_contents)
+            elif section.startswith("packages") or section.startswith("dev-packages"):
+                logger.info("Detected pipenv/Pipfile toml section")
                 section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
-                # assume poetry
+                logger.info("Detected Poetry toml section")
                 section_deps = self.pyproject_poetry(section_contents)
             else:
                 raise TypeError("Unsupported dependency format.")
