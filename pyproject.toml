@@ -11,6 +11,7 @@ license = "MIT"
 keywords = []
 authors = [{ name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" }]
 classifiers = [
+  # https://pypi.org/classifiers/
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
