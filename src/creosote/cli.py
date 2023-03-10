@@ -88,6 +88,7 @@ def main(args_=None):
 
     logger.debug(f"Creosote version: {__version__}")
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
+    logger.debug(f"Arguments: {args}")
 
     imports = parsers.get_modules_from_code(args.paths)
     logger.debug("Imports found in code (provided by --paths):")
