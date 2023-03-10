@@ -13,7 +13,7 @@ Install creosote in separate virtual environment (using e.g. [pipx](https://gith
 pipx install creosote
 ```
 
-Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/) and `requirements.txt` files are also supported):
+Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported):
 
 ```bash
 creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.dependencies
@@ -94,6 +94,18 @@ Just provide `--sections tool.poetry.dev-dependencies`.
 #### Dependency groups?
 
 Just provide `--sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `--sections tool.poetry.group.lint.dependencies`.
+
+### Can I scan for Pipenv dependencies?
+
+Yes, see below!
+
+#### Dependencies
+
+Just provide `--sections packages`.
+
+#### Developer dependencies
+
+Just provide `--sections dev-packages`.
 
 ### Can I scan for multiple toml sections?
 
