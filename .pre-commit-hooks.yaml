@@ -1,0 +1,6 @@
+- id: creosote
+  name: creosote
+  description: Identify unused dependencies and avoid a bloated virtual environment
+  entry: creosote
+  language: python
+  pass_filenames: false
