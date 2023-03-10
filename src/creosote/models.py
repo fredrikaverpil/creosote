@@ -15,5 +15,4 @@ class Package:
     top_level_import_names: Optional[List[str]] = None
     distlib_db_import_name: Optional[str] = None
     canonicalized_package_name: Optional[str] = None
-    importable_as: Optional[str] = None
     associated_imports: List[Import] = dataclasses.field(default_factory=list)
