@@ -125,11 +125,12 @@ class DepsResolver:
             self.map_package_to_module_via_distlib(package)
 
     def associate(self):
+        """Associate package name with import (module) name"""
         for package in self.packages:
             self.associate_imports_with_package(package, package.name)
             if package.top_level_import_names:
-                for t in package.top_level_import_names:
-                    self.associate_imports_with_package(package, t)
+                for import_name in package.top_level_import_names:
+                    self.associate_imports_with_package(package, import_name)
             if package.module_name:
                 # fallback to module name
                 self.associate_imports_with_package(package, package.module_name)
