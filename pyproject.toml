@@ -4,15 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "creosote"
-version = "2.2.0"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
 keywords = []
-authors = [
-  { name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" },
-]
+authors = [{ name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" }]
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
@@ -23,31 +20,24 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+dynamic = ["version"]
 dependencies = [
-    "distlib>=0.3.4,<0.4",
-    "dotty-dict>=1.3.1,<1.4",
-    "loguru>=0.6.0,<0.7",
-    "pip-requirements-parser>=32.0.1,<33.1",
-    "toml>=0.10.2,<0.11",
+  "distlib>=0.3.4,<0.4",
+  "dotty-dict>=1.3.1,<1.4",
+  "loguru>=0.6.0,<0.7",
+  "pip-requirements-parser>=32.0.1,<33.1",
+  "toml>=0.10.2,<0.11",
 ]
+
+[tool.hatch.version]
+path = "src/creosote/__about__.py"
 
 [project.optional-dependencies]
 # PEP-440
-lint = [
-  "black",
-  "ruff",
-]
-types = [
-  "mypy",
-  "loguru-mypy",
-  "types-toml",
-]
-test = [
-    "pytest"
-]
-dev = [
-    "creosote[lint,types,test]",
-]
+lint = ["black", "ruff"]
+types = ["mypy", "loguru-mypy", "types-toml"]
+test = ["pytest"]
+dev = ["creosote[lint,types,test]"]
 
 [project.urls]
 Homepage = "https://github.com/fredrikaverpil/creosote"
@@ -57,58 +47,54 @@ creosote = "creosote.cli:main"
 
 [tool.ruff]
 src = ["src", "tests"]
-line-length = 88  # black default
+line-length = 88 # black default
 select = [
-    "E",  # pycodestyle (supersedes pep8)
-    "W",  # pycodestyle warnings
-    # "D",  # pydocstyle
-    "F",  # pyflakes
-    # "UP", # pyupgrade
-    "S",  # flake8-bandit
-    "B",  # flake8-bugbear
-    "I",  # isort
-    "N",  # pep8-naming
-    # "ERA",  # eradicate
-    "C4",  # flake8-comprehensions
-    "A",  # flake8-builtins
-    "Q",  # flake8-quotes
-    "YTT",  # flake8-2020
-    # "ANN",  # flake8-annotations
-    "BLE",  # flake8-blind-except
-    # "FBT",  # flake8-boolean-trap
-    "C90",  # mccabe
-    "T10",  # flake8-debugger
-    # "EM",  # flake8-errmsg
-    "ICN",  # flake8-import-conventions
-    # "T20",  # flake8-print
-    # "RET",  # flake8-return
-    "SIM",  # flake8-simplify
-    "TID",  # flake8-tidy-imports
-    # "ARG",  # flake8-unused-arguments
-    "PDV",  # pandas-vet
-    "PGH",  # pygrep-hooks
-    "PLC",  # pylint
-    "PLE",  # pylint
-    "PLR",  # pylint
-    "PLW",  # pylint
-    "RUF",  # ruff-specific rules
+  "E", # pycodestyle (supersedes pep8)
+  "W", # pycodestyle warnings
+  # "D",  # pydocstyle
+  "F", # pyflakes
+  # "UP", # pyupgrade
+  "S", # flake8-bandit
+  "B", # flake8-bugbear
+  "I", # isort
+  "N", # pep8-naming
+  # "ERA",  # eradicate
+  "C4",  # flake8-comprehensions
+  "A",   # flake8-builtins
+  "Q",   # flake8-quotes
+  "YTT", # flake8-2020
+  # "ANN",  # flake8-annotations
+  "BLE", # flake8-blind-except
+  # "FBT",  # flake8-boolean-trap
+  "C90", # mccabe
+  "T10", # flake8-debugger
+  # "EM",  # flake8-errmsg
+  "ICN", # flake8-import-conventions
+  # "T20",  # flake8-print
+  # "RET",  # flake8-return
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  # "ARG",  # flake8-unused-arguments
+  "PDV", # pandas-vet
+  "PGH", # pygrep-hooks
+  "PLC", # pylint
+  "PLE", # pylint
+  "PLR", # pylint
+  "PLW", # pylint
+  "RUF", # ruff-specific rules
 
 ]
 ignore = []
 
 [tool.ruff.per-file-ignores]
 "tests/*" = [
-    "S101",  # assert used
-    "S105"  # hardcoded password
+  "S101", # assert used
+  "S105", # hardcoded password
 ]
 
 [tool.mypy]
 python_version = "3.7"
 
 [[tool.mypy.overrides]]
-module = [
-    "distlib.*",
-    "dotty_dict.*",
-    "pip_requirements_parser.*"
-]
+module = ["distlib.*", "dotty_dict.*", "pip_requirements_parser.*"]
 ignore_missing_imports = true
