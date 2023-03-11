@@ -103,7 +103,6 @@ def main(args_=None):
     for package in deps_reader.packages:
         logger.debug(f"- {package}")
 
-    logger.info("Resolving package<->import name... (uses venv provided by --venv):")
     deps_resolver = resolvers.DepsResolver(
         imports=imports, packages=deps_reader.packages or [], venv=args.venv
     )

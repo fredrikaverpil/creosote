@@ -22,16 +22,10 @@ creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.
 Example output (using Poetry dependency definition):
 
 ```bash
-$ creosote --venv .venv --paths src --deps-file pyproject.toml --sections tool.poetry.dependencies
-Parsing src/creosote/formatters.py
-Parsing src/creosote/models.py
-Parsing src/creosote/resolvers.py
-Parsing src/creosote/__init__.py
-Parsing src/creosote/parsers.py
-Parsing src/creosote/cli.py
+$ creosote --venv .venv --paths src --deps-file pyproject.toml 
 Parsing pyproject.toml for packages
+Detected PEP-621 toml section in pyproject.toml
 Found packages in pyproject.toml: PyYAML, distlib, loguru, protobuf, toml
-Resolving...
 Unused packages found: PyYAML, protobuf
 ```
 
