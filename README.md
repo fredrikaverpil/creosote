@@ -115,14 +115,11 @@ Yes! Just provide each section after the `--sections` parameter, e.g. `--section
 
 Yes! See the `action` job in [.github/workflows/test.yml](.github/workflows/test.yml) for a working example.
 
-### Can I use this with pre-commit?
+### Can I use this with [pre-commit](https://pre-commit.com)?
 
-While there is no formal support for [pre-commit](https://pre-commit.com) (at least not now), you can configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it
-with `pipx`). Example below:
+Yes, please refer to [`.pre-commit-hooks.yaml`](.pre-commit-hooks.yaml). You can also configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it with `pipx`). Example below:
 
 ```yaml
-# .pre-commit-config.yaml
-
 repos:
   - repo: local
     hooks:
