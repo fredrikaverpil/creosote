@@ -14,9 +14,20 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: What did you expect to happen?
-      placeholder: Explain what you see!
-      value: "A bug happened!"
+      description: Also, what did you expect to happen?
+      placeholder: |
+        I expected Creosote to do this, but it did that instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Do this
+        2. Do that
+        3. See error
     validations:
       required: true
 
