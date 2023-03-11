@@ -65,24 +65,23 @@ even be in use.
 The goal would be to be able to run this tool in CI, which will catch cases where the developer
 forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
 
-Note: The creosote tool supports identifying both unused production dependencies and developer dependencies.
+Note: The creosote tool supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
 
 ## :raised_eyebrow: FAQ
 
 ### Which dependency specification tooling/standards are supported?
 
-| Tool/standard                                                     |     Supported      | `--deps-file` value | Example `--sections` values                                                                                     |
-| ----------------------------------------------------------------- | :----------------: | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| [PEP-621](https://peps.python.org/pep-0621/)                      | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                          |
-| [Poetry](https://python-poetry.org/)                              | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
-| [Pipenv](https://pipenv.pypa.io/en/latest/)                       | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                   |
-| `requirements.txt` ([PEP-508](https://peps.python.org/pep-0508/)) | :white_check_mark: | `*.txt`             | N/A                                                                                                             |
-| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)          | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                             |
-| `setup.py` (legacy)                                               |         ❌          |                     |                                                                                                                 |
+| Tool/standard                                                                                                               |     Supported      | `--deps-file` value | Example `--sections` values                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------- | :----------------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [PEP-621](https://peps.python.org/pep-0621/) ⭐                                                                              | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
+| [Poetry](https://python-poetry.org/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
+| [Pipenv](https://pipenv.pypa.io/en/latest/)                                                                                 | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
+| [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) | :white_check_mark: | `*.[txt\|in]`       | N/A                                                                                                                 |
+| Legacy Setuptools (`setup.py`)                                                                                              |         ❌          |                     |                                                                                                                     |
 
-#### 📔 Notes on `requirements.txt`
+#### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
-When using `requirements.txt|.in` files, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input.
+When using `requirements.txt` files to specify dependencies, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input. When using [pip-tools](https://pip-tools.readthedocs.io/en/latest/), you likely want to point Creosote to scan your `*.in` file(s).
 
 ### Can I specify multiple toml sections?
 
