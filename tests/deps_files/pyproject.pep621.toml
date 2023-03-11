@@ -16,7 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 # PEP-440
 directrefs =[
-  "idna @ git+https://git@github.com/kjd/idna.git@master",
+  "typing_extensions @ git+https://git@github.com/python/typing_extensions.git@main",
 ]
 lint = [
   "black",
