@@ -65,7 +65,7 @@ even be in use.
 The goal would be to be able to run this tool in CI, which will catch cases where the developer
 forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
 
-Note: The creosote tool supports identifying both unused production dependencies and developer dependencies.
+Note: The creosote tool supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
 
 ## :raised_eyebrow: FAQ
 
