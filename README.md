@@ -71,14 +71,14 @@ Note: The creosote tool supports identifying both unused production dependencies
 
 ### Which dependency specification tooling/standards are supported?
 
-| Tool/standard                                                     |     Supported      | `--deps-file` value | Example `--sections` values                                                                                         |
-| ----------------------------------------------------------------- | :----------------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [PEP-621](https://peps.python.org/pep-0621/) ⭐                    | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
-| [Poetry](https://python-poetry.org/)                              | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
-| [Pipenv](https://pipenv.pypa.io/en/latest/)                       | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
-| `requirements.txt` ([PEP-508](https://peps.python.org/pep-0508/)) | :white_check_mark: | `*.txt`             | N/A                                                                                                                 |
-| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)          | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                                 |
-| `setup.py` (legacy)                                               |         ❌          |                     |                                                                                                                     |
+| Tool/standard                                                       |     Supported      | `--deps-file` value | Example `--sections` values                                                                                         |
+| ------------------------------------------------------------------- | :----------------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [PEP-621](https://peps.python.org/pep-0621/) ⭐                      | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
+| [Poetry](https://python-poetry.org/)                                | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
+| [Pipenv](https://pipenv.pypa.io/en/latest/)                         | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
+| ([PEP-508](https://peps.python.org/pep-0508/)) (`requirements.txt`) | :white_check_mark: | `*.txt`             | N/A                                                                                                                 |
+| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)            | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                                 |
+| Legacy Setuptools (`setup.py`)                                      |         ❌          |                     |                                                                                                                     |
 
 #### 📔 Notes on `requirements.txt`
 
