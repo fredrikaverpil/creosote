@@ -91,15 +91,15 @@ def main(args_=None):
     logger.debug(f"Arguments: {args}")
 
     imports = parsers.get_modules_from_code(args.paths)
-    logger.debug("Imports found in code (provided by --paths):")
+    logger.debug("Imports found in code:")
     for imp in imports:
         logger.debug(f"- {imp}")
 
-    logger.info(f"Parsing {args.deps_file} for packages")
+    logger.debug(f"Parsing {args.deps_file} for packages...")
     deps_reader = parsers.PackageReader()
     deps_reader.read(args.deps_file, args.sections)
 
-    logger.debug(f"Packages found in {args.deps_file} (provided by --deps-file):")
+    logger.debug(f"Packages found in {args.deps_file}:")
     for package in deps_reader.packages:
         logger.debug(f"- {package}")
 
@@ -108,7 +108,10 @@ def main(args_=None):
     )
     deps_resolver.resolve()
 
-    logger.debug(f"Packages found in {args.deps_file}:")
+    logger.debug(
+        "Packages with populated 'associated_import' attribute are used in code. "
+        "End result of resolve:"
+    )
     for package in deps_resolver.packages:
         logger.debug(f"- {package}")
 
