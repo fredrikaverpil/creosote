@@ -79,9 +79,9 @@ Note: The creosote tool supports identifying both unused production dependencies
 | [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) | :white_check_mark: | `*.[txt\|in]`       | N/A                                                                                                                 |
 | Legacy Setuptools (`setup.py`)                                                                                              |         ❌          |                     |                                                                                                                     |
 
-#### 📔 Notes on `requirements.txt`
+#### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
-When using `requirements.txt|.in` files, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input.
+When using `requirements.[txt|in]` files, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input. When using [pip-tools](https://pip-tools.readthedocs.io/en/latest/), you likely want to point Creosote to scan your `*.in` file(s).
 
 ### Can I specify multiple toml sections?
 
