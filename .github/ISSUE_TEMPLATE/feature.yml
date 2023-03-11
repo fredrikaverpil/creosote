@@ -20,7 +20,13 @@ body:
   - type: checkboxes
     attributes:
       label: Will this require breaking backwards compatibility?
+      description: |
+        If you are suggesting a change that will break backwards compatibility, please
+        explain why you think it's necessary.
       options:
         - label: Yes
+          required: false
         - label: No
-        - label: I don't know
+          required: false
+        - label: "I don't know"
+          required: false
