@@ -7,13 +7,13 @@ Identify unused dependencies and avoid a bloated virtual environment.
 
 ## :zap: Quickstart
 
-Install creosote in separate virtual environment (using e.g. [pipx](https://github.com/pypa/pipx)):
+Install creosote in separate virtual environment (using e.g. [`pipx`](https://github.com/pypa/pipx)):
 
 ```bash
 pipx install creosote
 ```
 
-Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported):
+Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
 
 ```bash
 creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.dependencies
@@ -71,14 +71,14 @@ Note: The creosote tool supports identifying both unused production dependencies
 
 ### Which dependency specification tooling/standards are supported?
 
-| Tool/standard                                                   |     Supported      | `--deps-file` value | Example `--sections` values                                                                                     |
-| --------------------------------------------------------------- | :----------------: | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| [PEP-621](https://peps.python.org/pep-0621/)                    | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                          |
-| [Poetry](https://python-poetry.org/)                            | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
-| [Pipenv](https://pipenv.pypa.io/en/latest/)                     | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                   |
-| Requirements.txt ([PEP-508](https://peps.python.org/pep-0508/)) | :white_check_mark: | `*.txt`             | N/A                                                                                                             |
-| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)        | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                             |
-| `setup.py` (legacy)                                             |         ❌          |                     |                                                                                                                 |
+| Tool/standard                                                     |     Supported      | `--deps-file` value | Example `--sections` values                                                                                     |
+| ----------------------------------------------------------------- | :----------------: | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| [PEP-621](https://peps.python.org/pep-0621/)                      | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                          |
+| [Poetry](https://python-poetry.org/)                              | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
+| [Pipenv](https://pipenv.pypa.io/en/latest/)                       | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                   |
+| `requirements.txt` ([PEP-508](https://peps.python.org/pep-0508/)) | :white_check_mark: | `*.txt`             | N/A                                                                                                             |
+| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)          | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                             |
+| `setup.py` (legacy)                                               |         ❌          |                     |                                                                                                                 |
 
 #### 📔 Notes on `requirements.txt`
 
