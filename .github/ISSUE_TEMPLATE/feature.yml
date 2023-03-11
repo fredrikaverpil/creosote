@@ -18,15 +18,10 @@ body:
       required: true
 
   - type: checkboxes
+    id: backwards-compatibility
     attributes:
-      label: Will this require breaking backwards compatibility?
-      description: |
-        If you are suggesting a change that will break backwards compatibility, please
-        explain why you think it's necessary.
+      label: Backwards compatibility
+      description: Will this feature request break backwards compatibility with previous versions of Creosote?
       options:
         - label: Yes
-          required: false
-        - label: No
-          required: false
-        - label: "I don't know"
           required: false
