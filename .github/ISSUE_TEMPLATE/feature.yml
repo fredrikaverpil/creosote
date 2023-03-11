@@ -16,3 +16,11 @@ body:
       label: What feature request would you like to suggest?
     validations:
       required: true
+
+  - type: checkboxes
+    attributes:
+      label: Will this require breaking backwards compatibility?
+      options:
+        - label: Yes
+        - label: No
+        - label: I don't know
