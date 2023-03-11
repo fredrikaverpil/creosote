@@ -1,6 +1,6 @@
 
 -i https://pypi.org/simple
 -e git+https://github.com/psf/black.git@4a063a9#egg=black
-idna @ git+https://git@github.com/kjd/idna.git@master
+typing_extensions @ git+https://git@github.com/python/typing_extensions.git@main
 requests
 boto3>=1.26.0

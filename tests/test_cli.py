@@ -44,7 +44,9 @@ def test_pyproject_pep621(capsys):
     assert captured.out == expected_log
 
 
-@pytest.mark.parametrize("with_pyproject_pep621_packages", [["idna"]], indirect=True)
+@pytest.mark.parametrize(
+    "with_pyproject_pep621_packages", [["typing-extensions"]], indirect=True
+)
 def test_pyproject_pep621_directrefs(capsys, with_pyproject_pep621_packages):
     cli.main(
         [
@@ -59,7 +61,7 @@ def test_pyproject_pep621_directrefs(capsys, with_pyproject_pep621_packages):
     )
 
     captured = capsys.readouterr()
-    expected_log = "idna\n"
+    expected_log = "typing_extensions\n"
 
     assert captured.out == expected_log
 
@@ -83,7 +85,9 @@ def test_pyproject_case_sensitive_top_level_filepaths(capsys, with_poetry_packag
     assert captured.out == expected_log
 
 
-@pytest.mark.parametrize("with_requirements_txt_packages", [["idna"]], indirect=True)
+@pytest.mark.parametrize(
+    "with_requirements_txt_packages", [["typing-extensions"]], indirect=True
+)
 def test_requirementstxt_directrefs(capsys, with_requirements_txt_packages):
     cli.main(
         [
@@ -98,6 +102,6 @@ def test_requirementstxt_directrefs(capsys, with_requirements_txt_packages):
     )
 
     captured = capsys.readouterr()
-    expected_log = "black\nboto3\nidna\nrequests\n"
+    expected_log = "black\nboto3\nrequests\ntyping_extensions\n"
 
     assert captured.out == expected_log

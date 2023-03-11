@@ -24,4 +24,4 @@ loguru-mypy = "*"
 types-toml = "*"
 
 [tool.poetry.group.directrefs.dependencies]
-idna = { git = "https://github.com/kjd/idna.git", branch = "master" }
+typing_extensions = { git = "https://github.com/python/typing_extensions.git", branch = "main" }
