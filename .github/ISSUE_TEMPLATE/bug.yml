@@ -36,6 +36,9 @@ body:
     attributes:
       label: Relevant log output
       description: Please copy and paste the log output (make sure to use `--verbose`). This will be automatically formatted into code, so no need for backticks.
+      placeholder: |
+        Creosote version ...
+        ...
       render: shell
     validations:
       required: true
