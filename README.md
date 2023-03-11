@@ -5,7 +5,7 @@
 
 Identify unused dependencies and avoid a bloated virtual environment.
 
-## Quickstart
+## :zap: Quickstart
 
 Install creosote in separate virtual environment (using e.g. [pipx](https://github.com/pypa/pipx)):
 
@@ -41,7 +41,7 @@ Get help:
 creosote --help
 ```
 
-## How this works
+## 🤔 How this works
 
 Some data is required as input:
 
@@ -52,7 +52,11 @@ Some data is required as input:
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
 
-## Ambition and history
+### :triumph: Known limitations
+
+- `importlib` imports are not detected by the AST parser.
+
+## 🥧 History and ambition
 
 The idea of a package like this was born from having gotten security vulnerability
 reports about production dependencies (shipped into production) which turned out to not not
@@ -63,63 +67,55 @@ forgets to remove unused dependencies. An example of such a case could be when d
 
 Note: The creosote tool supports identifying both unused production dependencies and developer dependencies.
 
-## FAQ
+## :raised_eyebrow: FAQ
 
-### Are requirements.txt files supported?
+### Which dependency specification tooling/standards are supported?
 
-Yes, kind of. There is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input.
+| Tool/standard                                                   |     Supported      | `--deps-file` value | Example `--sections` values                                                                                     |
+| --------------------------------------------------------------- | :----------------: | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| [PEP-621](https://peps.python.org/pep-0621/)                    | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                          |
+| [Poetry](https://python-poetry.org/)                            | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
+| [Pipenv](https://pipenv.pypa.io/en/latest/)                     | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                   |
+| Requirements.txt ([PEP-508](https://peps.python.org/pep-0508/)) | :white_check_mark: | `*.txt`             | N/A                                                                                                             |
+| [Pip-tools](https://pip-tools.readthedocs.io/en/latest/)        | :white_check_mark: | `*.txt`, `*.in`     | N/A                                                                                                             |
+| `setup.py` (legacy)                                             |         ❌          |                     |                                                                                                                 |
 
-If you are using [pip-tools](https://github.com/jazzband/pip-tools), you can provide a `*.in` file.
+#### 📔 Notes on `requirements.txt`
 
-### Can I scan for PEP-621 dependencies?
+When using `requirements.txt|.in` files, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input.
 
-Yes! Just provide `--sections project.dependencies`.
+### Can I specify multiple toml sections?
 
-### Can I scan for PEP-621 optional dependencies?
+Yes, you can specify a list of sections after the `--sections` argument. It all depends on what your setup looks like and what you set out to achieve.
 
-Yes! Just provide `--sections project.optional-dependencies.<GROUP>` where `<GROUP>` is your dependency group name, e.g. `--sections project.optional-dependencies.lint`.
+### Can I run Creosote in a GitHub Action workflow?
 
-### Can I scan for Poetry's dependencies?
+Yes, please see the `action` job in [`.github/workflows/test.yml`](.github/workflows/test.yml) for a working example.
 
-Yes, see below!
+### Can I run Creosote with [pre-commit](https://pre-commit.com)?
 
-#### Main dependencies
+Yes, you can either use Cresosote by specifying the exact, desired version (a very common workflow), or you can piggy-back on the Creosote already installed via e.g. `pipx`.
 
-Just provide `--sections tool.poetry.dependencies`.
-
-#### Dev-dependencies?
-
-Just provide `--sections tool.poetry.dev-dependencies`.
-
-#### Dependency groups?
-
-Just provide `--sections tool.poetry.group.<GROUP>.dependencies` where `<GROUP>` is your dependency group, e.g. `--sections tool.poetry.group.lint.dependencies`.
-
-### Can I scan for Pipenv dependencies?
-
-Yes, see below!
-
-#### Dependencies
-
-Just provide `--sections packages`.
-
-#### Developer dependencies
-
-Just provide `--sections dev-packages`.
-
-### Can I scan for multiple toml sections?
-
-Yes! Just provide each section after the `--sections` parameter, e.g. `--sections project.optional-dependencies.test project.optional-dependencies.lint`.
-
-### Can I use this as a GitHub Action?
-
-Yes! See the `action` job in [.github/workflows/test.yml](.github/workflows/test.yml) for a working example.
-
-### Can I use this with [pre-commit](https://pre-commit.com)?
-
-Yes, please refer to [`.pre-commit-hooks.yaml`](.pre-commit-hooks.yaml). You can also configure pre-commit to run creosote if it is available on `$PATH` (e.g. if you installed it with `pipx`). Example below:
+Examples:
 
 ```yaml
+# .pre-commit-config.yaml
+
+repos:
+  - repo: https://github.com/fredrikaverpil/creosote
+    rev: v2.3.5
+    hooks:
+      - id: creosote
+        args:
+          - "--venv=.venv"
+          - "--paths=$MY_PROJECT_PATH"
+          - "--deps-file=pyproject.toml"
+          - "--sections=project.dependencies"
+```
+
+```yaml
+# .pre-commit-config.yaml
+
 repos:
   - repo: local
     hooks:
@@ -131,7 +127,12 @@ repos:
         language: system
 ```
 
-### 💡 Install in-development builds
+### What's with the name "creosote"?
+
+This tool has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
+
+## :woman_scientist: Development/debugging info
+### Install in-development builds
 
 You can run in-development versions of Creosote. Examples below:
 
@@ -146,11 +147,6 @@ $ pipx install --suffix=@123 --force git+https://github.com/fredrikaverpil/creos
 $ creosote@123 --venv .venv ...
 $ pipx uninstall creosote@123
 ```
-
-### What's with the name "creosote"?
-
-This tool has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
-
 
 ### Releasing
 
