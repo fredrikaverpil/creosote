@@ -45,10 +45,13 @@ creosote --help
 
 Some data is required as input:
 
-- The path to the virtual environment (`--venv`).
-- The path to one or more Python files, or a folder containing such files (`--paths`).
-- A list of package names, fetched from e.g. `pyproject.toml`, `requirements_*.txt|.in` (`--deps-file`).
-- One or more toml sections to parse, e.g. `project.dependencies` (`--sections`).
+| Argument      | Description                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `--venv`      | The path to your virtual environment.                                                                 |
+| `--paths`     | The path to your source code, one or more files/folders.                                              |
+| `--deps-file` | The path to the file specifying your dependencies, like`pyproject.toml`, `requirements_*.txt \| .in`. |
+| `--sections`  | One or more toml sections to parse, e.g. `project.dependencies`.                                      |
+
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
 
