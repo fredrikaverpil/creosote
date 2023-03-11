@@ -7,10 +7,10 @@
 ## Are there any concerns, side-effects, additional notes?
 
 
-##  Checklist, when applicable
+## Checklist, when applicable
 
 - [ ] Added test(s)
 - [ ] Updated README.md
-- [ ] Considered the type of version bump following the change (major, minor, patch)
+- [ ] Is this a backwards-compatibility breaking change?
 - [ ] Resolves: #issue-number-here
 
