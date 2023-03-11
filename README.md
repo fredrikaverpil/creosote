@@ -149,7 +149,7 @@ $ pipx uninstall creosote@123
 
 ### What's with the name "creosote"?
 
-This library has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
+This tool has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
 
 
 ### Releasing
