@@ -54,7 +54,7 @@ The creosote tool will first scan the given python file(s) for all its imports. 
 
 ### :triumph: Known limitations
 
-- `importlib` imports are not detected by the AST parser.
+- `importlib` imports are not detected by the AST parser (a great first contribution for anyone inclined 😄, reach out or start [here](https://github.com/fredrikaverpil/creosote/blob/72d4ce0a8a983725a704decce9083702aa2312cc/src/creosote/parsers.py#L138-L156)).
 
 ## 🥧 History and ambition
 
