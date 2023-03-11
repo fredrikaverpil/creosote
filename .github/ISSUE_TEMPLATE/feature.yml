@@ -21,6 +21,6 @@ body:
     id: backwards-compatibility
     attributes:
       label: Will the feature request break backwards compatibility?
-      description: If yes, please explain how important this feature is for you.
+      description: If yes, please explain how important this feature would be to you.
     validations:
       required: true
