@@ -132,12 +132,16 @@ class DepsResolver:
 
         for package in self.packages:
             if venv_exists:
+                # best chance to get the import name
                 found_import_name = self.map_package_to_import_via_top_level_txt_file(
                     package
                 )
 
-            found_import_name = self.map_package_to_module_via_distlib(package)
+            if not found_import_name:
+                # fallback to distlib
+                found_import_name = self.map_package_to_module_via_distlib(package)
 
+            # this is really just guessing, but it's better than nothing
             package.canonicalized_package_name = self.canonicalize_module_name(
                 package.name
             )
