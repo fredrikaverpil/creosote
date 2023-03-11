@@ -17,11 +17,10 @@ body:
     validations:
       required: true
 
-  - type: checkboxes
+  - type: textarea
     id: backwards-compatibility
     attributes:
-      label: Backwards compatibility
-      description: Will this feature request break backwards compatibility with previous versions of Creosote?
-      options:
-        - label: Yes
-          required: false
+      label: Will the feature request break backwards compatibility?
+      description: If yes, please explain how important this feature is for you.
+    validations:
+      required: true
