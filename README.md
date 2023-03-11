@@ -101,7 +101,7 @@ Examples:
 
 repos:
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v2.3.5
+    rev: v2.3.6
     hooks:
       - id: creosote
         args:
