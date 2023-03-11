@@ -49,13 +49,13 @@ class PackageReader:
 
             section_deps = []
             if section.startswith("project"):
-                logger.info(f"Detected PEP-621 toml section in {deps_file}")
+                logger.debug(f"Detected PEP-621 toml section in {deps_file}")
                 section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("packages") or section.startswith("dev-packages"):
-                logger.info(f"Detected pipenv/Pipfile toml section in {deps_file}")
+                logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
                 section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
-                logger.info(f"Detected Poetry toml section in {deps_file}")
+                logger.debug(f"Detected Poetry toml section in {deps_file}")
                 section_deps = self.pyproject_poetry(cast(dict, section_contents))
             else:
                 raise TypeError("Unsupported dependency format.")

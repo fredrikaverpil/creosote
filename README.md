@@ -15,18 +15,20 @@ pipx install creosote
 
 Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
 
-```bash
-creosote --venv .venv --paths src --deps-file pyproject.toml --sections project.dependencies
+
+```
+$ creosote
+Found packages in pyproject.toml: PyYAML, distlib, loguru, protobuf, toml
+Oh no! 💥 💔 💥
+Unused packages found: PyYAML, protobuf
 ```
 
-Example output (using Poetry dependency definition):
+And after having removed/uninstalled `PyYAML` and `protobuf`:
 
-```bash
-$ creosote --venv .venv --paths src --deps-file pyproject.toml 
-Parsing pyproject.toml for packages
-Detected PEP-621 toml section in pyproject.toml
-Found packages in pyproject.toml: PyYAML, distlib, loguru, protobuf, toml
-Unused packages found: PyYAML, protobuf
+```
+$ creosote
+Found packages in pyproject.toml: distlib, loguru, toml
+No unused packages found! ✨ 🍰 ✨
 ```
 
 Get help:
@@ -39,12 +41,12 @@ creosote --help
 
 Some data is required as input:
 
-| Argument      | Description                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
-| `--venv`      | The path to your virtual environment.                                                                 |
-| `--paths`     | The path to your source code, one or more files/folders.                                              |
-| `--deps-file` | The path to the file specifying your dependencies, like`pyproject.toml`, `requirements_*.txt \| .in`. |
-| `--sections`  | One or more toml sections to parse, e.g. `project.dependencies`.                                      |
+| Argument      | Default value          | Description                                                                                            |
+| ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `--venv`      | `.venv`                | The path to your virtual environment.                                                                  |
+| `--paths`     | `src`                  | The path to your source code, one or more files/folders.                                               |
+| `--deps-file` | `pyproject.toml`       | The path to the file specifying your dependencies, like `pyproject.toml`, `requirements_*.txt \| .in`. |
+| `--sections`  | `project.dependencies` | One or more toml sections to parse, e.g. `project.dependencies`.                                       |
 
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
@@ -134,7 +136,7 @@ You can run in-development versions of Creosote. Examples below:
 
 ```bash
 # Creosote build from main branch
-$ pipx install --suffix=@main --force git+https://github.com/fredrikaverpil/creosote.git
+$ pipx install --suffix=@main --force git+https://github.com/fredrikaverpil/creosote.git@main
 $ creosote@main --venv .venv ...
 $ pipx uninstall creosote@main
 

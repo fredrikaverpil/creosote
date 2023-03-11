@@ -54,7 +54,8 @@ class DepsResolver:
         for top_level_filepath in self.top_level_filepaths:
             logger.debug(f"Found {top_level_filepath}")
 
-    def map_package_to_import_via_top_level_txt_file(self, package: Package):
+    def map_package_to_import_via_top_level_txt_file(self, package: Package) -> bool:
+        """Return True if import name was found in the top_level.txt."""
         package_name = self.canonicalize_module_name(package.name)
 
         for top_level_filepath in self.top_level_filepaths:
@@ -66,26 +67,30 @@ class DepsResolver:
                     package.top_level_import_names = [line.strip() for line in lines]
                     import_names = ",".join(package.top_level_import_names)
                     logger.debug(
-                        f"Mapped package/import: {package_name}/{import_names}"
+                        f"[{package.name}] found import name via top_level.txt: "
+                        f"{import_names} ⭐️"
                     )
-                    return
-        logger.debug(f"Did not find a top_level.txt file for package {package_name}")
+                    return True
+        logger.debug(f"[{package.name}] did not find top_level.txt in venv")
+        return False
 
-    def map_package_to_module_via_distlib(self, package: Package):
+    def map_package_to_module_via_distlib(self, package: Package) -> bool:
         """Fallback to distlib if we can't find the top_level.txt file.
 
         It seems this brings very little value right now, but I'll
         leave it in for now...
         """
-        logger.debug("Performing fallback module name resolution...")
-
         dp = database.DistributionPath(include_egg=True)
         dist = dp.get_distribution(package.name)
 
         if dist is None:
             # raise ModuleNotFoundError
-            return
-        module = package.name  # until we figure out something better
+            logger.debug(f"[{package.name}] did not find package in distlib.database")
+            return False
+
+        # until we figure out something better... (not great)
+        module = self.canonicalize_module_name(package.name)
+
         for filename, _, _ in dist.list_installed_files():
             if filename.endswith((".py")):
                 parts = os.path.splitext(filename)[0].split(os.sep)
@@ -97,8 +102,11 @@ class DepsResolver:
                     module = parts[-2]
                     break
 
-        logger.debug(f"Found module name for {package.name}: {module}")
+        logger.debug(
+            f"[{package.name}] found import name via distlib.database: {module} 🤞"
+        )
         package.distlib_db_import_name = module
+        return True
 
     def gather_import_info(self):
         """Populate Package object with import naming info.
@@ -107,9 +115,14 @@ class DepsResolver:
         found:
             1. In the top_level.txt file in the venv.
             2. From the distlib database.
-            3. Simply just canonicalize the package name.
+            3. Guess the import name by canonicalizing the package name.
+
+        Later, these gathered import names will be compared against the
+        imports found in the source code by the AST parser.
         """
+        logger.debug("Attempting to find import names...")
         venv_exists = Path(self.venv).exists()
+        found_import_name = False
 
         if not venv_exists:
             logger.warning(
@@ -119,20 +132,27 @@ class DepsResolver:
 
         for package in self.packages:
             if venv_exists:
-                self.map_package_to_import_via_top_level_txt_file(package)
+                found_import_name = self.map_package_to_import_via_top_level_txt_file(
+                    package
+                )
 
-            self.map_package_to_module_via_distlib(package)
+            found_import_name = self.map_package_to_module_via_distlib(package)
 
             package.canonicalized_package_name = self.canonicalize_module_name(
                 package.name
             )
+            if not found_import_name:
+                logger.debug(
+                    f"[{package.name}] relying on canonicalization fallback: "
+                    f"{package.canonicalized_package_name } 🤞"
+                )
 
-    def associate_package_with_import(self, package: Package, name: str):
+    def associate_package_with_import(self, package: Package, import_name: str):
         for imp in self.imports.copy():
-            if not imp.module and name in imp.name:  # noqa: SIM114
+            if not imp.module and import_name in imp.name:  # noqa: SIM114
                 # import <imp.name>
                 package.associated_imports.append(imp)
-            elif imp.name and name in imp.module:
+            elif imp.name and import_name in imp.module:
                 # from <imp.name> import ...
                 package.associated_imports.append(imp)
 
