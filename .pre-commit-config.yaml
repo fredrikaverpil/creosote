@@ -1,5 +1,3 @@
-# .pre-commit-config.yaml
-
 repos:
   - repo: https://github.com/fredrikaverpil/creosote
     rev: v2.3.6
