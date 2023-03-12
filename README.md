@@ -19,7 +19,7 @@ Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/
 ```
 $ creosote
 Found packages in pyproject.toml: PyYAML, distlib, loguru, protobuf, toml
-Oh no! 💥 💔 💥
+Oh no, bloated venv! 🤢 🪣
 Unused packages found: PyYAML, protobuf
 ```
 
@@ -28,7 +28,7 @@ And after having removed/uninstalled `PyYAML` and `protobuf`:
 ```
 $ creosote
 Found packages in pyproject.toml: distlib, loguru, toml
-No unused packages found! ✨ 🍰 ✨
+No unused packages found! ✨
 ```
 
 Get help:
