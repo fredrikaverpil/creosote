@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v2.3.6
+    rev: v2.3.7
     hooks:
       - id: creosote
         args:
