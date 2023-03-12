@@ -18,16 +18,16 @@ Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/
 
 ```
 $ creosote
-Found packages in pyproject.toml: PyYAML, distlib, loguru, protobuf, toml
+Found packages in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, requests, toml
 Oh no, bloated venv! 🤢 🪣
-Unused packages found: PyYAML, protobuf
+Unused packages found: requests
 ```
 
-And after having removed/uninstalled `PyYAML` and `protobuf`:
+And after having removed/uninstalled `requests`:
 
 ```
 $ creosote
-Found packages in pyproject.toml: distlib, loguru, toml
+Found packages in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, toml
 No unused packages found! ✨
 ```
 
