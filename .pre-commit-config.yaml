@@ -1,0 +1,12 @@
+# .pre-commit-config.yaml
+
+repos:
+  - repo: https://github.com/fredrikaverpil/creosote
+    rev: v2.3.6
+    hooks:
+      - id: creosote
+        args:
+          - --venv=.venv
+          - --paths=src
+          - --deps-file=pyproject.toml
+          - --sections=project.dependencies

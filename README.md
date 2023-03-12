@@ -88,28 +88,15 @@ Yes, you can specify a list of sections after the `--sections` argument. It all 
 
 ### Can I run Creosote in a GitHub Action workflow?
 
-Yes, please see the `action` job in [`.github/workflows/test.yml`](.github/workflows/test.yml) for a working example.
+Yes, please see the `action` job example in [`.github/workflows/test.yml`](.github/workflows/test.yml).
 
 ### Can I run Creosote with [pre-commit](https://pre-commit.com)?
 
-Yes, you can either use Cresosote by specifying the exact, desired version (a very common workflow), or you can piggy-back on the Creosote already installed via e.g. `pipx`.
+Yes, see example in [`.pre-commit-config.yaml`](.pre-commit-config.yaml).
 
-Examples:
 
-```yaml
-# .pre-commit-config.yaml
-
-repos:
-  - repo: https://github.com/fredrikaverpil/creosote
-    rev: v2.3.6
-    hooks:
-      - id: creosote
-        args:
-          - "--venv=.venv"
-          - "--paths=$MY_PROJECT_PATH"
-          - "--deps-file=pyproject.toml"
-          - "--sections=project.dependencies"
-```
+<details>
+<summary>Here's another example setup, if already have Creosote installed onto $PATH (via e.g. pipx).</summary>
 
 ```yaml
 # .pre-commit-config.yaml
@@ -124,6 +111,9 @@ repos:
         files: \.(py|toml|txt|in|lock)$
         language: system
 ```
+
+</details>
+
 
 ### What's with the name "creosote"?
 
@@ -148,5 +138,5 @@ $ pipx uninstall creosote@123
 
 ### Releasing
 
-1. Bump version in `src/creosote/__about__.py`.
+1. Bump version in `src/creosote/__about__.py` and `.pre-commit-config.yaml`.
 2. GitHub Action will run automatically on creating [a release](https://github.com/fredrikaverpil/creosote/releases) and deploy the release onto PyPi.
