@@ -24,32 +24,28 @@ class PackageReader:
         self,
         deps_file: str,
         sections: List[str],
-        extend_with_packages: Union[List[str], None] = None,
+        exclude_packages: List[str],
     ) -> None:
         if not pathlib.Path(deps_file).exists():
             raise Exception(f"File {deps_file} does not exist")
 
+        always_excluded_packages = ["python"]  # occurs in Poetry setup
+        packages_to_exclude = always_excluded_packages + exclude_packages
+
         if deps_file.endswith(".toml"):  # pyproject.toml expected
             for dependency_name in self.load_pyproject(deps_file, sections):
-                self.add_package(dependency_name)
+                if dependency_name not in packages_to_exclude:
+                    self.add_package(dependency_name)
 
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
             for dependency_name in self.load_requirements(deps_file):
-                self.add_package(dependency_name)
+                if dependency_name not in packages_to_exclude:
+                    self.add_package(dependency_name)
 
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
             )
-
-        always_ignored_packages = ["python"]
-        for package in self.packages:
-            if package.name in always_ignored_packages:
-                self.packages.remove(package)
-
-        if extend_with_packages:
-            for dependency_name in extend_with_packages:
-                self.add_package(dependency_name)
 
         found_packages = [package.name for package in self.packages if package.name]
         logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
@@ -155,40 +151,6 @@ class PackageReader:
         if match and match.groups():
             dep = match.groups()[0]
             return dep
-
-    def build_package_list(
-        self,
-        deps_file: str,
-        sections: List[str],
-        extend_with_packages: Union[List[str], None] = None,
-    ) -> None:
-        if not pathlib.Path(deps_file).exists():
-            raise Exception(f"File {deps_file} does not exist")
-
-        if deps_file.endswith(".toml"):  # pyproject.toml expected
-            for dependency_name in self.load_pyproject(deps_file, sections):
-                self.add_package(dependency_name)
-
-        elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            for dependency_name in self.load_requirements(deps_file):
-                self.add_package(dependency_name)
-
-        else:
-            raise NotImplementedError(
-                f"Dependency specs file {deps_file} is not supported."
-            )
-
-        always_ignored_packages = ["python"]
-        for package in self.packages:
-            if package.name in always_ignored_packages:
-                self.packages.remove(package)
-
-        if extend_with_packages:
-            for dependency_name in extend_with_packages:
-                self.add_package(dependency_name)
-
-        found_packages = [package.name for package in self.packages if package.name]
-        logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
 
 
 def get_module_info_from_code(path):
