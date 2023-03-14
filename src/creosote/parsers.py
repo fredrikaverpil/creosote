@@ -1,8 +1,7 @@
 import ast
 import pathlib
 import re
-from functools import lru_cache
-from typing import Any, Dict, List, cast, Union
+from typing import Any, Dict, List, Union, cast
 
 import toml
 from dotty_dict import Dotty, dotty
@@ -13,10 +12,49 @@ from creosote.models import Import, Package
 
 
 class PackageReader:
-    def __init__(self):
-        self.packages = []
+    """Read dependencies from various dependency file formats.
 
-    def pyproject_pep621(self, section_contents: List[str]):
+    The dependency names read will be converted into a list of internal Package
+    objects.
+    """
+
+    packages: List[Package] = []
+
+    def __init__(
+        self,
+        deps_file: str,
+        sections: List[str],
+        extend_with_packages: Union[List[str], None] = None,
+    ) -> None:
+        if not pathlib.Path(deps_file).exists():
+            raise Exception(f"File {deps_file} does not exist")
+
+        if deps_file.endswith(".toml"):  # pyproject.toml expected
+            for dependency_name in self.load_pyproject(deps_file, sections):
+                self.add_package(dependency_name)
+
+        elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
+            for dependency_name in self.load_requirements(deps_file):
+                self.add_package(dependency_name)
+
+        else:
+            raise NotImplementedError(
+                f"Dependency specs file {deps_file} is not supported."
+            )
+
+        always_ignored_packages = ["python"]
+        for package in self.packages:
+            if package.name in always_ignored_packages:
+                self.packages.remove(package)
+
+        if extend_with_packages:
+            for dependency_name in extend_with_packages:
+                self.add_package(dependency_name)
+
+        found_packages = [package.name for package in self.packages if package.name]
+        logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
+
+    def load_pyproject_pep621(self, section_contents: List[str]):
         if not isinstance(section_contents, list):
             raise TypeError("Unexpected dependency format, list expected.")
 
@@ -26,13 +64,13 @@ class PackageReader:
             section_deps.append(parsed_dep)
         return section_deps
 
-    def pyproject_poetry(self, section_contents: Dict[str, Any]):
+    def load_pyproject_poetry(self, section_contents: Dict[str, Any]):
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
 
-    def pyproject(self, deps_file: str, sections: List[str]):
-        """Return dependencies from pyproject.toml."""
+    def load_pyproject(self, deps_file: str, sections: List[str]):
+        """Read dependency names from pyproject.toml."""
         with open(deps_file, "r", encoding="utf-8") as infile:
             contents = toml.loads(infile.read())
 
@@ -50,16 +88,16 @@ class PackageReader:
             section_deps = []
             if section.startswith("project"):
                 logger.debug(f"Detected PEP-621 toml section in {deps_file}")
-                section_deps = self.pyproject_pep621(section_contents)
+                section_deps = self.load_pyproject_pep621(section_contents)
             elif section.startswith("packages") or section.startswith("dev-packages"):
                 logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
-                section_deps = self.pyproject_pep621(section_contents)
+                section_deps = self.load_pyproject_pep621(section_contents)
             elif section.startswith("tool.pdm"):
                 logger.debug(f"Detected PDM toml section in {deps_file}")
-                section_deps = self.pyproject_pep621(section_contents)
+                section_deps = self.load_pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
                 logger.debug(f"Detected Poetry toml section in {deps_file}")
-                section_deps = self.pyproject_poetry(cast(dict, section_contents))
+                section_deps = self.load_pyproject_poetry(cast(dict, section_contents))
             else:
                 raise TypeError("Unsupported dependency format.")
 
@@ -70,10 +108,24 @@ class PackageReader:
 
         return sorted(deps)
 
-    def requirements(self, deps_file: str):
-        """Return dependencies from requirements.txt-format file."""
+    def load_requirements(self, deps_file: str) -> List[str]:
+        """Read dependency names from requirements.txt-format file."""
         deps = RequirementsFile.from_file(deps_file).requirements
         return sorted([dep.name for dep in deps if dep.name is not None])
+
+    def add_package(self, dependency_name: str) -> Package:
+        if dependency_name not in [package.name for package in self.packages]:
+            package = Package(name=dependency_name)
+            self.packages.append(package)
+            return package
+        raise Exception(f"Package {dependency_name} already exists.")
+
+    def remove_package(self, dependency_name: str) -> None:
+        for package in self.packages:
+            if package.name == dependency_name:
+                self.packages.remove(package)
+                return
+        raise Exception(f"Package {dependency_name} does not exist.")
 
     @staticmethod
     def parse_dep_string(dep: str):
@@ -104,40 +156,38 @@ class PackageReader:
             dep = match.groups()[0]
             return dep
 
-    def filter_ignored_dependencies(self, deps, ignore_packages) -> List[Package]:
-        always_ignored_packages = ["python"]  # occurs in e.g. pyproject.toml
-        packages = []
-        for dep in deps:
-            if dep not in ignore_packages and dep not in always_ignored_packages:
-                packages.append(Package(name=dep))
-        return packages
-
-    def read(
+    def build_package_list(
         self,
         deps_file: str,
         sections: List[str],
-        ignore_packages: Union[List[str], None] = None,
+        extend_with_packages: Union[List[str], None] = None,
     ) -> None:
         if not pathlib.Path(deps_file).exists():
             raise Exception(f"File {deps_file} does not exist")
 
         if deps_file.endswith(".toml"):  # pyproject.toml expected
-            self.packages = self.pyproject(deps_file, sections)
+            for dependency_name in self.load_pyproject(deps_file, sections):
+                self.add_package(dependency_name)
 
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            self.packages = self.requirements(deps_file)
+            for dependency_name in self.load_requirements(deps_file):
+                self.add_package(dependency_name)
 
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
             )
 
-        self.packages = self.filter_ignored_dependencies(
-            deps=self.packages, ignore_packages=ignore_packages
-        )
+        always_ignored_packages = ["python"]
+        for package in self.packages:
+            if package.name in always_ignored_packages:
+                self.packages.remove(package)
+
+        if extend_with_packages:
+            for dependency_name in extend_with_packages:
+                self.add_package(dependency_name)
 
         found_packages = [package.name for package in self.packages if package.name]
-
         logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
 
 
