@@ -8,15 +8,11 @@ from dotty_dict import Dotty, dotty
 from loguru import logger
 from pip_requirements_parser import RequirementsFile
 
-from creosote.models import Import, Package
+from creosote.models import Import
 
 
 class PackageReader:
-    """Read dependencies from various dependency file formats.
-
-    The dependency names read will be converted into a list of internal Package
-    objects.
-    """
+    """Read dependencies from various dependency file formats."""
 
     def __init__(
         self,
@@ -29,34 +25,33 @@ class PackageReader:
         self.deps_file = deps_file
         self.sections = sections
         self.exclude_packages = exclude_packages + always_excluded_packages
-        self.packages: List[Package] = []
 
-    def build(self):
+    def read(self) -> List[str]:
         if not pathlib.Path(self.deps_file).exists():
             raise Exception(f"File {self.deps_file} does not exist")
 
+        dependency_names = []
         always_excluded_packages = ["python"]  # occurs in Poetry setup
         packages_to_exclude = always_excluded_packages + self.exclude_packages
 
         if self.deps_file.endswith(".toml"):  # pyproject.toml expected
             for dependency_name in self.load_pyproject(self.deps_file, self.sections):
                 if dependency_name not in packages_to_exclude:
-                    self.add_package(dependency_name)
-
+                    dependency_names.append(dependency_name)
         elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
             for dependency_name in self.load_requirements(self.deps_file):
                 if dependency_name not in packages_to_exclude:
-                    self.add_package(dependency_name)
-
+                    dependency_names.append(dependency_name)
         else:
             raise NotImplementedError(
                 f"Dependency specs file {self.deps_file} is not supported."
             )
 
-        found_packages = [package.name for package in self.packages if package.name]
         logger.info(
-            f"Found packages in {self.deps_file}: " f"{', '.join(found_packages)}"
+            f"Found packages in {self.deps_file}: " f"{', '.join(dependency_names)}"
         )
+
+        return dependency_names
 
     def load_pyproject_pep621(self, section_contents: List[str]):
         if not isinstance(section_contents, list):
@@ -116,13 +111,6 @@ class PackageReader:
         """Read dependency names from requirements.txt-format file."""
         deps = RequirementsFile.from_file(deps_file).requirements
         return sorted([dep.name for dep in deps if dep.name is not None])
-
-    def add_package(self, dependency_name: str) -> Package:
-        if dependency_name not in [package.name for package in self.packages]:
-            package = Package(name=dependency_name)
-            self.packages.append(package)
-            return package
-        raise Exception(f"Package {dependency_name} already exists.")
 
     @staticmethod
     def parse_dep_string(dep: str):
