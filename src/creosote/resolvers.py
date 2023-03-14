@@ -67,8 +67,8 @@ class DepsResolver:
                     package.top_level_import_names = [line.strip() for line in lines]
                     import_names = ",".join(package.top_level_import_names)
                     logger.debug(
-                        f"[{package.dependency_name}] found import name via top_level.txt: "
-                        f"{import_names} ⭐️"
+                        f"[{package.dependency_name}] found import name "
+                        f"via top_level.txt: {import_names} ⭐️"
                     )
                     return True
         logger.debug(f"[{package.dependency_name}] did not find top_level.txt in venv")
@@ -105,7 +105,8 @@ class DepsResolver:
                     break
 
         logger.debug(
-            f"[{package.dependency_name}] found import name via distlib.database: {module} 🤞"
+            f"[{package.dependency_name}] found import name "
+            f"via distlib.database: {module} 🤞"
         )
         package.distlib_db_import_name = module
         return True
@@ -149,8 +150,8 @@ class DepsResolver:
             )
             if not found_import_name:
                 logger.debug(
-                    f"[{package.dependency_name}] relying on canonicalization fallback: "
-                    f"{package.canonicalized_package_name } 🤞"
+                    f"[{package.dependency_name}] relying on canonicalization "
+                    f"fallback: {package.canonicalized_package_name } 🤞"
                 )
 
     def associate_package_with_import(self, package: Package, import_name: str):
