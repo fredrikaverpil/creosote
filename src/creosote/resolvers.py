@@ -14,11 +14,11 @@ class DepsResolver:
     def __init__(
         self,
         imports: List[Import],
-        packages: List[Package],
+        packages: List[str],
         venv: str,
     ):
         self.imports = imports
-        self.packages = packages
+        self.packages = [Package(name=package) for package in packages]
         self.venv = venv
 
         self.map_package_to_import_via_top_level_txt_file

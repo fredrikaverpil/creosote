@@ -110,14 +110,14 @@ def main(args_=None):
         sections=args.sections,
         exclude_packages=args.exclude_packages,
     )
-    deps_reader.build()
+    dependency_names = deps_reader.read()
 
     logger.debug(f"Packages found in {args.deps_file}:")
-    for package in deps_reader.packages:
+    for package in dependency_names:
         logger.debug(f"- {package}")
 
     deps_resolver = resolvers.DepsResolver(
-        imports=imports, packages=deps_reader.packages, venv=args.venv
+        imports=imports, packages=dependency_names, venv=args.venv
     )
     deps_resolver.resolve()
 
