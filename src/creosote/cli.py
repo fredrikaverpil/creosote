@@ -73,12 +73,12 @@ def parse_args(args):
     )
 
     parser.add_argument(
-        "--ignore-packages",
-        dest="ignore_packages",
+        "--extend-with-packages",
+        dest="extend_with_packages",
         metavar="PACKAGE",
         nargs="*",
         default=[],
-        help="packages to ignore",
+        help="packages, not imported by source code, to include in the scan",
     )
 
     parsed_args = parser.parse_args(args)
@@ -105,22 +105,18 @@ def main(args_=None):
         logger.debug(f"- {imp}")
 
     logger.debug(f"Parsing {args.deps_file} for packages...")
-    deps_reader = parsers.PackageReader()
-    deps_reader.read(
+    deps_reader = parsers.PackageReader(
         deps_file=args.deps_file,
         sections=args.sections,
-        ignore_packages=args.ignore_packages,
+        extend_with_packages=args.extend_with_packages,
     )
-
-    # TODO: check for ignored but not installed packages here
 
     logger.debug(f"Packages found in {args.deps_file}:")
     for package in deps_reader.packages:
         logger.debug(f"- {package}")
 
-    packages = deps_reader.packages or []
     deps_resolver = resolvers.DepsResolver(
-        imports=imports, packages=packages, venv=args.venv
+        imports=imports, packages=deps_reader.packages, venv=args.venv
     )
     deps_resolver.resolve()
 
