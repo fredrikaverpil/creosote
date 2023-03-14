@@ -18,33 +18,39 @@ class PackageReader:
     objects.
     """
 
-    packages: List[Package] = []
-
     def __init__(
         self,
         deps_file: str,
         sections: List[str],
         exclude_packages: List[str],
     ) -> None:
-        if not pathlib.Path(deps_file).exists():
-            raise Exception(f"File {deps_file} does not exist")
+        always_excluded_packages = ["python"]  # occurs in Poetry setup
+
+        self.deps_file = deps_file
+        self.sections = sections
+        self.exclude_packages = exclude_packages + always_excluded_packages
+        self.packages: List[Package] = []
+
+    def build(self):
+        if not pathlib.Path(self.deps_file).exists():
+            raise Exception(f"File {self.deps_file} does not exist")
 
         always_excluded_packages = ["python"]  # occurs in Poetry setup
-        packages_to_exclude = always_excluded_packages + exclude_packages
+        packages_to_exclude = always_excluded_packages + self.exclude_packages
 
-        if deps_file.endswith(".toml"):  # pyproject.toml expected
-            for dependency_name in self.load_pyproject(deps_file, sections):
+        if self.deps_file.endswith(".toml"):  # pyproject.toml expected
+            for dependency_name in self.load_pyproject(self.deps_file, self.sections):
                 if dependency_name not in packages_to_exclude:
                     self.add_package(dependency_name)
 
-        elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            for dependency_name in self.load_requirements(deps_file):
+        elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
+            for dependency_name in self.load_requirements(self.deps_file):
                 if dependency_name not in packages_to_exclude:
                     self.add_package(dependency_name)
 
         else:
             raise NotImplementedError(
-                f"Dependency specs file {deps_file} is not supported."
+                f"Dependency specs file {self.deps_file} is not supported."
             )
 
         found_packages = [
@@ -52,7 +58,9 @@ class PackageReader:
             for package in self.packages
             if package.dependency_name
         ]
-        logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
+        logger.info(
+            f"Found packages in {self.deps_file}: " f"{', '.join(found_packages)}"
+        )
 
     def load_pyproject_pep621(self, section_contents: List[str]):
         if not isinstance(section_contents, list):
