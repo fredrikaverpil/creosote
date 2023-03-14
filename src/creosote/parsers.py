@@ -47,7 +47,11 @@ class PackageReader:
                 f"Dependency specs file {deps_file} is not supported."
             )
 
-        found_packages = [package.name for package in self.packages if package.name]
+        found_packages = [
+            package.dependency_name
+            for package in self.packages
+            if package.dependency_name
+        ]
         logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
 
     def load_pyproject_pep621(self, section_contents: List[str]):
@@ -110,18 +114,13 @@ class PackageReader:
         return sorted([dep.name for dep in deps if dep.name is not None])
 
     def add_package(self, dependency_name: str) -> Package:
-        if dependency_name not in [package.name for package in self.packages]:
-            package = Package(name=dependency_name)
+        if dependency_name not in [
+            package.dependency_name for package in self.packages
+        ]:
+            package = Package(dependency_name=dependency_name)
             self.packages.append(package)
             return package
         raise Exception(f"Package {dependency_name} already exists.")
-
-    def remove_package(self, dependency_name: str) -> None:
-        for package in self.packages:
-            if package.name == dependency_name:
-                self.packages.remove(package)
-                return
-        raise Exception(f"Package {dependency_name} does not exist.")
 
     @staticmethod
     def parse_dep_string(dep: str):
