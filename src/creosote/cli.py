@@ -1,11 +1,22 @@
 import argparse
 import glob
+import os
 import sys
+from pathlib import Path
 
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
 from creosote.__about__ import __version__
+
+
+def default_venv_argument():
+    activated_virtual_env = os.environ.get("VIRTUAL_ENV")
+    if activated_virtual_env:
+        return activated_virtual_env
+    elif Path(".venv").exists():
+        return ".venv"
+    return None
 
 
 def parse_args(args):
@@ -49,7 +60,7 @@ def parse_args(args):
         "-v",
         "--venv",
         dest="venv",
-        default=".venv",
+        default=default_venv_argument(),
         help="path to the virtual environment you want to scan",
     )
 

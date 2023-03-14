@@ -121,7 +121,7 @@ class DepsResolver:
         imports found in the source code by the AST parser.
         """
         logger.debug("Attempting to find import names...")
-        venv_exists = Path(self.venv).exists()
+        venv_exists = bool(self.venv and Path(self.venv).exists())
         found_import_name = False
 
         if not venv_exists:
