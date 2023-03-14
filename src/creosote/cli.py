@@ -72,6 +72,15 @@ def parse_args(args):
         help="pyproject.toml section(s) to scan for dependencies",
     )
 
+    parser.add_argument(
+        "--ignore-packages",
+        dest="ignore_packages",
+        metavar="PACKAGE",
+        nargs="*",
+        default=[],
+        help="packages to ignore",
+    )
+
     parsed_args = parser.parse_args(args)
 
     return parsed_args
@@ -97,14 +106,21 @@ def main(args_=None):
 
     logger.debug(f"Parsing {args.deps_file} for packages...")
     deps_reader = parsers.PackageReader()
-    deps_reader.read(args.deps_file, args.sections)
+    deps_reader.read(
+        deps_file=args.deps_file,
+        sections=args.sections,
+        ignore_packages=args.ignore_packages,
+    )
+
+    # TODO: check for ignored but not installed packages here
 
     logger.debug(f"Packages found in {args.deps_file}:")
     for package in deps_reader.packages:
         logger.debug(f"- {package}")
 
+    packages = deps_reader.packages or []
     deps_resolver = resolvers.DepsResolver(
-        imports=imports, packages=deps_reader.packages or [], venv=args.venv
+        imports=imports, packages=packages, venv=args.venv
     )
     deps_resolver.resolve()
 

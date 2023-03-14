@@ -2,7 +2,7 @@ import ast
 import pathlib
 import re
 from functools import lru_cache
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, Union
 
 import toml
 from dotty_dict import Dotty, dotty
@@ -104,38 +104,41 @@ class PackageReader:
             dep = match.groups()[0]
             return dep
 
-    @lru_cache(maxsize=None)  # noqa: B019
-    def ignore_packages(self):
-        return ["python"]
-
-    def filter_ignored_dependencies(self, deps):
+    def filter_ignored_dependencies(self, deps, ignore_packages) -> List[Package]:
+        always_ignored_packages = ["python"]  # occurs in e.g. pyproject.toml
         packages = []
         for dep in deps:
-            if dep not in self.ignore_packages():
+            if dep not in ignore_packages and dep not in always_ignored_packages:
                 packages.append(Package(name=dep))
         return packages
 
-    def read(self, deps_file: str, sections: List[str]):
+    def read(
+        self,
+        deps_file: str,
+        sections: List[str],
+        ignore_packages: Union[List[str], None] = None,
+    ) -> None:
         if not pathlib.Path(deps_file).exists():
             raise Exception(f"File {deps_file} does not exist")
 
         if deps_file.endswith(".toml"):  # pyproject.toml expected
-            self.packages = self.filter_ignored_dependencies(
-                self.pyproject(deps_file, sections)
-            )
+            self.packages = self.pyproject(deps_file, sections)
+
         elif deps_file.endswith(".txt") or deps_file.endswith(".in"):
-            self.packages = self.filter_ignored_dependencies(
-                self.requirements(deps_file)
-            )
+            self.packages = self.requirements(deps_file)
+
         else:
             raise NotImplementedError(
                 f"Dependency specs file {deps_file} is not supported."
             )
 
-        logger.info(
-            f"Found packages in {deps_file}: "
-            f"{', '.join([pkg.name for pkg in self.packages])}"
+        self.packages = self.filter_ignored_dependencies(
+            deps=self.packages, ignore_packages=ignore_packages
         )
+
+        found_packages = [package.name for package in self.packages if package.name]
+
+        logger.info(f"Found packages in {deps_file}: " f"{', '.join(found_packages)}")
 
 
 def get_module_info_from_code(path):
