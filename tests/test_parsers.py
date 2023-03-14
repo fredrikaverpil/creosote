@@ -1,6 +1,6 @@
 import pytest
 
-from creosote.parsers import PackageReader
+from creosote.parsers import DependencyReader
 
 
 @pytest.mark.parametrize(
@@ -15,7 +15,7 @@ from creosote.parsers import PackageReader
     ],
 )
 def test_dependency_without_version_constraint(dependency_string, expected_package):
-    assert expected_package == PackageReader.dependency_without_version_constraint(
+    assert expected_package == DependencyReader.dependency_without_version_constraint(
         dependency_string
     )
 
@@ -30,6 +30,6 @@ def test_dependency_without_version_constraint(dependency_string, expected_packa
     ],
 )
 def test_pyproject_directref_package_name(dependency_string, expected_package):
-    assert expected_package == PackageReader.dependency_without_direct_reference(
+    assert expected_package == DependencyReader.dependency_without_direct_reference(
         dependency_string
     )
