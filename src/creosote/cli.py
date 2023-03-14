@@ -110,6 +110,7 @@ def main(args_=None):
         sections=args.sections,
         exclude_packages=args.exclude_packages,
     )
+    deps_reader.build()
 
     logger.debug(f"Packages found in {args.deps_file}:")
     for package in deps_reader.packages:
