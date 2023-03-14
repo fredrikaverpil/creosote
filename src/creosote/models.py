@@ -11,7 +11,7 @@ class Import:
 
 @dataclasses.dataclass
 class Package:
-    dependency_name: str
+    name: str  # as defined in the dependencies specification file
     top_level_import_names: Optional[List[str]] = None
     distlib_db_import_name: Optional[str] = None
     canonicalized_package_name: Optional[str] = None
