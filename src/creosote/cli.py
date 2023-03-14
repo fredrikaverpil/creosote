@@ -73,12 +73,12 @@ def parse_args(args):
     )
 
     parser.add_argument(
-        "--extend-with-packages",
-        dest="extend_with_packages",
+        "--exclude-packages",
+        dest="exclude_packages",
         metavar="PACKAGE",
         nargs="*",
         default=[],
-        help="packages, not imported by source code, to include in the scan",
+        help="Exclude dependencies from the scan",
     )
 
     parsed_args = parser.parse_args(args)
@@ -108,7 +108,7 @@ def main(args_=None):
     deps_reader = parsers.PackageReader(
         deps_file=args.deps_file,
         sections=args.sections,
-        extend_with_packages=args.extend_with_packages,
+        exclude_packages=args.exclude_packages,
     )
 
     logger.debug(f"Packages found in {args.deps_file}:")
@@ -126,6 +126,8 @@ def main(args_=None):
     )
     for package in deps_resolver.packages:
         logger.debug(f"- {package}")
+
+    # TODO: warn about ignored packages not found in the .venv
 
     unused_packages = deps_resolver.get_unused_package_names()
     formatters.print_results(unused_packages=unused_packages, format_=args.format)
