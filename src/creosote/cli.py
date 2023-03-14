@@ -105,7 +105,7 @@ def main(args_=None):
         logger.debug(f"- {imp}")
 
     logger.debug(f"Parsing {args.deps_file} for packages...")
-    deps_reader = parsers.PackageReader(
+    deps_reader = parsers.DependencyReader(
         deps_file=args.deps_file,
         sections=args.sections,
         exclude_packages=args.exclude_packages,

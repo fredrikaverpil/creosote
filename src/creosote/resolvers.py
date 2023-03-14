@@ -7,7 +7,7 @@ from typing import List
 from distlib import database
 from loguru import logger
 
-from creosote.models import Import, Package
+from creosote.models import Import, PackageInfo
 
 
 class DepsResolver:
@@ -18,7 +18,7 @@ class DepsResolver:
         venv: str,
     ):
         self.imports = imports
-        self.packages = [Package(name=package) for package in packages]
+        self.packages = [PackageInfo(name=package) for package in packages]
         self.venv = venv
 
         self.map_package_to_import_via_top_level_txt_file
@@ -26,7 +26,7 @@ class DepsResolver:
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
         )
 
-        self.unused_packages: List[Package] = []
+        self.unused_packages: List[PackageInfo] = []
 
     @staticmethod
     def canonicalize_module_name(module_name: str):
@@ -54,7 +54,9 @@ class DepsResolver:
         for top_level_filepath in self.top_level_filepaths:
             logger.debug(f"Found {top_level_filepath}")
 
-    def map_package_to_import_via_top_level_txt_file(self, package: Package) -> bool:
+    def map_package_to_import_via_top_level_txt_file(
+        self, package: PackageInfo
+    ) -> bool:
         """Return True if import name was found in the top_level.txt."""
         package_name = self.canonicalize_module_name(package.name)
 
@@ -74,7 +76,7 @@ class DepsResolver:
         logger.debug(f"[{package.name}] did not find top_level.txt in venv")
         return False
 
-    def map_package_to_module_via_distlib(self, package: Package) -> bool:
+    def map_package_to_module_via_distlib(self, package: PackageInfo) -> bool:
         """Fallback to distlib if we can't find the top_level.txt file.
 
         It seems this brings very little value right now, but I'll
@@ -151,7 +153,7 @@ class DepsResolver:
                     f"fallback: {package.canonicalized_package_name } 🤞"
                 )
 
-    def associate_package_with_import(self, package: Package, import_name: str):
+    def associate_package_with_import(self, package: PackageInfo, import_name: str):
         for imp in self.imports.copy():
             if not imp.module and import_name in imp.name:  # noqa: SIM114
                 # import <imp.name>

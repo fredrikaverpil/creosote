@@ -11,7 +11,7 @@ from pip_requirements_parser import RequirementsFile
 from creosote.models import Import
 
 
-class PackageReader:
+class DependencyReader:
     """Read dependencies from various dependency file formats."""
 
     def __init__(
@@ -115,9 +115,9 @@ class PackageReader:
     @staticmethod
     def parse_dep_string(dep: str):
         if "@" in dep:
-            return PackageReader.dependency_without_direct_reference(dep)
+            return DependencyReader.dependency_without_direct_reference(dep)
         else:
-            return PackageReader.dependency_without_version_constraint(dep)
+            return DependencyReader.dependency_without_version_constraint(dep)
 
     @staticmethod
     def dependency_without_version_constraint(dependency_string: str):
