@@ -56,7 +56,7 @@ class DepsResolver:
 
     def map_package_to_import_via_top_level_txt_file(self, package: Package) -> bool:
         """Return True if import name was found in the top_level.txt."""
-        package_name = self.canonicalize_module_name(package.name)
+        package_name = self.canonicalize_module_name(package.dependency_name)
 
         for top_level_filepath in self.top_level_filepaths:
             matches = self.top_level_package_pattern.findall(str(top_level_filepath))
@@ -67,11 +67,11 @@ class DepsResolver:
                     package.top_level_import_names = [line.strip() for line in lines]
                     import_names = ",".join(package.top_level_import_names)
                     logger.debug(
-                        f"[{package.name}] found import name via top_level.txt: "
+                        f"[{package.dependency_name}] found import name via top_level.txt: "
                         f"{import_names} ⭐️"
                     )
                     return True
-        logger.debug(f"[{package.name}] did not find top_level.txt in venv")
+        logger.debug(f"[{package.dependency_name}] did not find top_level.txt in venv")
         return False
 
     def map_package_to_module_via_distlib(self, package: Package) -> bool:
@@ -81,15 +81,17 @@ class DepsResolver:
         leave it in for now...
         """
         dp = database.DistributionPath(include_egg=True)
-        dist = dp.get_distribution(package.name)
+        dist = dp.get_distribution(package.dependency_name)
 
         if dist is None:
             # raise ModuleNotFoundError
-            logger.debug(f"[{package.name}] did not find package in distlib.database")
+            logger.debug(
+                f"[{package.dependency_name}] did not find package in distlib.database"
+            )
             return False
 
         # until we figure out something better... (not great)
-        module = self.canonicalize_module_name(package.name)
+        module = self.canonicalize_module_name(package.dependency_name)
 
         for filename, _, _ in dist.list_installed_files():
             if filename.endswith((".py")):
@@ -103,7 +105,7 @@ class DepsResolver:
                     break
 
         logger.debug(
-            f"[{package.name}] found import name via distlib.database: {module} 🤞"
+            f"[{package.dependency_name}] found import name via distlib.database: {module} 🤞"
         )
         package.distlib_db_import_name = module
         return True
@@ -143,11 +145,11 @@ class DepsResolver:
 
             # this is really just guessing, but it's better than nothing
             package.canonicalized_package_name = self.canonicalize_module_name(
-                package.name
+                package.dependency_name
             )
             if not found_import_name:
                 logger.debug(
-                    f"[{package.name}] relying on canonicalization fallback: "
+                    f"[{package.dependency_name}] relying on canonicalization fallback: "
                     f"{package.canonicalized_package_name } 🤞"
                 )
 
