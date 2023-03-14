@@ -1,7 +1,7 @@
 import ast
 import pathlib
 import re
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, cast
 
 import toml
 from dotty_dict import Dotty, dotty
