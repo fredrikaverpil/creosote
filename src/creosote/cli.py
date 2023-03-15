@@ -2,6 +2,7 @@ import argparse
 import glob
 import sys
 from typing import List
+
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
