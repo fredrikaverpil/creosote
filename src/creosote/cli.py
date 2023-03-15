@@ -144,7 +144,7 @@ def main(args_=None):
     for package in deps_resolver.packages:
         logger.debug(f"- {package}")
 
-    unused_packages = (
+    unused_packages = sorted(
         deps_resolver.get_unused_package_names()
         + excluded_packages_not_installed(args.exclude_packages, args.venv)
     )
