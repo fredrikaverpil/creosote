@@ -184,3 +184,11 @@ def get_modules_from_code(paths):
             dupes_removed.append(imp)
 
     return dupes_removed
+
+
+def get_installed_packages(venv):
+    site_packages = pathlib.Path(venv).glob("**/site-packages").__next__()
+    packages = []
+    for path in site_packages.glob("**/*.dist-info"):
+        packages.append(path.name.split("-")[0])
+    return packages
