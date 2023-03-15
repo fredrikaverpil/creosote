@@ -54,7 +54,7 @@ class PackageReader:
             elif section.startswith("packages") or section.startswith("dev-packages"):
                 logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
                 section_deps = self.pyproject_pep621(section_contents)
-            elif section.startswith("tool.pdm") or section.startswith("dev-packages"):
+            elif section.startswith("tool.pdm"):
                 logger.debug(f"Detected PDM toml section in {deps_file}")
                 section_deps = self.pyproject_pep621(section_contents)
             elif section.startswith("tool.poetry"):
