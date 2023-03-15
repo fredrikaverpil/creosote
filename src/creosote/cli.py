@@ -1,7 +1,7 @@
 import argparse
 import glob
 import sys
-
+from typing import List
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
@@ -86,6 +86,22 @@ def parse_args(args):
     return parsed_args
 
 
+def excluded_packages_not_installed(
+    excluded_packages: List[str], venv: str
+) -> List[str]:
+    packages = []
+    if excluded_packages:
+        for package in excluded_packages:
+            if package not in parsers.get_installed_packages(venv):
+                packages.append(package)
+
+    if packages:
+        logger.warning(
+            f"Excluded packages not found in virtual environment: {', '.join(packages)}"
+        )
+    return packages
+
+
 def main(args_=None):
     args = parse_args(args_)
 
@@ -128,9 +144,10 @@ def main(args_=None):
     for package in deps_resolver.packages:
         logger.debug(f"- {package}")
 
-    # TODO: warn about ignored packages not found in the .venv
-
-    unused_packages = deps_resolver.get_unused_package_names()
+    unused_packages = (
+        deps_resolver.get_unused_package_names()
+        + excluded_packages_not_installed(args.exclude_packages, args.venv)
+    )
     formatters.print_results(unused_packages=unused_packages, format_=args.format)
     return 1 if unused_packages else 0  # exit code
 
