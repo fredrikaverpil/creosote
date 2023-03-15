@@ -2,7 +2,7 @@ import os
 import pathlib
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from distlib import database
 from loguru import logger
@@ -26,7 +26,7 @@ class DepsResolver:
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
         )
 
-        self.unused_packages: Optional[List[Package]] = None
+        self.unused_packages: List[Package] = []
 
     @staticmethod
     def canonicalize_module_name(module_name: str):
@@ -185,10 +185,8 @@ class DepsResolver:
             package for package in self.packages if not package.associated_imports
         ]
 
-    def get_unused_package_names(self):
-        if self.unused_packages:
-            return [package.name for package in self.unused_packages]
-        return None
+    def get_unused_package_names(self) -> List[str]:
+        return [package.name for package in self.unused_packages]
 
     def resolve(self):
         self.gather_top_level_filepaths()

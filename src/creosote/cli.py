@@ -115,8 +115,10 @@ def main(args_=None):
     for package in deps_resolver.packages:
         logger.debug(f"- {package}")
 
-    formatters.print_results(deps_resolver=deps_resolver, format_=args.format)
+    unused_packages = deps_resolver.get_unused_package_names()
+    formatters.print_results(unused_packages=unused_packages, format_=args.format)
+    return 1 if unused_packages else 0  # exit code
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
