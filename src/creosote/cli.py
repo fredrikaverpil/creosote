@@ -44,14 +44,14 @@ def parse_args(args):
         dest="paths",
         default=glob.glob("src"),
         nargs="*",
-        help="one or more paths to Python files",
+        help="paths(s) to Python source code to scan for imports",
     )
     parser.add_argument(
         "-v",
         "--venv",
         dest="venv",
         default=".venv",
-        help="path to the virtual environment you want to scan",
+        help="path to the virtual environment to scan for dependencies",
     )
 
     parser.add_argument(
@@ -60,7 +60,7 @@ def parse_args(args):
         dest="deps_file",
         metavar="PATH",
         default="pyproject.toml",
-        help="path to the pyproject.toml, requirements[.txt|.in] file",
+        help="path to the pyproject.toml or requirements[.txt|.in] file",
     )
 
     parser.add_argument(
@@ -76,10 +76,10 @@ def parse_args(args):
     parser.add_argument(
         "--exclude-deps",
         dest="exclude_deps",
-        metavar="PACKAGE",
+        metavar="DEPENDENCY",
         nargs="*",
         default=[],
-        help="Exclude dependencies from the scan",
+        help="dependencies to exclude from the scan",
     )
 
     parsed_args = parser.parse_args(args)
@@ -87,20 +87,19 @@ def parse_args(args):
     return parsed_args
 
 
-def excluded_packages_not_installed(
-    excluded_packages: List[str], venv: str
-) -> List[str]:
-    packages = []
-    if excluded_packages:
-        for package in excluded_packages:
-            if package not in parsers.get_installed_packages(venv):
-                packages.append(package)
+def excluded_deps_not_installed(excluded_deps: List[str], venv: str) -> List[str]:
+    dependency_names = []
+    if excluded_deps:
+        for dep_name in excluded_deps:
+            if dep_name not in parsers.get_installed_dependency_names(venv):
+                dependency_names.append(dep_name)
 
-    if packages:
+    if dependency_names:
         logger.warning(
-            f"Excluded packages not found in virtual environment: {', '.join(packages)}"
+            "Excluded dependencies not found in virtual environment: "
+            f"{', '.join(dependency_names)}"
         )
-    return packages
+    return dependency_names
 
 
 def main(args_=None):
@@ -108,7 +107,7 @@ def main(args_=None):
 
     if args.version:
         print(__version__)
-        sys.exit(0)
+        return 0
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
@@ -116,12 +115,12 @@ def main(args_=None):
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
     logger.debug(f"Arguments: {args}")
 
-    imports = parsers.get_modules_from_code(args.paths)
+    imports = parsers.get_module_names_from_code(args.paths)
     logger.debug("Imports found in code:")
     for imp in imports:
         logger.debug(f"- {imp}")
 
-    logger.debug(f"Parsing {args.deps_file} for packages...")
+    logger.debug(f"Parsing {args.deps_file} for dependencies...")
     deps_reader = parsers.DependencyReader(
         deps_file=args.deps_file,
         sections=args.sections,
@@ -129,28 +128,30 @@ def main(args_=None):
     )
     dependency_names = deps_reader.read()
 
-    logger.debug(f"Packages found in {args.deps_file}:")
-    for package in dependency_names:
-        logger.debug(f"- {package}")
+    logger.debug(f"Dependencies found in {args.deps_file}:")
+    for dep in dependency_names:
+        logger.debug(f"- {dep}")
 
     deps_resolver = resolvers.DepsResolver(
-        imports=imports, packages=dependency_names, venv=args.venv
+        imports=imports, dependency_names=dependency_names, venv=args.venv
     )
     deps_resolver.resolve()
 
     logger.debug(
-        "Packages with populated 'associated_import' attribute are used in code. "
+        "Dependencies with populated 'associated_import' attribute are used in code. "
         "End result of resolve:"
     )
-    for package in deps_resolver.packages:
-        logger.debug(f"- {package}")
+    for dep_info in deps_resolver.dependencies:
+        logger.debug(f"- {dep_info}")
 
-    unused_packages = sorted(
-        deps_resolver.get_unused_package_names()
-        + excluded_packages_not_installed(args.exclude_deps, args.venv)
+    unused_dependency_names = sorted(
+        deps_resolver.get_unused_dependency_names()
+        + excluded_deps_not_installed(args.exclude_deps, args.venv)
     )
-    formatters.print_results(unused_packages=unused_packages, format_=args.format)
-    return 1 if unused_packages else 0  # exit code
+    formatters.print_results(
+        unused_dependency_names=unused_dependency_names, format_=args.format
+    )
+    return 1 if unused_dependency_names else 0  # exit code
 
 
 if __name__ == "__main__":
