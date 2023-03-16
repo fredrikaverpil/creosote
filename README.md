@@ -90,7 +90,7 @@ Yes, you can specify a list of sections after the `--sections` argument. It all 
 
 Yes, you can use the `--exclude-deps` argument to specify one or more dependencies you do not wish to get warnings for.
 
-This feature meant to be used for dependencies you must specify in your dependencies spec file, but which you don't necessarily import in your source code. An example of such a dependency are database drivers, which are commonly only defined in connection strings and will signal to the ORM which driver to use.
+This feature is intended for dependencies you must specify in your dependencies spec file, but which you don't import in your source code. An example of such a dependency are database drivers, which are commonly only defined in connection strings and will signal to the ORM which driver to use.
 
 ### Can I run Creosote in a GitHub Action workflow?
 
