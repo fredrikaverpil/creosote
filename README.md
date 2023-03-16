@@ -5,7 +5,7 @@
 
 Identify unused dependencies and avoid a bloated virtual environment.
 
-## :zap: Quickstart
+## ⚡️ Quickstart
 
 Install creosote in separate virtual environment (using e.g. [`pipx`](https://github.com/pypa/pipx)):
 
@@ -51,7 +51,7 @@ Some data is required as input:
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
 
-### :triumph: Known limitations
+### 😤 Known limitations
 
 - `importlib` imports are not detected by the AST parser (a great first contribution for anyone inclined 😄, reach out or start [here](https://github.com/fredrikaverpil/creosote/blob/72d4ce0a8a983725a704decce9083702aa2312cc/src/creosote/parsers.py#L138-L156)).
 
@@ -66,7 +66,7 @@ forgets to remove unused dependencies. An example of such a case could be when d
 
 Note: The creosote tool supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
 
-## :raised_eyebrow: FAQ
+## 🤨 FAQ
 
 ### Which dependency specification tooling/standards are supported?
 
@@ -125,7 +125,7 @@ repos:
 
 This tool has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
 
-## :woman_scientist: Development/debugging info
+## 👩‍🔬 Development/debugging info
 ### Install in-development builds
 
 You can run in-development versions of Creosote. Examples below:
