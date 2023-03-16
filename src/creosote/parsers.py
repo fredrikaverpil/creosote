@@ -1,6 +1,6 @@
 import ast
-import pathlib
 import re
+from pathlib import Path
 from typing import Any, Dict, Generator, List, Union, cast
 
 import toml
@@ -27,7 +27,7 @@ class DependencyReader:
         self.exclude_deps = exclude_deps + always_excluded_deps
 
     def read(self) -> List[str]:
-        if not pathlib.Path(self.deps_file).exists():
+        if not Path(self.deps_file).exists():
             raise Exception(f"File {self.deps_file} does not exist")
 
         dep_names = []
@@ -170,23 +170,24 @@ def get_module_info_from_code(path) -> Generator[ImportInfo, None, None]:
         else:
             continue
 
-        for n in node.names:
-            yield ImportInfo(
-                module=module,
-                name=n.name.split("."),
-                alias=n.asname,
-            )
+        if hasattr(node, "names"):
+            for n in node.names:
+                yield ImportInfo(
+                    module=module,
+                    name=n.name.split("."),
+                    alias=n.asname,
+                )
 
 
-def get_module_names_from_code(paths):
-    resolved_paths = []
+def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
+    resolved_paths: List[Path] = []
     imports = []
 
     for path in paths:
-        if pathlib.Path(path).is_dir():
-            resolved_paths.extend(iter(pathlib.Path(path).glob("**/*.py")))
+        if Path(path).is_dir():
+            resolved_paths.extend(list(Path(path).glob("**/*.py")))
         else:
-            resolved_paths.append(pathlib.Path(path).resolve())
+            resolved_paths.append(Path(path).resolve())
 
     for resolved_path in resolved_paths:
         logger.debug(f"Parsing {resolved_path}")
@@ -202,7 +203,7 @@ def get_module_names_from_code(paths):
 
 
 def get_installed_dependency_names(venv: str) -> List[str]:
-    site_packages = pathlib.Path(venv).glob("**/site-packages").__next__()
+    site_packages = Path(venv).glob("**/site-packages").__next__()
     dep_names = []
     for path in site_packages.glob("**/*.dist-info"):
         dep_names.append(path.name.split("-")[0])
