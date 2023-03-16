@@ -4,7 +4,7 @@ from typing import List
 from loguru import logger
 
 
-def configure_logger(verbose: bool, format_: str):
+def configure_logger(verbose: bool, format_: str) -> None:
     logger.remove()
 
     if format_ == "porcelain":
@@ -19,14 +19,14 @@ def configure_logger(verbose: bool, format_: str):
         )
 
 
-def print_results(unused_packages: List[str], format_: str) -> None:
-    if unused_packages:
+def print_results(unused_dependency_names: List[str], format_: str) -> None:
+    if unused_dependency_names:
         if format_ == "porcelain":
-            print("\n".join(unused_packages))
+            print("\n".join(unused_dependency_names))
         else:
             logger.error(
                 "Oh no, bloated venv! 🤢 🪣\n"
-                f"Unused packages found: {', '.join(unused_packages)}"
+                f"Unused dependencies found: {', '.join(unused_dependency_names)}"
             )
     else:
-        logger.info("No unused packages found! ✨")
+        logger.info("No unused dependencies found! ✨")
