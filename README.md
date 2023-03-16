@@ -13,22 +13,22 @@ Install creosote in separate virtual environment (using e.g. [`pipx`](https://gi
 pipx install creosote
 ```
 
-Scan virtual environment for unused packages ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
+Scan virtual environment for unused dependencies ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
 
 
 ```
 $ creosote
-Found packages in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, requests, toml
+Found dependencies in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, requests, toml
 Oh no, bloated venv! 🤢 🪣
-Unused packages found: requests
+Unused dependencies found: requests
 ```
 
 And after having removed/uninstalled `requests`:
 
 ```
 $ creosote
-Found packages in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, toml
-No unused packages found! ✨
+Found dependencies in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, toml
+No unused dependencies found! ✨
 ```
 
 Get help:
@@ -49,7 +49,7 @@ Some data is required as input:
 | `--sections`  | `project.dependencies` | One or more toml sections to parse, e.g. `project.dependencies`.                                       |
 
 
-The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all package names (from the dependencies spec file). Finally, all imports are associated with their corresponding package name (requires the virtual environment for resolving). If a package does not have any imports associated, it will be considered to be unused.
+The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all dependency names (from the dependencies spec file). Finally, all imports are associated with their corresponding dependency name (requires the virtual environment for resolving). If a dependency does not have any imports associated, it is considered unused.
 
 ### 😤 Known limitations
 
@@ -57,14 +57,14 @@ The creosote tool will first scan the given python file(s) for all its imports. 
 
 ## 🥧 History and ambition
 
-The idea of a package like this was born from having gotten security vulnerability
+The idea of a project like this was hatched from having security vulnerability
 reports about production dependencies (shipped into production) which turned out to not not
 even be in use.
 
-The goal would be to be able to run this tool in CI, which will catch cases where the developer
+The goal of this project is to run the `creosote` tool in CI, which will catch cases where the developer
 forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
 
-Note: The creosote tool supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
+Note: Creosote supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
 
 ## 🤨 FAQ
 
