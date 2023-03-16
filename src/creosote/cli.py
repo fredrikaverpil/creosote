@@ -74,8 +74,8 @@ def parse_args(args):
     )
 
     parser.add_argument(
-        "--exclude-packages",
-        dest="exclude_packages",
+        "--exclude-deps",
+        dest="exclude_deps",
         metavar="PACKAGE",
         nargs="*",
         default=[],
@@ -125,7 +125,7 @@ def main(args_=None):
     deps_reader = parsers.DependencyReader(
         deps_file=args.deps_file,
         sections=args.sections,
-        exclude_packages=args.exclude_packages,
+        exclude_deps=args.exclude_deps,
     )
     dependency_names = deps_reader.read()
 
@@ -147,7 +147,7 @@ def main(args_=None):
 
     unused_packages = sorted(
         deps_resolver.get_unused_package_names()
-        + excluded_packages_not_installed(args.exclude_packages, args.venv)
+        + excluded_packages_not_installed(args.exclude_deps, args.venv)
     )
     formatters.print_results(unused_packages=unused_packages, format_=args.format)
     return 1 if unused_packages else 0  # exit code

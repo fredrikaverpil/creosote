@@ -18,13 +18,13 @@ class DependencyReader:
         self,
         deps_file: str,
         sections: List[str],
-        exclude_packages: List[str],
+        exclude_deps: List[str],
     ) -> None:
         always_excluded_packages = ["python"]  # occurs in Poetry setup
 
         self.deps_file = deps_file
         self.sections = sections
-        self.exclude_packages = exclude_packages + always_excluded_packages
+        self.exclude_deps = exclude_deps + always_excluded_packages
 
     def read(self) -> List[str]:
         if not pathlib.Path(self.deps_file).exists():
@@ -32,7 +32,7 @@ class DependencyReader:
 
         dependency_names = []
         always_excluded_packages = ["python"]  # occurs in Poetry setup
-        packages_to_exclude = always_excluded_packages + self.exclude_packages
+        packages_to_exclude = always_excluded_packages + self.exclude_deps
 
         if self.deps_file.endswith(".toml"):  # pyproject.toml expected
             for dependency_name in self.load_pyproject(self.deps_file, self.sections):
