@@ -153,7 +153,7 @@ class DependencyReader:
         return None
 
 
-def get_module_info_from_code(path) -> Generator[ImportInfo, None, None]:
+def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, None]:
     """Get imports, based on given filepath.
 
     Credit:
@@ -191,7 +191,7 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
 
     for resolved_path in resolved_paths:
         logger.debug(f"Parsing {resolved_path}")
-        for import_info in get_module_info_from_code(resolved_path):
+        for import_info in get_module_info_from_python_file(path=str(resolved_path)):
             imports.append(import_info)
 
     dupes_removed = []
