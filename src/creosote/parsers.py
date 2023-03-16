@@ -136,6 +136,7 @@ class DependencyReader:
         if match and match.groups():
             dep_name = match.groups()[0]
             return dep_name
+        return None
 
     @staticmethod
     def dependency_without_direct_reference(
@@ -149,6 +150,7 @@ class DependencyReader:
         if match and match.groups():
             dep_name = match.groups()[0]
             return dep_name
+        return None
 
 
 def get_module_info_from_code(path) -> Generator[ImportInfo, None, None]:
@@ -169,7 +171,11 @@ def get_module_info_from_code(path) -> Generator[ImportInfo, None, None]:
             continue
 
         for n in node.names:
-            yield ImportInfo(module, n.name.split("."), n.asname)
+            yield ImportInfo(
+                module=module,
+                name=n.name.split("."),
+                alias=n.asname,
+            )
 
 
 def get_module_names_from_code(paths):
