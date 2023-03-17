@@ -1,7 +1,6 @@
 import argparse
 import glob
 import sys
-from typing import List
 
 from loguru import logger
 
@@ -87,21 +86,6 @@ def parse_args(args):
     return parsed_args
 
 
-def excluded_deps_not_installed(excluded_deps: List[str], venv: str) -> List[str]:
-    dependency_names = []
-    if excluded_deps:
-        for dep_name in excluded_deps:
-            if dep_name not in parsers.get_installed_dependency_names(venv):
-                dependency_names.append(dep_name)
-
-    if dependency_names:
-        logger.warning(
-            "Excluded dependencies not found in virtual environment: "
-            f"{', '.join(dependency_names)}"
-        )
-    return dependency_names
-
-
 def main(args_=None):
     args = parse_args(args_)
 
@@ -115,12 +99,10 @@ def main(args_=None):
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
     logger.debug(f"Arguments: {args}")
 
+    # Get imports from source code
     imports = parsers.get_module_names_from_code(args.paths)
-    logger.debug("Imports found in code:")
-    for imp in imports:
-        logger.debug(f"- {imp}")
 
-    logger.debug(f"Parsing {args.deps_file} for dependencies...")
+    # Read dependencies from pyproject.toml or requirements.txt
     deps_reader = parsers.DependencyReader(
         deps_file=args.deps_file,
         sections=args.sections,
@@ -128,26 +110,21 @@ def main(args_=None):
     )
     dependency_names = deps_reader.read()
 
-    logger.debug(f"Dependencies found in {args.deps_file}:")
-    for dep in dependency_names:
-        logger.debug(f"- {dep}")
+    # Get dependencies that should be excluded from the scan
+    excluded_deps_not_installed = parsers.get_excluded_deps_not_installed(
+        excluded_deps=args.exclude_deps, venv=args.venv
+    )
 
+    # Resolve
     deps_resolver = resolvers.DepsResolver(
-        imports=imports, dependency_names=dependency_names, venv=args.venv
+        imports=imports,
+        dependency_names=dependency_names,
+        venv=args.venv,
+        excluded_deps_not_installed=excluded_deps_not_installed,
     )
-    deps_resolver.resolve()
+    unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
-    logger.debug(
-        "Dependencies with populated 'associated_import' attribute are used in code. "
-        "End result of resolve:"
-    )
-    for dep_info in deps_resolver.dependencies:
-        logger.debug(f"- {dep_info}")
-
-    unused_dependency_names = sorted(
-        deps_resolver.get_unused_dependency_names()
-        + excluded_deps_not_installed(args.exclude_deps, args.venv)
-    )
+    # Print final results
     formatters.print_results(
         unused_dependency_names=unused_dependency_names, format_=args.format
     )

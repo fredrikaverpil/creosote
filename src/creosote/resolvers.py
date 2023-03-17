@@ -16,10 +16,12 @@ class DepsResolver:
         imports: List[ImportInfo],
         dependency_names: List[str],
         venv: str,
+        excluded_deps_not_installed: List[str],
     ):
         self.imports = imports
         self.dependencies = [DependencyInfo(name=dep) for dep in dependency_names]
         self.venv = venv
+        self.excluded_deps_not_installed = excluded_deps_not_installed
 
         self.map_dep_to_import_via_top_level_txt_file
         self.top_level_txt_pattern = re.compile(
@@ -200,11 +202,22 @@ class DepsResolver:
             if not dep_info.associated_imports
         ]
 
-    def get_unused_dependency_names(self) -> List[str]:
-        return [dep_info.name for dep_info in self.unused_deps]
-
-    def resolve(self):
+    def resolve_unused_dependency_names(self) -> List[str]:
         self.gather_top_level_filepaths()
         self.gather_import_info()
         self.associate_dep_info_with_imports()
         self.get_unused_dependencies()
+
+        logger.debug(
+            "Dependencies with populated 'associated_import' attribute are used in "
+            "code. End result of resolve:"
+        )
+        for dep_info in self.dependencies:
+            logger.debug(f"- {dep_info}")
+
+        unused_dependency_names = sorted(
+            [dep_info.name for dep_info in self.unused_deps]
+            + self.excluded_deps_not_installed
+        )
+
+        return unused_dependency_names

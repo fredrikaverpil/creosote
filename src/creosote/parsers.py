@@ -27,6 +27,8 @@ class DependencyReader:
         self.exclude_deps = exclude_deps + always_excluded_deps
 
     def read(self) -> List[str]:
+        logger.debug(f"Parsing {self.deps_file} for dependencies...")
+
         if not Path(self.deps_file).exists():
             raise Exception(f"File {self.deps_file} does not exist")
 
@@ -194,12 +196,16 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
         for import_info in get_module_info_from_python_file(path=str(resolved_path)):
             imports.append(import_info)
 
-    dupes_removed = []
+    imports_with_dupes_removed = []
     for import_info in imports:
-        if import_info not in dupes_removed:
-            dupes_removed.append(import_info)
+        if import_info not in imports_with_dupes_removed:
+            imports_with_dupes_removed.append(import_info)
 
-    return dupes_removed
+    logger.debug("Imports found in code:")
+    for imp in imports_with_dupes_removed:
+        logger.debug(f"- {imp}")
+
+    return imports_with_dupes_removed
 
 
 def get_installed_dependency_names(venv: str) -> List[str]:
@@ -208,3 +214,18 @@ def get_installed_dependency_names(venv: str) -> List[str]:
     for path in site_packages.glob("**/*.dist-info"):
         dep_names.append(path.name.split("-")[0])
     return dep_names
+
+
+def get_excluded_deps_not_installed(excluded_deps: List[str], venv: str) -> List[str]:
+    dependency_names = []
+    if excluded_deps:
+        for dep_name in excluded_deps:
+            if dep_name not in get_installed_dependency_names(venv):
+                dependency_names.append(dep_name)
+
+    if dependency_names:
+        logger.warning(
+            "Excluded dependencies not found in virtual environment: "
+            f"{', '.join(dependency_names)}"
+        )
+    return dependency_names
