@@ -51,6 +51,8 @@ Some data is required as input:
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all dependency names (from the dependencies spec file). Finally, all imports are associated with their corresponding dependency name (requires the virtual environment for resolving). If a dependency does not have any imports associated, it is considered unused.
 
+See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote/blob/main/src/creosote/cli.py) for a terse overview of the logic.
+
 ### 😤 Known limitations
 
 - `importlib` imports are not detected by the AST parser (a great first contribution for anyone inclined 😄, reach out or start [here](https://github.com/fredrikaverpil/creosote/blob/72d4ce0a8a983725a704decce9083702aa2312cc/src/creosote/parsers.py#L138-L156)).
@@ -86,19 +88,27 @@ When using `requirements.txt` files to specify dependencies, there is no way to 
 
 Yes, you can specify a list of sections after the `--sections` argument. It all depends on what your setup looks like and what you set out to achieve.
 
+```bash
+$ creosote --sections project.dependencies project.optional-dependencies.lint project.optional-dependencies.test
+```
+
 ### Can I exclude dependencies from the scan?
 
 Yes, you can use the `--exclude-deps` argument to specify one or more dependencies you do not wish to get warnings for.
 
 This feature is intended for dependencies you must specify in your dependencies spec file, but which you don't import in your source code. An example of such a dependency are database drivers, which are commonly only defined in connection strings and will signal to the ORM which driver to use.
 
+```bash
+$ creosote --exclude-deps pyodbc starlette
+```
+
 ### Can I run Creosote in a GitHub Action workflow?
 
-Yes, please see the `action` job example in [`.github/workflows/test.yml`](.github/workflows/test.yml).
+Yes, please see the `action` job example in [`.github/workflows/test.yml`](https://github.com/fredrikaverpil/creosote/blob/main/.github/workflows/test.yml).
 
 ### Can I run Creosote with [pre-commit](https://pre-commit.com)?
 
-Yes, see example in [`.pre-commit-config.yaml`](.pre-commit-config.yaml).
+Yes, see example in [`.pre-commit-config.yaml`](https://github.com/fredrikaverpil/creosote/blob/main/.pre-commit-config.yaml).
 
 
 <details>
