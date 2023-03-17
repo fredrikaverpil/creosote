@@ -137,7 +137,7 @@ This tool has borrowed its name from the [Monty Python scene about Mr. Creosote]
 
 ## 📰 Creosote in the "news"
 
-Because it makes me happy to see this tool can help others! 🥳
+Because it makes me happy to see this tool can help others! 🥰
 
 - [Creosote - Identify unused dependencies and avoid a bloated virtual environment](https://www.reddit.com/r/Python/comments/11n717z/creosote_identify_unused_dependencies_and_avoid_a/) — Reddit
 
