@@ -136,6 +136,7 @@ repos:
 This tool has borrowed its name from the [Monty Python scene about Mr. Creosote](https://www.youtube.com/watch?v=aczPDGC3f8U).
 
 ## 👩‍🔬 Development/debugging info
+
 ### Install in-development builds
 
 You can run in-development versions of Creosote. Examples below:
@@ -159,7 +160,7 @@ Because it makes me happy to see this tool can help others! 🥳
 - [Creosote - Identify unused dependencies and avoid a bloated virtual environment](https://www.reddit.com/r/Python/comments/11n717z/creosote_identify_unused_dependencies_and_avoid_a/) — Reddit
 
 
-### Releasing
+### 🚀 Releasing
 
 1. Bump version in `src/creosote/__about__.py` and `.pre-commit-config.yaml`.
 2. GitHub Action will run automatically on creating [a release](https://github.com/fredrikaverpil/creosote/releases) and deploy the release onto PyPi.
