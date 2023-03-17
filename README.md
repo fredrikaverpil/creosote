@@ -152,6 +152,13 @@ $ creosote@123 --venv .venv ...
 $ pipx uninstall creosote@123
 ```
 
+### 📰 Creosote in the "news"
+
+Because it makes me happy to see this tool can help others! 🥳
+
+- [Creosote - Identify unused dependencies and avoid a bloated virtual environment](https://www.reddit.com/r/Python/comments/11n717z/creosote_identify_unused_dependencies_and_avoid_a/) — Reddit
+
+
 ### Releasing
 
 1. Bump version in `src/creosote/__about__.py` and `.pre-commit-config.yaml`.
