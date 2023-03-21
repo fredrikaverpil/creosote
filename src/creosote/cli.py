@@ -128,7 +128,9 @@ def main(args_=None):
     formatters.print_results(
         unused_dependency_names=unused_dependency_names, format_=args.format
     )
-    return 1 if unused_dependency_names else 0  # exit code
+    return (
+        1 if set(unused_dependency_names).difference(set(args.exclude_deps)) else 0
+    )  # exit code
 
 
 if __name__ == "__main__":
