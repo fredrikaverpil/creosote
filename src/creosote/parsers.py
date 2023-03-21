@@ -216,12 +216,14 @@ def get_installed_dependency_names(venv: str) -> List[str]:
     return dep_names
 
 
-def get_excluded_deps_not_installed(excluded_deps: List[str], venv: str) -> List[str]:
+def get_excluded_deps_which_are_not_installed(
+    excluded_deps: List[str], venv: str
+) -> List[str]:
     dependency_names = []
     if excluded_deps:
-        for dep_name in excluded_deps:
-            if dep_name not in get_installed_dependency_names(venv):
-                dependency_names.append(dep_name)
+        for excluded_dep_name in excluded_deps:
+            if excluded_dep_name not in get_installed_dependency_names(venv):
+                dependency_names.append(excluded_dep_name)
 
     if dependency_names:
         logger.warning(

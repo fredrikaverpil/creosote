@@ -111,7 +111,7 @@ def main(args_=None):
     dependency_names = deps_reader.read()
 
     # Get dependencies that should be excluded from the scan
-    excluded_deps_not_installed = parsers.get_excluded_deps_not_installed(
+    excluded_deps_and_not_installed = parsers.get_excluded_deps_which_are_not_installed(
         excluded_deps=args.exclude_deps, venv=args.venv
     )
 
@@ -120,7 +120,7 @@ def main(args_=None):
         imports=imports,
         dependency_names=dependency_names,
         venv=args.venv,
-        excluded_deps_not_installed=excluded_deps_not_installed,
+        excluded_deps_and_not_installed=excluded_deps_and_not_installed,
     )
     unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
