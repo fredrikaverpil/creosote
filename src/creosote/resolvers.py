@@ -16,12 +16,12 @@ class DepsResolver:
         imports: List[ImportInfo],
         dependency_names: List[str],
         venv: str,
-        excluded_deps_not_installed: List[str],
+        excluded_deps_and_not_installed: List[str],
     ):
         self.imports = imports
         self.dependencies = [DependencyInfo(name=dep) for dep in dependency_names]
         self.venv = venv
-        self.excluded_deps_not_installed = excluded_deps_not_installed
+        self.excluded_deps_not_installed = excluded_deps_and_not_installed
 
         self.map_dep_to_import_via_top_level_txt_file
         self.top_level_txt_pattern = re.compile(
@@ -93,16 +93,13 @@ class DepsResolver:
         """
         dp = database.DistributionPath(include_egg=True)
         dist = dp.get_distribution(dep_info.name)
+        found_module_name = None
 
         if dist is None:
-            # raise ModuleNotFoundError
             logger.debug(
                 f"[{dep_info.name}] did not find dependency in distlib.database"
             )
             return False
-
-        # until we figure out something better... (not great)
-        module_name = self.canonicalize_module_name(dep_info.name)
 
         for filename, _, _ in dist.list_installed_files():  # TODO: #125
             if filename.endswith((".py")):
@@ -112,15 +109,18 @@ class DepsResolver:
                 if parts[-1].startswith("_") and not parts[-1].startswith("__"):
                     continue  # ignore internals
                 elif filename.endswith(".py") and parts[-1] == "__init__":
-                    module_name = parts[-2]
+                    found_module_name = parts[-2]
                     break
 
         logger.debug(
             f"[{dep_info.name}] found import name "
-            f"via distlib.database: {module_name} 🤞"
+            f"via distlib.database: {found_module_name} 🤞"
         )
-        dep_info.distlib_db_import_name = module_name
+        dep_info.distlib_db_import_name = found_module_name
         return True
+
+    def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
+        return self.canonicalize_module_name(dep_info.name)
 
     def gather_import_info(self):
         """Populate DependencyInfo object with import naming info.
@@ -156,9 +156,8 @@ class DepsResolver:
                 found_import_name = self.map_dep_to_module_via_distlib(dep_info)
 
             # this is really just guessing, but it's better than nothing
-            dep_info.canonicalized_dep_name = self.canonicalize_module_name(
-                dep_info.name
-            )
+            dep_info.canonicalized_dep_name = self.map_dep_to_canonical_name(dep_info)
+
             if not found_import_name:
                 logger.debug(
                     f"[{dep_info.name}] relying on canonicalization "
@@ -170,6 +169,7 @@ class DepsResolver:
             if not imp.module and import_name in imp.name:  # noqa: SIM114
                 # import <imp.name>
                 dep_info.associated_imports.append(imp)
+
             elif imp.name and import_name in imp.module:
                 # from <imp.name> import ...
                 dep_info.associated_imports.append(imp)
