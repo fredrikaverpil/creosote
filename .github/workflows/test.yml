@@ -56,8 +56,12 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
+      # Note: I'm using pip, for faster CI. But you can also uses pipx:
+      # Example:
+      #     - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
+      - run: pip install creosote
 
       - name: run creosote (linux/macos)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
