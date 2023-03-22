@@ -222,3 +222,51 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
 
     assert captured.out.splitlines() == expected_unused_packages
     assert exit_code == 0
+
+
+def test_unused_found_because_excluded_but_not_installed(
+    capsys: CaptureFixture,
+    mocker: MockerFixture,
+    tmp_path: Path,
+):
+    """Excluded dependency is used but never imported by source code."""
+    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
+    dependency_names_from_deps_file = ["dotty-dict"]
+    excluded_dependencies = "pyodbc"
+    venv_path = tmp_path / "venv"
+    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
+    site_packages_path.mkdir(parents=True)
+    expected_unused_packages = ["pyodbc"]
+
+    mocker.patch(
+        "creosote.parsers.get_module_names_from_code",
+        return_value=imports_from_code,
+    )
+    mocker.patch(
+        "creosote.parsers.DependencyReader.load_pyproject",
+        return_value=dependency_names_from_deps_file,
+    )
+    mocker.patch(
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
+        return_value=False,
+    )
+    mocker.patch(
+        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+        return_value=False,
+    )
+
+    exit_code = cli.main(
+        [
+            "--venv",
+            str(venv_path),
+            "--exclude-deps",
+            excluded_dependencies,
+            "--format",
+            "porcelain",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert captured.out.splitlines() == expected_unused_packages
+    assert exit_code == 1
