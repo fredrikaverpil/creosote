@@ -67,7 +67,10 @@ class DepsResolver:
         dep_name = self.canonicalize_module_name(dep_info.name)
 
         for top_level_filepath in self.top_level_filepaths:
-            matches = self.top_level_txt_pattern.findall(str(top_level_filepath))
+            normalized_top_level_filepath = str(top_level_filepath).replace(
+                "\\", "/"
+            )  # TODO: see if we can use pathlib to do this normalization instead
+            matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
             for import_name_from_top_level in matches:
                 if import_name_from_top_level.lower() == dep_name.lower():
                     with open(top_level_filepath, "r", encoding="utf-8") as infile:
