@@ -61,7 +61,7 @@ jobs:
       # Note: I'm using pip, for faster CI. But you can also uses pipx:
       # Example:
       #     - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
-      - run: pip install creosote
+      - run: pip install --upgrade creosote
 
       - name: run creosote (linux/macos)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
@@ -69,7 +69,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           echo "VIRTUAL_ENV: $VIRTUAL_ENV"
-          pip install .
+          pip install --upgrade .
           creosote --venv .venv
 
       - name: run creosote (windows)
@@ -78,5 +78,5 @@ jobs:
           python -m venv .venv
           .venv/Scripts/Activate.ps1
           Write-Host "VIRTUAL_ENV: $env:VIRTUAL_ENV"
-          pip install .
+          pip install --upgrade .
           creosote --venv .venv
