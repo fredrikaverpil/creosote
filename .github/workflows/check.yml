@@ -21,15 +21,7 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-
-      - uses: actions/cache@v3
-        id: cache-pip-lint
-        env:
-          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
-        with:
-          path: |
-            ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}
+          cache: pip
 
       - run: pip install '.[lint]'
       - run: ruff src tests
@@ -48,15 +40,7 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-
-      - uses: actions/cache@v3
-        id: cache-pip-types
-        env:
-          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
-        with:
-          path: |
-            ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}
+          cache: pip
 
       - run: pip install '.[types]'
       - run: mypy src

@@ -21,18 +21,7 @@ jobs:
         id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
-
-      - run: pipx install poetry --python '${{ steps.cpython_setup.outputs.python-path }}'
-
-      - uses: actions/cache@v3
-        id: cache-poetry-test
-        env:
-          SEGMENT_DOWNLOAD_TIMEOUT_MIN: "15"
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: pip-poetry-${{ runner.os }}-${{ runner.arch }}-py-${{ steps.cpython_setup.outputs.python-version }}
+          cache: pip
 
       - name: pytest (linux/macos)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
