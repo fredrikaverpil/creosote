@@ -63,6 +63,9 @@ The idea of a project like this was hatched from having security vulnerability
 reports about production dependencies (shipped into production) which turned out to not not
 even be in use.
 
+This can also help avoiding noise from bots like [Dependabot](https://github.com/dependabot) or [Renovate](https://github.com/renovatebot/renovate)
+for dependencies you don't even need.
+
 The goal of this project is to run the `creosote` tool in CI, which will catch cases where the developer
 forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
 
