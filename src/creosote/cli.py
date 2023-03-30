@@ -20,7 +20,8 @@ def parse_args(args):
         "-V",
         "--version",
         dest="version",
-        action="store_true",
+        action="version",
+        version=__version__,
         help="show version and exit",
     )
     parser.add_argument(
@@ -52,7 +53,6 @@ def parse_args(args):
         default=".venv",
         help="path to the virtual environment to scan for dependencies",
     )
-
     parser.add_argument(
         "-d",
         "--deps-file",
@@ -61,7 +61,6 @@ def parse_args(args):
         default="pyproject.toml",
         help="path to the pyproject.toml or requirements[.txt|.in] file",
     )
-
     parser.add_argument(
         "-s",
         "--sections",
@@ -71,7 +70,6 @@ def parse_args(args):
         default=["project.dependencies"],
         help="pyproject.toml section(s) to scan for dependencies",
     )
-
     parser.add_argument(
         "--exclude-deps",
         dest="exclude_deps",
@@ -88,10 +86,6 @@ def parse_args(args):
 
 def main(args_=None):
     args = parse_args(args_)
-
-    if args.version:
-        print(__version__)
-        return 0
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
