@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from _pytest.capture import CaptureFixture
 from pytest_mock import MockerFixture
 
@@ -224,10 +225,20 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
     assert exit_code == 0
 
 
+@pytest.mark.parametrize(
+    ["use_feature", "exit_code"],
+    [
+        ("", 0),
+        ("pass-excluded-and-not-installed", 0),
+        ("fail-excluded-and-not-installed", 1),
+    ],
+)
 def test_unused_found_because_excluded_but_not_installed(
     capsys: CaptureFixture,
     mocker: MockerFixture,
     tmp_path: Path,
+    use_feature: str,
+    exit_code: int,
 ):
     """Excluded dependency is used but never imported by source code."""
     imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
@@ -236,7 +247,7 @@ def test_unused_found_because_excluded_but_not_installed(
     venv_path = tmp_path / "venv"
     site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
     site_packages_path.mkdir(parents=True)
-    expected_unused_packages = ["pyodbc"]
+    expected_unused_packages = []
 
     mocker.patch(
         "creosote.parsers.get_module_names_from_code",
@@ -255,18 +266,19 @@ def test_unused_found_because_excluded_but_not_installed(
         return_value=False,
     )
 
-    exit_code = cli.main(
-        [
-            "--venv",
-            str(venv_path),
-            "--exclude-deps",
-            excluded_dependencies,
-            "--format",
-            "porcelain",
-        ]
-    )
+    args = [
+        "--venv",
+        str(venv_path),
+        "--exclude-deps",
+        excluded_dependencies,
+        "--format",
+        "porcelain",
+    ]
+    if use_feature:
+        args.extend(["--use-feature", use_feature])
 
+    exit_code_ = cli.main(args)
     captured = capsys.readouterr()
 
     assert captured.out.splitlines() == expected_unused_packages
-    assert exit_code == 1
+    assert exit_code_ == exit_code
