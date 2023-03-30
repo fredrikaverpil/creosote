@@ -1,11 +1,19 @@
 import argparse
 import glob
 import sys
+from enum import Enum
 
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
 from creosote.__about__ import __version__
+
+
+class Features(Enum):
+    """Features that can be enabled via the --use-feature flag."""
+
+    FAIL_EXCLUDED_AND_NOT_INSTALLED = "fail-excluded-and-not-installed"
+    PASS_EXCLUDED_AND_NOT_INSTALLED = "pass-excluded-and-not-installed"  # noqa: S105
 
 
 def parse_args(args):
@@ -78,6 +86,18 @@ def parse_args(args):
         default=[],
         help="dependencies to exclude from the scan",
     )
+    parser.add_argument(
+        "--use-feature",
+        dest="features",
+        metavar="FEATURE",
+        action="append",
+        choices=[v.value for v in Features.__members__.values()],
+        default=[],
+        help=(
+            "enable new/experimental functionality, "
+            "that may be backward incompatible"
+        ),
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -93,6 +113,8 @@ def main(args_=None):
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
     logger.debug(f"Arguments: {args}")
 
+    logger.info(f"Feature(s) enabled: {', '.join(args.features)}")
+
     # Get imports from source code
     imports = parsers.get_module_names_from_code(args.paths)
 
@@ -104,17 +126,17 @@ def main(args_=None):
     )
     dependency_names = deps_reader.read()
 
-    # Get dependencies that should be excluded from the scan
+    # Warn if excluded dependencies are not installed
     excluded_deps_and_not_installed = parsers.get_excluded_deps_which_are_not_installed(
         excluded_deps=args.exclude_deps, venv=args.venv
     )
 
     # Resolve
+    deps_to_scan_for = list(set(dependency_names) - set(args.exclude_deps))
     deps_resolver = resolvers.DepsResolver(
         imports=imports,
-        dependency_names=dependency_names,
+        dependency_names=deps_to_scan_for,
         venv=args.venv,
-        excluded_deps_and_not_installed=excluded_deps_and_not_installed,
     )
     unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
@@ -122,7 +144,16 @@ def main(args_=None):
     formatters.print_results(
         unused_dependency_names=unused_dependency_names, format_=args.format
     )
-    return 1 if unused_dependency_names else 0  # exit code
+
+    # Return with exit code
+    if unused_dependency_names:
+        return 1
+    elif excluded_deps_and_not_installed:
+        if Features.PASS_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
+            return 0
+        if Features.FAIL_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
+            return 1
+    return 0
 
 
 if __name__ == "__main__":

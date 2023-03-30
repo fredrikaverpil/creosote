@@ -16,12 +16,10 @@ class DepsResolver:
         imports: List[ImportInfo],
         dependency_names: List[str],
         venv: str,
-        excluded_deps_and_not_installed: List[str],
     ):
         self.imports = imports
         self.dependencies = [DependencyInfo(name=dep) for dep in dependency_names]
         self.venv = venv
-        self.excluded_deps_not_installed = excluded_deps_and_not_installed
 
         self.top_level_txt_pattern = re.compile(
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
@@ -217,7 +215,6 @@ class DepsResolver:
 
         unused_dependency_names = sorted(
             [dep_info.name for dep_info in self.unused_deps]
-            + self.excluded_deps_not_installed
         )
 
         return unused_dependency_names
