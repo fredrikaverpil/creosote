@@ -23,7 +23,6 @@ class DepsResolver:
         self.venv = venv
         self.excluded_deps_not_installed = excluded_deps_and_not_installed
 
-        self.map_dep_to_import_via_top_level_txt_file
         self.top_level_txt_pattern = re.compile(
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
         )
