@@ -226,7 +226,7 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
 
 
 @pytest.mark.parametrize(
-    ["use_feature", "exit_code"],
+    ["use_feature", "expected_exit_code"],
     [
         ("", 0),  # no feature in use
         ("fail-excluded-and-not-installed", 1),
@@ -237,7 +237,7 @@ def test_unused_found_because_excluded_but_not_installed(
     mocker: MockerFixture,
     tmp_path: Path,
     use_feature: str,
-    exit_code: int,
+    expected_exit_code: int,
 ):
     """Excluded dependency is used but never imported by source code."""
     imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
@@ -276,8 +276,8 @@ def test_unused_found_because_excluded_but_not_installed(
     if use_feature:
         args.extend(["--use-feature", use_feature])
 
-    exit_code_ = cli.main(args)
+    exit_code = cli.main(args)
     captured = capsys.readouterr()
 
     assert captured.out.splitlines() == expected_unused_packages
-    assert exit_code_ == exit_code
+    assert exit_code == expected_exit_code
