@@ -13,7 +13,6 @@ class Features(Enum):
     """Features that can be enabled via the --use-feature flag."""
 
     FAIL_EXCLUDED_AND_NOT_INSTALLED = "fail-excluded-and-not-installed"
-    PASS_EXCLUDED_AND_NOT_INSTALLED = "pass-excluded-and-not-installed"  # noqa: S105
 
 
 def parse_args(args):
@@ -148,9 +147,7 @@ def main(args_=None):
     # Return with exit code
     if unused_dependency_names:
         return 1
-    elif excluded_deps_and_not_installed:
-        if Features.PASS_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
-            return 0
+    elif excluded_deps_and_not_installed:  # noqa: SIM102
         if Features.FAIL_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
             return 1
     return 0
