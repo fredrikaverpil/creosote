@@ -52,7 +52,7 @@ class DepsResolver:
         venv_exists = Path(venv).exists()
         if not venv_exists:
             logger.warning(
-                f"Virtual environment '{self.venvs}' does not exist, "
+                f"Virtual environment(s) '{', '.join(self.venvs)}' does not exist, "
                 "cannot resolve top-level names. This may lead to incorrect results."
             )
 
