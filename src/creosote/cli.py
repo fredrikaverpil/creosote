@@ -112,7 +112,8 @@ def main(args_=None):
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
     logger.debug(f"Arguments: {args}")
 
-    logger.info(f"Feature(s) enabled: {', '.join(args.features)}")
+    if args.features:
+        logger.info(f"Feature(s) enabled: {', '.join(args.features)}")
 
     # Get imports from source code
     imports = parsers.get_module_names_from_code(args.paths)
