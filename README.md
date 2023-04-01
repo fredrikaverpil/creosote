@@ -104,7 +104,7 @@ Yes, you can use the `--exclude-deps` argument to specify one or more dependenci
 This feature is intended for dependencies you must specify in your dependencies spec file, but which you don't import in your source code. An example of such a dependency are database drivers, which are commonly only defined in connection strings and will signal to the ORM which driver to use.
 
 ```bash
-$ creosote --exclude-deps pyodbc starlette
+$ creosote --exclude-deps pyodbc pg8000
 ```
 
 ### Can I run Creosote in a GitHub Action workflow?
