@@ -122,12 +122,14 @@ class DepsResolver:
                     found_module_name = parts[-2]
                     break
 
-        logger.debug(
-            f"[{dep_info.name}] found import name "
-            f"via distlib.database: {found_module_name} 🤞"
-        )
-        dep_info.distlib_db_import_name = found_module_name
-        return True
+        if found_module_name:
+            logger.debug(
+                f"[{dep_info.name}] found import name "
+                f"via distlib.database: {found_module_name} 🤞"
+            )
+            dep_info.distlib_db_import_name = found_module_name
+            return True
+        return False
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
