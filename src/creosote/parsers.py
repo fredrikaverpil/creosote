@@ -219,7 +219,7 @@ def get_installed_dependency_names(venv: str) -> List[str]:
 def get_excluded_deps_which_are_not_installed(
     excluded_deps: List[str], venvs: List[str]
 ) -> List[str]:
-    dependency_names = []
+    dependency_names: List[str] = []
     if not excluded_deps:
         return dependency_names
 
