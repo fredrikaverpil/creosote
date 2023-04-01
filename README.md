@@ -39,7 +39,7 @@ creosote --help
 
 ## 🤔 How this works
 
-Some data is required as input:
+### ☘️ Required arguments
 
 | Argument      | Default value          | Description                                                                                            |
 | ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -53,10 +53,8 @@ The creosote tool will first scan the given python file(s) for all its imports. 
 
 See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote/blob/main/src/creosote/cli.py) for a terse overview of the logic.
 
-
 ### 🌶️ Features
 
-Experimental or backwards compatibility breaking changes might be introduced as "features". Use the `--use-feature <FEATURE>` argument to enable.
 
 | Feature                           | Description                                                                                                                                                                                  |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,12 +85,12 @@ Note: Creosote supports identifying both unused production dependencies and deve
 
 | Tool/standard                                                                                                               |     Supported      | `--deps-file` value | Example `--sections` values                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------- | :----------------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) | :white_check_mark: | `*.[txt\|in]`       | N/A                                                                                                                 |
-| [PEP-621](https://peps.python.org/pep-0621/)                                                                                | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
 | [PDM](https://pdm.fming.dev/latest/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |
 | [Pipenv](https://pipenv.pypa.io/en/latest/)                                                                                 | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
 | [Poetry](https://python-poetry.org/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
 | Legacy Setuptools (`setup.py`)                                                                                              |         ❌          |                     |                                                                                                                     |
+| [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) | :white_check_mark: | `*.[txt\|in]`       | N/A                                                                                                                 |
+| [PEP-621](https://peps.python.org/pep-0621/)                                                                                | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
 
 #### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
