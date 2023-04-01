@@ -43,7 +43,7 @@ creosote --help
 
 | Argument      | Default value          | Description                                                                                            |
 | ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--venv`      | `.venv`                | The path to your virtual environment.                                                                  |
+| `--venv`      | `.venv`                | The path to your virtual environment or site-packages folder.                                          |
 | `--paths`     | `src`                  | The path to your source code, one or more files/folders.                                               |
 | `--deps-file` | `pyproject.toml`       | The path to the file specifying your dependencies, like `pyproject.toml`, `requirements_*.txt \| .in`. |
 | `--sections`  | `project.dependencies` | One or more toml sections to parse, e.g. `project.dependencies`.                                       |

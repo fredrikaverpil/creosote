@@ -147,7 +147,7 @@ def parse_args(args):
         metavar="PATH",
         action=CustomAppendAction,
         default=[".venv"],
-        help="path(s) to the virtual environment to scan",
+        help="path(s) to the virtual environment (or site-packages)",
     )
     parser.add_argument(
         "--use-feature",
