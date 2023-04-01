@@ -56,10 +56,10 @@ See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote
 ### 🌶️ Features
 
 
-| Feature                           | Description                                                                                                                                                                                  |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fail-excluded-and-not-installed` | When excluding a dependency from the scan (using `--exclude-deps`) and if the dependency is removed from the dependency specification file (e.g. `pyproject.toml`), return with exit code 1. |
-
+| Feature                           | Description                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fail-excluded-and-not-installed` | When excluding a dependency from the scan (using `--exclude-deps`) and if the dependency is removed from the dependency specification file (e.g. `pyproject.toml`), return with exit code 1.                                                                                                                                                                                         |
+| `v3-args`                         | Use the new arguments, which will be used in creosote version 3.0.0. In version 2.x, the argument is specified once and then space-separated values, like `-p <path1> <path2>`. This will change in version 3.0.0, where you will have to define the argument for each value, like `-p <path1> -p <path2>`. I believe this is more common and caters better for different use cases. |
 
 ### 😤 Known limitations
 
