@@ -13,7 +13,7 @@ Install creosote in separate virtual environment (using e.g. [`pipx`](https://gi
 pipx install creosote
 ```
 
-Scan virtual environment for unused dependencies ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
+Scan virtual environment for unused dependencies ([PEP-621](https://peps.python.org/pep-0621/) example below, but [Poetry](https://python-poetry.org/), [Pipenv](https://github.com/pypa/pipenv), [PDM](https://pdm.fming.dev/latest/) and `requirements.txt` files are also supported, [see this table](#which-dependency-specification-toolingstandards-are-supported)):
 
 
 ```
