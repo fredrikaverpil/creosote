@@ -57,7 +57,6 @@ See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote
 
 These optional features enable new/experimental functionality, that may be backward incompatible and may be removed at any time. Use at your own risk!
 
-
 | Feature                           | Description                                                                                                                                                                                                                                                                                                                                                                          |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `fail-excluded-and-not-installed` | When excluding a dependency from the scan (using `--exclude-deps`) and if the dependency is removed from the dependency specification file (e.g. `pyproject.toml`), return with exit code 1.                                                                                                                                                                                         |
