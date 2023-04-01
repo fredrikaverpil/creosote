@@ -53,6 +53,16 @@ The creosote tool will first scan the given python file(s) for all its imports. 
 
 See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote/blob/main/src/creosote/cli.py) for a terse overview of the logic.
 
+
+### 🌶️ Features
+
+Experimental or backwards compatibility breaking changes might be introduced as "features". Use the `--use-feature <FEATURE>` argument to enable.
+
+| Feature                           | Description                                                                                                                                                                                  |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fail-excluded-and-not-installed` | When excluding a dependency from the scan (using `--exclude-deps`) and if the dependency is removed from the dependency specification file (e.g. `pyproject.toml`), return with exit code 1. |
+
+
 ### 😤 Known limitations
 
 - `importlib` imports are not detected by the AST parser (a great first contribution for anyone inclined 😄, reach out or start [here](https://github.com/fredrikaverpil/creosote/blob/72d4ce0a8a983725a704decce9083702aa2312cc/src/creosote/parsers.py#L138-L156)).
@@ -77,7 +87,7 @@ Note: Creosote supports identifying both unused production dependencies and deve
 
 | Tool/standard                                                                                                               |     Supported      | `--deps-file` value | Example `--sections` values                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------- | :----------------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [PDM](https://pdm.fming.dev/latest/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |   
+| [PDM](https://pdm.fming.dev/latest/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |
 | [PEP-621](https://peps.python.org/pep-0621/)                                                                                | :white_check_mark: | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
 | [Poetry](https://python-poetry.org/)                                                                                        | :white_check_mark: | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
 | [Pipenv](https://pipenv.pypa.io/en/latest/)                                                                                 | :white_check_mark: | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
