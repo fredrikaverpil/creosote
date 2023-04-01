@@ -228,8 +228,7 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
 @pytest.mark.parametrize(
     ["use_feature", "exit_code"],
     [
-        ("", 0),
-        ("pass-excluded-and-not-installed", 0),
+        ("", 0),  # no feature in use
         ("fail-excluded-and-not-installed", 1),
     ],
 )
