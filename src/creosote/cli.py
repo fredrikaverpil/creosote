@@ -132,8 +132,6 @@ def parse_args(args):
             help="dependencies to exclude from the scan",
         )
 
-    # TODO: Add support for supplying a list of deps files, which
-    # are coupled with the section(s) to read...?
     parser.add_argument(
         "-d",
         "--deps-file",
