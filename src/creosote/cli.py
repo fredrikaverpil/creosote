@@ -85,7 +85,7 @@ def parse_args(args):
             metavar="PATH",
             action=CustomAppendAction,
             default=["src"],
-            help="paths(s) to Python source code to scan for imports",
+            help="path(s) to Python source code to scan for imports",
         )
         parser.add_argument(
             "-s",
@@ -102,7 +102,7 @@ def parse_args(args):
             metavar="DEPENDENCY",
             action="append",
             default=[],
-            help="dependencies to exclude from the scan",
+            help="dependency(ies) to exclude from the scan",
         )
     else:
         # v2.x behavior
@@ -149,7 +149,7 @@ def parse_args(args):
         metavar="PATH",
         action=CustomAppendAction,
         default=[".venv"],
-        help="path to the virtual environment to scan",
+        help="path(s) to the virtual environment to scan",
     )
     parser.add_argument(
         "--use-feature",
