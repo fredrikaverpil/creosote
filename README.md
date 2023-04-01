@@ -55,7 +55,7 @@ See the `main` function in [`cli.py`](https://github.com/fredrikaverpil/creosote
 
 ### 🌶️ Features
 
-These optional features enable new/experimental functionality, that may be backward incompatible and may be removed/changed at any time. Some features may be implemented early but will target e.g. the next major release. Enable using `--use-feature <FEATURE>`. Use at your own risk!
+These optional features enable new/experimental functionality, that may be backward incompatible and may be removed/changed at any time. Some features may become mandatory for a target release version e.g. the next major release. Enable using `--use-feature <FEATURE>`. Use at your own risk!
 
 | Feature                           | Description                                                                                                                                                                                                                                                                                                                          | Target version |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
