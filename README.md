@@ -68,17 +68,9 @@ These optional features enable new/experimental functionality, that may be backw
 
 ## 🥧 History and ambition
 
-The idea of a project like this was hatched from having security vulnerability
-reports about production dependencies (shipped into production) which turned out to not not
-even be in use.
+This project was inspired by security vulnerability reports about production dependencies that were shipped into production but turned out to be unused. It aims to help prevent such occurrences and reduce noise from bots like [Dependabot](https://github.com/dependabot) or [Renovate](https://github.com/renovatebot/renovate) for simply unused dependencies.
 
-This can also help avoiding noise from bots like [Dependabot](https://github.com/dependabot) or [Renovate](https://github.com/renovatebot/renovate)
-for dependencies you don't even need.
-
-The goal of this project is to run the `creosote` tool in CI, which will catch cases where the developer
-forgets to remove unused dependencies. An example of such a case could be when doing refactorings.
-
-Note: Creosote supports identifying both unused production dependencies and developer dependencies. It all depends on what you would like to achieve.
+The intent is to run the `creosote` tool in CI (or with [pre-commit](https://pre-commit.com)) to detect cases where developers forget to remove unused dependencies, especially during refactorings. Creosote can identify both unused production dependencies and developer dependencies, depending on your objectives.
 
 ## 🤨 FAQ
 
