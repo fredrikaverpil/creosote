@@ -105,10 +105,6 @@ Yes, you can specify a list of sections after the `--sections` argument. It all 
 $ creosote --sections project.dependencies project.optional-dependencies.lint project.optional-dependencies.test
 ```
 
-### Can I specify multiple virtual environment locations?
-
-Yes, you can specify the `--venv` parameter multiple times, such as `--venv .venv --venv other-venv`. You can also point `--venv` to any site-packages folder.
-
 ### Can I exclude dependencies from the scan?
 
 Yes, you can use the `--exclude-deps` argument to specify one or more dependencies you do not wish to get warnings for.
