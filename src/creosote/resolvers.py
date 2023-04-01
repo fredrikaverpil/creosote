@@ -15,11 +15,11 @@ class DepsResolver:
         self,
         imports: List[ImportInfo],
         dependency_names: List[str],
-        venv: str,
+        venvs: List[str],
     ):
         self.imports = imports
         self.dependencies = [DependencyInfo(name=dep) for dep in dependency_names]
-        self.venv = venv
+        self.venvs = venvs
 
         self.top_level_txt_pattern = re.compile(
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
@@ -38,7 +38,7 @@ class DepsResolver:
         except ImportError:
             return False
 
-    def gather_top_level_filepaths(self) -> None:
+    def gather_top_level_filepaths(self, venv: str) -> None:
         """Gathers all top_level.txt filepaths in the venv.
 
         Note:
@@ -46,7 +46,7 @@ class DepsResolver:
             dependency name, like e.g. GitPython for gitpython.
         """
         logger.debug("Gathering all top_level.txt files in venv...")
-        venv_path = pathlib.Path(self.venv)
+        venv_path = pathlib.Path(venv)
         glob_str = "**/*.dist-info/top_level.txt"
         top_level_filepaths = venv_path.glob(glob_str)
         self.top_level_filepaths = sorted(top_level_filepaths)
@@ -120,7 +120,7 @@ class DepsResolver:
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
 
-    def gather_import_info(self):
+    def gather_import_info(self, venv: str):
         """Populate DependencyInfo object with import naming info.
 
         There are three strategies from where the import name can be
@@ -133,12 +133,12 @@ class DepsResolver:
         imports found in the source code by the AST parser.
         """
         logger.debug("Attempting to find import names...")
-        venv_exists = Path(self.venv).exists()
+        venv_exists = Path(venv).exists()
         found_import_name = False
 
         if not venv_exists:
             logger.warning(
-                f"Virtual environment '{self.venv}' does not exist, "
+                f"Virtual environment '{self.venvs}' does not exist, "
                 "cannot resolve top-level names. This may lead to incorrect results."
             )
 
@@ -201,8 +201,9 @@ class DepsResolver:
         ]
 
     def resolve_unused_dependency_names(self) -> List[str]:
-        self.gather_top_level_filepaths()
-        self.gather_import_info()
+        for venv in self.venvs:
+            self.gather_top_level_filepaths(venv=venv)
+            self.gather_import_info(venv=venv)
         self.associate_dep_info_with_imports()
         self.get_unused_dependencies()
 

@@ -15,6 +15,35 @@ class Features(Enum):
     FAIL_EXCLUDED_AND_NOT_INSTALLED = "fail-excluded-and-not-installed"
 
 
+class CustomAppendAction(argparse.Action):
+    """Custom action to append values to a list.
+
+    When using the `append` action, the default value is not removed
+    from the list. This problem is described in
+    https://github.com/python/cpython/issues/60603
+
+    This custom action aims to fix this problem by removing the default
+    value when the argument is specified for the first time.
+    """
+
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        """Initialize the action."""
+        self.called_times = 0
+        self.default_value = kwargs.get("default")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """When the argument is specified on the commandline."""
+        current_values = getattr(namespace, self.dest)
+
+        if self.called_times == 0 and current_values == self.default_value:
+            current_values = []
+
+        current_values.append(values)
+        setattr(namespace, self.dest, current_values)
+        self.called_times += 1
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(
         description=(
@@ -56,8 +85,10 @@ def parse_args(args):
     parser.add_argument(
         "-v",
         "--venv",
-        dest="venv",
-        default=".venv",
+        dest="venvs",
+        metavar="PATH",
+        action=CustomAppendAction,
+        default=[".venv"],
         help="path to the virtual environment to scan for dependencies",
     )
     parser.add_argument(
@@ -128,7 +159,7 @@ def main(args_=None):
 
     # Warn if excluded dependencies are not installed
     excluded_deps_and_not_installed = parsers.get_excluded_deps_which_are_not_installed(
-        excluded_deps=args.exclude_deps, venv=args.venv
+        excluded_deps=args.exclude_deps, venvs=args.venvs
     )
 
     # Resolve
@@ -136,7 +167,7 @@ def main(args_=None):
     deps_resolver = resolvers.DepsResolver(
         imports=imports,
         dependency_names=deps_to_scan_for,
-        venv=args.venv,
+        venvs=args.venvs,
     )
     unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
