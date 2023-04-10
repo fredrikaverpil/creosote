@@ -20,7 +20,7 @@ def test_pyproject_poetry(capsys, with_poetry_packages):
     )
 
     captured = capsys.readouterr()
-    expected_log = "distlib\ndotty-dict\nprotobuf\npyyaml\ntoml\n"
+    expected_log = "dotty-dict\nprotobuf\npyyaml\ntoml\n"
 
     assert captured.out == expected_log
 
@@ -39,7 +39,7 @@ def test_pyproject_pep621(capsys):
     )
 
     captured = capsys.readouterr()
-    expected_log = "distlib\ndotty-dict\npip-requirements-parser\ntoml\n"
+    expected_log = "dotty-dict\npip-requirements-parser\ntoml\n"
 
     assert captured.out == expected_log
 
