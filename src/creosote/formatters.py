@@ -10,7 +10,15 @@ def configure_logger(verbose: bool, format_: str) -> None:
     if format_ == "porcelain":
         logger.add(sys.stderr, level="CRITICAL")
         return
+    if format_ == "no-color":
+        logger.add(
+            sys.stderr,
+            level="DEBUG" if verbose else "INFO",
+            colorize=False,
+            format="<level>{message}</level>",
+        )
     else:
+        # default
         logger.add(
             sys.stderr,
             level="DEBUG" if verbose else "INFO",

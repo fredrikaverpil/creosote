@@ -72,7 +72,7 @@ def parse_args(args):
         "--format",
         dest="format",
         default="default",
-        choices=["default", "porcelain"],
+        choices=["default", "no-color", "porcelain"],
         help="output format",
     )
 

@@ -1,83 +1,26 @@
-import pathlib
-import subprocess
-from pathlib import Path
+"""Pytest configuration file.
 
-import pytest
+Notes:
+    Do not define fixtures in this file. Instead, place them under
+    tests/pytest/fixtures.
 
-
-@pytest.fixture()
-def _stash_away_project_toml():
-    Path("pyproject.toml").rename("pyproject.toml.stashed")
-    yield
-    Path("pyproject.toml.stashed").rename("pyproject.toml")
+    Fixtures defined via `pytest_plugins` may not be defined in
+    non-top-level `conftest.py` file. More info:
+    https://docs.pytest.org/en/7.0.x/deprecations.html#pytest-plugins-in-non-top-level-conftest-files
+"""
 
 
-@pytest.fixture()
-def with_poetry_packages(_stash_away_project_toml, capsys, request):
-    repo_root = Path.cwd()
-    deps_files = Path("tests/deps_files")
-
-    with capsys.disabled():
-        Path(deps_files / "pyproject.poetry.toml").rename(repo_root / "pyproject.toml")
-        subprocess.run(
-            ["poetry", "add", *request.param],
-            stdout=subprocess.DEVNULL,
-        )
-    try:
-        yield
-    finally:
-        with capsys.disabled():
-            subprocess.run(
-                ["poetry", "remove", *request.param],
-                stdout=subprocess.DEVNULL,
-            )
-            pathlib.Path("poetry.lock").unlink()
-            Path(repo_root / "pyproject.toml").rename(
-                deps_files / "pyproject.poetry.toml"
-            )
+import os
+from glob import glob
 
 
-@pytest.fixture()
-def with_pyproject_pep621_packages(_stash_away_project_toml, capsys, request):
-    repo_root = Path.cwd()
-    deps_files = Path("tests/deps_files")
-
-    with capsys.disabled():
-        Path(deps_files / "pyproject.pep621.toml").rename(repo_root / "pyproject.toml")
-        subprocess.run(
-            ["pip", "install", *request.param],
-            stdout=subprocess.DEVNULL,
-        )
-    try:
-        yield
-    finally:
-        with capsys.disabled():
-            subprocess.run(
-                ["pip", "uninstall", "-y", *request.param],
-                stdout=subprocess.DEVNULL,
-            )
-            Path(repo_root / "pyproject.toml").rename(
-                deps_files / "pyproject.pep621.toml"
-            )
+def refactor(string: str) -> str:
+    filename, ext = os.path.splitext(string.replace(os.path.sep, "."))
+    return filename
 
 
-@pytest.fixture()
-def with_requirements_txt_packages(_stash_away_project_toml, capsys, request):
-    repo_root = Path.cwd()
-    deps_files = Path("tests/deps_files")
-
-    with capsys.disabled():
-        Path(deps_files / "requirements.txt").rename(repo_root / "requirements.txt")
-        subprocess.run(
-            ["pip", "install", *request.param],
-            stdout=subprocess.DEVNULL,
-        )
-    try:
-        yield
-    finally:
-        with capsys.disabled():
-            subprocess.run(
-                ["pip", "uninstall", "-y", *request.param],
-                stdout=subprocess.DEVNULL,
-            )
-            Path(repo_root / "requirements.txt").rename(deps_files / "requirements.txt")
+pytest_plugins = [
+    refactor(fixture)
+    for fixture in glob("tests/fixtures/*.py") + glob("tests/fixtures/**/*.py")
+    if "__" not in fixture
+]  # magic pytest variable, used for collecting fixtures
