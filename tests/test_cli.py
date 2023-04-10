@@ -143,7 +143,7 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
         ("fail-excluded-and-not-installed", 1),
     ],
 )
-def test_unused_found_because_excluded_but_not_installed(
+def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
     capsys: CaptureFixture,
     mock_dependencies_from_pyproject_toml: Callable,
     mock_imports_from_source_code: Callable,
