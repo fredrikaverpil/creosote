@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import pytest
 from _pytest.capture import CaptureFixture
@@ -13,7 +14,7 @@ def test_no_unused_and_found_in_top_level_txt(
     mocker: MockerFixture,
     tmp_path: Path,
 ):
-    """The dependency if found in top_level.txt file."""
+    """The dependency is found in top_level.txt file."""
     imports_from_code = [ImportInfo(module=[], name=["yolo"])]
     dependency_names_from_deps_file = ["yolo"]
     venv_path = tmp_path / "venv"
@@ -23,7 +24,7 @@ def test_no_unused_and_found_in_top_level_txt(
     top_level_txt_path = dist_info_path / "top_level.txt"
     top_level_txt_path.write_text("yolo\n")
 
-    expected_unused_packages = []
+    expected_unused_packages: List[str] = []
 
     mocker.patch(
         "creosote.parsers.get_module_names_from_code",
@@ -33,8 +34,8 @@ def test_no_unused_and_found_in_top_level_txt(
         "creosote.parsers.DependencyReader.load_pyproject",
         return_value=dependency_names_from_deps_file,
     )
-    mocked_map_via_distlib = mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+    mocked_map_via_record = mocker.patch(
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
         return_value=False,
     )
     mocked_map_via_canonicalization = mocker.patch(
@@ -48,7 +49,7 @@ def test_no_unused_and_found_in_top_level_txt(
 
     captured = capsys.readouterr()
 
-    mocked_map_via_distlib.assert_not_called()
+    mocked_map_via_record.assert_called_once()
     mocked_map_via_canonicalization.assert_called_once()
     assert captured.out.splitlines() == expected_unused_packages
     assert exit_code == 0
@@ -60,11 +61,18 @@ def test_no_unused_and_found_via_distlib_db(
     tmp_path: Path,
 ):
     """The dependency is found by distlib db lookup."""
-    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
-    dependency_names_from_deps_file = ["dotty-dict"]
+    imports_from_code = [ImportInfo(module=[], name=["yolo"])]
+    dependency_names_from_deps_file = ["yolo"]
     venv_path = tmp_path / "venv"
+    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
+    dist_info_path = site_packages_path / "yolo-1.2.3.dist-info"
+    dist_info_path.mkdir(parents=True)
+    record = dist_info_path / "RECORD"
+    record.write_text(
+        "yolo/__init__.py,sha256=4skFj_sdo33SWqTefV1JBAvZiT4MY_pB5yaRL5DMNVs,240\n"
+    )
 
-    expected_unused_packages = []
+    expected_unused_packages: List[str] = []
 
     mocker.patch(
         "creosote.parsers.get_module_names_from_code",
@@ -77,10 +85,6 @@ def test_no_unused_and_found_via_distlib_db(
     mocker.patch(
         "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
         return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.canonicalize_module_name",
-        return_value=None,
     )
     mocked_map_via_canonicalization = mocker.patch(
         "creosote.resolvers.DepsResolver.map_dep_to_canonical_name",
@@ -121,7 +125,7 @@ def test_no_unused_and_found_via_canonicalization(
         return_value=False,
     )
     mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
         return_value=False,
     )
 
@@ -158,7 +162,7 @@ def test_unused_found(
         return_value=False,
     )
     mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
         return_value=False,
     )
     mocker.patch(
@@ -204,7 +208,7 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
         return_value=False,
     )
     mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
         return_value=False,
     )
 
@@ -261,7 +265,7 @@ def test_unused_found_because_excluded_but_not_installed(
         return_value=False,
     )
     mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_module_via_distlib",
+        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
         return_value=False,
     )
 
