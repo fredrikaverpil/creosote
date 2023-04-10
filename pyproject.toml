@@ -37,7 +37,7 @@ path = "src/creosote/__about__.py"
 # PEP-440
 lint = ["black", "ruff"]
 types = ["mypy", "loguru-mypy", "types-toml"]
-test = ["pytest", "pytest-mock"]
+test = ["pytest", "pytest-mock", "coverage"]
 dev = ["creosote[lint,types,test]"]
 
 [project.urls]

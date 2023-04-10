@@ -1,3 +1,5 @@
 .venv
 dist
 __pycache__
+htmlcov
+.coverage
