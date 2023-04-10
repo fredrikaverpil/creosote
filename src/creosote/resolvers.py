@@ -111,7 +111,7 @@ class DepsResolver:
             )
             return False
 
-        for filename, _, _ in dist.list_installed_files():  # TODO: #125
+        for filename, _, _ in dist.list_installed_files():
             if filename.endswith((".py")):
                 parts = os.path.splitext(filename)[0].split(os.sep)
                 if len(parts) == 1:  # windows sep varies with distribution type
