@@ -13,6 +13,6 @@ class ImportInfo:
 class DependencyInfo:
     name: str  # as defined in the dependencies specification file
     top_level_import_names: Optional[List[str]] = None
-    distlib_db_import_name: Optional[str] = None
+    record_import_names: Optional[List[str]] = None
     canonicalized_dep_name: Optional[str] = None
     associated_imports: List[ImportInfo] = dataclasses.field(default_factory=list)
