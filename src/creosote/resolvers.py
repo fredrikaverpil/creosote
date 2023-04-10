@@ -4,7 +4,6 @@ import re
 from pathlib import Path
 from typing import List
 
-from distlib import database
 from loguru import logger
 
 from creosote.models import DependencyInfo, ImportInfo
@@ -26,8 +25,10 @@ class DepsResolver:
         self.top_level_txt_pattern = re.compile(
             r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
         )
+        self.record_pattern = re.compile(r"\/([\w]*).[\d\.]*.dist-info\/RECORD")
 
         self.top_level_filepaths: List[pathlib.Path] = []
+        self.record_filepaths: List[pathlib.Path] = []
         self.unused_deps: List[DependencyInfo] = []
 
     @staticmethod
@@ -41,6 +42,14 @@ class DepsResolver:
         except ImportError:
             return False
 
+    def gather_filepaths(self, venv: str, glob_str: str) -> List[Path]:
+        logger.debug(f"Gathering all top_level.txt files in venv {venv}...")
+        venv_path = pathlib.Path(venv)
+        filepaths = list(venv_path.glob(glob_str))
+        for filepath in filepaths:
+            logger.debug(f"Found {filepath}")
+        return sorted(set(filepaths))
+
     def gather_top_level_filepaths(self, venv: str) -> None:
         """Gathers all top_level.txt filepaths in the venv.
 
@@ -49,21 +58,18 @@ class DepsResolver:
             dependency name, like e.g. GitPython for gitpython.
         """
 
-        venv_exists = Path(venv).exists()
-        if not venv_exists:
-            logger.warning(
-                f"Virtual environment(s) '{', '.join(self.venvs)}' does not exist, "
-                "cannot resolve top-level names. This may lead to incorrect results."
-            )
-
-        logger.debug("Gathering all top_level.txt files in venv...")
-        venv_path = pathlib.Path(venv)
         glob_str = "**/*.dist-info/top_level.txt"
-        top_level_filepaths = venv_path.glob(glob_str)
-        self.top_level_filepaths.extend(top_level_filepaths)
-        self.top_level_filepaths = sorted(set(self.top_level_filepaths))
-        for top_level_filepath in self.top_level_filepaths:
-            logger.debug(f"Found {top_level_filepath}")
+        self.top_level_filepaths = self.gather_filepaths(venv=venv, glob_str=glob_str)
+
+    def gather_record_files(self, venv: str) -> None:
+        """Gathers all RECORD filepaths in the venv.
+
+        Note:
+            The path may contain case sensitive variations of the
+            dependency name, like e.g. GitPython for gitpython.
+        """
+        glob_str = "**/*.dist-info/RECORD"
+        self.record_filepaths = self.gather_filepaths(venv=venv, glob_str=glob_str)
 
     def map_dep_to_import_via_top_level_txt_file(
         self, dep_info: DependencyInfo
@@ -76,6 +82,7 @@ class DepsResolver:
         dep_name = self.canonicalize_module_name(dep_info.name)
 
         for top_level_filepath in self.top_level_filepaths:
+            # logger.debug(f"SEARCHING {dep_name} IN {top_level_filepath}")
             normalized_top_level_filepath = top_level_filepath.as_posix()
             matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
             for import_name_from_top_level in matches:
@@ -83,52 +90,45 @@ class DepsResolver:
                     with open(top_level_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
                     dep_info.top_level_import_names = [line.strip() for line in lines]
-                    import_names = ",".join(dep_info.top_level_import_names)
+                    import_names = ", ".join(dep_info.top_level_import_names)
                     logger.debug(
-                        f"[{dep_info.name}] found import name "
+                        f"[{dep_info.name}] found import name(s) "
                         f"via top_level.txt: {import_names} ⭐️"
                     )
                     return True
         logger.debug(f"[{dep_info.name}] did not find top_level.txt in venv")
         return False
 
-    def map_dep_to_module_via_distlib(self, dep_info: DependencyInfo) -> bool:
-        """Fallback to distlib if we can't find the top_level.txt file.
+    def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
+        dep_name = self.canonicalize_module_name(dep_info.name)
 
-        Return True if import name was found in the distlib database,
-        otherwise return False.
+        for record_filepath in self.record_filepaths:
+            # logger.debug(f"SEARCHING {dep_name} IN {record_filepath}")
+            normalized_record_filepath = record_filepath.as_posix()
+            matches = self.record_pattern.findall(normalized_record_filepath)
+            for import_name_from_record in matches:
+                if import_name_from_record.lower() == dep_name.lower():
+                    with open(record_filepath, "r", encoding="utf-8") as infile:
+                        lines = infile.readlines()
 
-        It seems this brings very little value right now, but I'll
-        leave it in for now...
-        """
-        dp = database.DistributionPath(include_egg=True)
-        dist = dp.get_distribution(dep_info.name)
-        found_module_name = None
+                    import_names_found = []
+                    for line in lines:
+                        candidate, _hash, _size = line.split(",")
+                        if candidate.endswith(".py") and "__init__" in candidate:
+                            import_name = candidate.split(os.sep)[0]
+                            if import_name not in import_names_found:
+                                import_names_found.append(import_name)
 
-        if dist is None:
-            logger.debug(
-                f"[{dep_info.name}] did not find dependency in distlib.database"
-            )
-            return False
+                            dep_info.record_import_names = import_names_found
 
-        for filename, _, _ in dist.list_installed_files():
-            if filename.endswith((".py")):
-                parts = os.path.splitext(filename)[0].split(os.sep)
-                if len(parts) == 1:  # windows sep varies with distribution type
-                    parts = os.path.splitext(filename)[0].split("/")
-                if parts[-1].startswith("_") and not parts[-1].startswith("__"):
-                    continue  # ignore internals
-                elif filename.endswith(".py") and parts[-1] == "__init__":
-                    found_module_name = parts[-2]
-                    break
+                            import_names = ",".join(dep_info.record_import_names)
+                            logger.debug(
+                                f"[{dep_info.name}] found import name "
+                                f"via RECORD: {import_names} ⭐️"
+                            )
+                            return True
 
-        if found_module_name:
-            logger.debug(
-                f"[{dep_info.name}] found import name "
-                f"via distlib.database: {found_module_name} 🤞"
-            )
-            dep_info.distlib_db_import_name = found_module_name
-            return True
+        logger.debug(f"[{dep_info.name}] did not find RECORD in venv")
         return False
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
@@ -140,27 +140,28 @@ class DepsResolver:
         There are three strategies from where the import name can be
         found:
             1. In the top_level.txt file in the venv.
-            2. From the distlib database.
+            2. From the RECORD file in the venv.
             3. Guess the import name by canonicalizing the dep name.
 
         Later, these gathered import names will be compared against the
         imports found in the source code by the AST parser.
         """
         logger.debug("Attempting to find import names...")
-        found_import_name = False
+        found_via_top_level_txt = False
 
         for dep_info in self.dependencies:
-            # best chance to get the import name
-            found_import_name = self.map_dep_to_import_via_top_level_txt_file(dep_info)
+            # find the import name in the top_level.txt file
+            found_via_top_level_txt = self.map_dep_to_import_via_top_level_txt_file(
+                dep_info
+            )
 
-            if not found_import_name:
-                # fallback to distlib
-                found_import_name = self.map_dep_to_module_via_distlib(dep_info)
+            # find the import name in the RECORD file
+            found_via_record = self.map_dep_to_import_via_record_file(dep_info)
 
             # this is really just guessing, but it's better than nothing
             dep_info.canonicalized_dep_name = self.map_dep_to_canonical_name(dep_info)
 
-            if not found_import_name:
+            if not found_via_top_level_txt and not found_via_record:
                 logger.debug(
                     f"[{dep_info.name}] relying on canonicalization "
                     f"fallback: {dep_info.canonicalized_dep_name } 🤞"
@@ -188,11 +189,14 @@ class DepsResolver:
             if dep_info.top_level_import_names:
                 for top_level_import_name in dep_info.top_level_import_names:
                     self.associate_dep_with_import(dep_info, top_level_import_name)
-            elif dep_info.distlib_db_import_name:
-                self.associate_dep_with_import(
-                    dep_info, dep_info.distlib_db_import_name
-                )
-            elif dep_info.canonicalized_dep_name:
+            if dep_info.record_import_names:
+                for record_import_name in dep_info.record_import_names:
+                    self.associate_dep_with_import(dep_info, record_import_name)
+            # if dep_info.distlib_db_import_name:
+            #     self.associate_dep_with_import(
+            #         dep_info, dep_info.distlib_db_import_name
+            #     )
+            if dep_info.canonicalized_dep_name:
                 self.associate_dep_with_import(
                     dep_info, dep_info.canonicalized_dep_name
                 )
@@ -206,7 +210,13 @@ class DepsResolver:
 
     def resolve_unused_dependency_names(self) -> List[str]:
         for venv in self.venvs:
+            if not Path(venv).exists():
+                logger.warning(
+                    f"Virtual environment(s) '{', '.join(self.venvs)}' does not exist, "
+                    "cannot resolve top-level names. This may lead to incorrect results."
+                )
             self.gather_top_level_filepaths(venv=venv)
+            self.gather_record_files(venv=venv)
         self.gather_import_info()
         self.associate_dep_info_with_imports()
         self.get_unused_dependencies()
