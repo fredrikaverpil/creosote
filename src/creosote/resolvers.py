@@ -210,7 +210,8 @@ class DepsResolver:
             if not Path(venv).exists():
                 logger.warning(
                     f"Virtual environment(s) '{', '.join(self.venvs)}' does not exist, "
-                    "cannot resolve top-level names. This may lead to incorrect results."
+                    "cannot resolve top-level names. "
+                    "This may lead to incorrect results."
                 )
             self.gather_top_level_filepaths(venv=venv)
             self.gather_record_filepaths(venv=venv)
