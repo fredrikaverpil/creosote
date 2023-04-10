@@ -68,22 +68,3 @@ def venv_with_record(create_venv: Tuple[Path, Path]) -> Generator[Callable, None
         return venv_path, record_path
 
     yield _
-
-
-@pytest.fixture()
-def mock_canonical_name(mocker: MockerFixture):
-    def _(name: str):
-        return mocker.patch(
-            "creosote.resolvers.DepsResolver.map_dep_to_canonical_name",
-            return_value=name,
-        )
-
-    yield _
-
-
-@pytest.fixture()
-def mocked_record_file_mapping(mocker: MockerFixture):
-    yield mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
