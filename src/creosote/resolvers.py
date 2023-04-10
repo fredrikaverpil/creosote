@@ -82,12 +82,10 @@ class DepsResolver:
         dep_name = self.canonicalize_module_name(dep_info.name)
 
         for top_level_filepath in self.top_level_filepaths:
-            # logger.debug(f"SEARCHING {dep_name} IN {top_level_filepath}")
             normalized_top_level_filepath = top_level_filepath.as_posix()
             matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
             for import_name_from_top_level in matches:
                 if import_name_from_top_level.lower() == dep_name.lower():
-                    # logger.debug(f"OPENING {dep_name} IN {top_level_filepath}")
                     with open(top_level_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
                     dep_info.top_level_import_names = [line.strip() for line in lines]
@@ -104,12 +102,10 @@ class DepsResolver:
         dep_name = self.canonicalize_module_name(dep_info.name)
 
         for record_filepath in self.record_filepaths:
-            # logger.debug(f"SEARCHING {dep_name} IN {record_filepath}")
             normalized_record_filepath = record_filepath.as_posix()
             matches = self.record_pattern.findall(normalized_record_filepath)
             for import_name_from_record in matches:
                 if import_name_from_record.lower() == dep_name.lower():
-                    # logger.debug(f"OPENING {dep_name} IN {record_filepath}")
                     with open(record_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
 
