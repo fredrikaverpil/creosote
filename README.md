@@ -18,7 +18,7 @@ Scan virtual environment for unused dependencies ([PEP-621](https://peps.python.
 
 ```
 $ creosote
-Found dependencies in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, requests, toml
+Found dependencies in pyproject.toml: dotty-dict, loguru, pip-requirements-parser, requests, toml
 Oh no, bloated venv! 🤢 🪣
 Unused dependencies found: requests
 ```
@@ -27,7 +27,7 @@ And after having removed/uninstalled `requests`:
 
 ```
 $ creosote
-Found dependencies in pyproject.toml: distlib, dotty-dict, loguru, pip-requirements-parser, toml
+Found dependencies in pyproject.toml: dotty-dict, loguru, pip-requirements-parser, toml
 No unused dependencies found! ✨
 ```
 

@@ -98,7 +98,7 @@ ignore = []
 python_version = "3.7"
 
 [[tool.mypy.overrides]]
-module = ["distlib.*", "dotty_dict.*", "pip_requirements_parser.*"]
+module = ["dotty_dict.*", "pip_requirements_parser.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

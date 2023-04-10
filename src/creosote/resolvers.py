@@ -61,7 +61,7 @@ class DepsResolver:
         glob_str = "**/*.dist-info/top_level.txt"
         self.top_level_filepaths = self.gather_filepaths(venv=venv, glob_str=glob_str)
 
-    def gather_record_files(self, venv: str) -> None:
+    def gather_record_filepaths(self, venv: str) -> None:
         """Gathers all RECORD filepaths in the venv.
 
         Note:
@@ -87,6 +87,7 @@ class DepsResolver:
             matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
             for import_name_from_top_level in matches:
                 if import_name_from_top_level.lower() == dep_name.lower():
+                    # logger.debug(f"OPENING {dep_name} IN {top_level_filepath}")
                     with open(top_level_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
                     dep_info.top_level_import_names = [line.strip() for line in lines]
@@ -108,6 +109,7 @@ class DepsResolver:
             matches = self.record_pattern.findall(normalized_record_filepath)
             for import_name_from_record in matches:
                 if import_name_from_record.lower() == dep_name.lower():
+                    # logger.debug(f"OPENING {dep_name} IN {record_filepath}")
                     with open(record_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
 
@@ -134,7 +136,7 @@ class DepsResolver:
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
 
-    def gather_import_info(self):
+    def populate_dependency_info(self):
         """Populate DependencyInfo object with import naming info.
 
         There are three strategies from where the import name can be
@@ -177,13 +179,13 @@ class DepsResolver:
                 # from <imp.name> import ...
                 dep_info.associated_imports.append(imp)
 
-    def associate_dep_info_with_imports(self):
+    def resolve(self):
         """Associate dependency name with import (module) name.
 
         The AST has found imports from the source code. This function
         will now attempt to associate these imports with the
-        DependencyInfo data, gathered from the venv, distlib, or
-        canonicalization.
+        DependencyInfo data, gathered from the venv's top_level.txt,
+        the RECORD and a best-guess.
         """
         for dep_info in self.dependencies:
             if dep_info.top_level_import_names:
@@ -192,10 +194,6 @@ class DepsResolver:
             if dep_info.record_import_names:
                 for record_import_name in dep_info.record_import_names:
                     self.associate_dep_with_import(dep_info, record_import_name)
-            # if dep_info.distlib_db_import_name:
-            #     self.associate_dep_with_import(
-            #         dep_info, dep_info.distlib_db_import_name
-            #     )
             if dep_info.canonicalized_dep_name:
                 self.associate_dep_with_import(
                     dep_info, dep_info.canonicalized_dep_name
@@ -216,9 +214,10 @@ class DepsResolver:
                     "cannot resolve top-level names. This may lead to incorrect results."
                 )
             self.gather_top_level_filepaths(venv=venv)
-            self.gather_record_files(venv=venv)
-        self.gather_import_info()
-        self.associate_dep_info_with_imports()
+            self.gather_record_filepaths(venv=venv)
+
+        self.populate_dependency_info()
+        self.resolve()
         self.get_unused_dependencies()
 
         logger.debug(

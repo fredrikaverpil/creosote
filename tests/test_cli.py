@@ -14,7 +14,7 @@ def test_no_unused_and_found_in_top_level_txt(
     mocker: MockerFixture,
     tmp_path: Path,
 ):
-    """The dependency is found in top_level.txt file."""
+    """The dependency is found in the top_level.txt file."""
     imports_from_code = [ImportInfo(module=[], name=["yolo"])]
     dependency_names_from_deps_file = ["yolo"]
     venv_path = tmp_path / "venv"
@@ -55,12 +55,12 @@ def test_no_unused_and_found_in_top_level_txt(
     assert exit_code == 0
 
 
-def test_no_unused_and_found_via_distlib_db(
+def test_no_unused_and_found_via_record_file(
     capsys: CaptureFixture,
     mocker: MockerFixture,
     tmp_path: Path,
 ):
-    """The dependency is found by distlib db lookup."""
+    """The dependency is found in the RECORD file."""
     imports_from_code = [ImportInfo(module=[], name=["yolo"])]
     dependency_names_from_deps_file = ["yolo"]
     venv_path = tmp_path / "venv"
