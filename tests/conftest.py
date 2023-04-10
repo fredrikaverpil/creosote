@@ -11,16 +11,15 @@ Notes:
 
 
 import os
-from glob import glob
+from pathlib import Path
 
 
-def refactor(string: str) -> str:
-    filename, ext = os.path.splitext(string.replace(os.path.sep, "."))
-    return filename
+def refactor(path: Path) -> str:
+    relative_path = path.relative_to(Path.cwd())
+    relative_path_as_string = str(relative_path)
+    return relative_path_as_string.replace(os.path.sep, ".").replace(".py", "")
 
 
 pytest_plugins = [
-    refactor(fixture)
-    for fixture in glob("tests/fixtures/*.py") + glob("tests/fixtures/**/*.py")
-    if "__" not in fixture
+    refactor(fixture) for fixture in Path.cwd().glob("tests/fixtures/**/*.py")
 ]  # magic pytest variable, used for collecting fixtures
