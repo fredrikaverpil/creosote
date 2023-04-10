@@ -32,6 +32,7 @@ jobs:
           pip install --upgrade pip
           pip install '.[test]'
           coverage run -m pytest -s -vv
+          coverage html
 
       - name: pytest (windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -42,9 +43,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install '.[test]'
           coverage run -m pytest -s -vv
-
-      - name: export coverage to html format
-        run: coverage html
+          coverage html
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
