@@ -1,174 +1,98 @@
 from pathlib import Path
-from typing import List
+from typing import Callable, List, Tuple
 
 import pytest
 from _pytest.capture import CaptureFixture
-from pytest_mock import MockerFixture
 
 from creosote import cli
-from creosote.models import ImportInfo
 
 
 def test_no_unused_and_found_in_top_level_txt(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
+    venv_with_top_level_txt: Callable,
 ):
     """The dependency is found in the top_level.txt file."""
-    imports_from_code = [ImportInfo(module=[], name=["yolo"])]
-    dependency_names_from_deps_file = ["yolo"]
-    venv_path = tmp_path / "venv"
-    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
-    dist_info_path = site_packages_path / "yolo-1.2.3.dist-info"
-    dist_info_path.mkdir(parents=True)
-    top_level_txt_path = dist_info_path / "top_level.txt"
-    top_level_txt_path.write_text("yolo\n")
-
-    expected_unused_packages: List[str] = []
-
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
-    )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocked_map_via_record = mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
-    mocked_map_via_canonicalization = mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_canonical_name",
-        return_value="",
+    mock_dependencies_from_pyproject_toml(["YoloYolo"])
+    mock_imports_from_source_code(["yolo"])
+    venv_path, _top_level_txt_path = venv_with_top_level_txt(
+        dependency_name="YoloYolo", contents=["yolo"]
     )
 
     exit_code = cli.main(
-        ["--venv", str(venv_path), "--format", "porcelain", "--verbose"]
+        ["--venv", str(venv_path), "--format", "no-color", "--verbose"]
     )
+    actual_output = capsys.readouterr().err.splitlines()
 
-    captured = capsys.readouterr()
-
-    mocked_map_via_record.assert_called_once()
-    mocked_map_via_canonicalization.assert_called_once()
-    assert captured.out.splitlines() == expected_unused_packages
+    assert "[YoloYolo] found import name(s) via top_level.txt: yolo ⭐️" in actual_output
+    assert "[YoloYolo] did not find RECORD in venv" in actual_output
+    assert "No unused dependencies found!" in actual_output[-1]
     assert exit_code == 0
 
 
 def test_no_unused_and_found_via_record_file(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
+    venv_with_record: Callable,
 ):
     """The dependency is found in the RECORD file."""
-    imports_from_code = [ImportInfo(module=[], name=["yolo"])]
-    dependency_names_from_deps_file = ["yolo"]
-    venv_path = tmp_path / "venv"
-    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
-    dist_info_path = site_packages_path / "yolo-1.2.3.dist-info"
-    dist_info_path.mkdir(parents=True)
-    record = dist_info_path / "RECORD"
-    record.write_text(
-        "yolo/__init__.py,sha256=4skFj_sdo33SWqTefV1JBAvZiT4MY_pB5yaRL5DMNVs,240\n"
+    mock_dependencies_from_pyproject_toml(["YoloYolo"])
+    mock_imports_from_source_code(["yolo"])
+    venv_path, _record_path = venv_with_record(
+        dependency_name="YoloYolo",
+        contents=[
+            "yolo/__init__.py,sha256=4skFj_sdo33SWqTefV1JBAvZiT4MY_pB5yaRL5DMNVs,240"
+        ],
     )
 
-    expected_unused_packages: List[str] = []
-
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
+    exit_code = cli.main(
+        ["--venv", str(venv_path), "--format", "no-color", "--verbose"]
     )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
-        return_value=False,
-    )
-    mocked_map_via_canonicalization = mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_canonical_name",
-        return_value="",
-    )
+    actual_output = capsys.readouterr().err.splitlines()
 
-    exit_code = cli.main(["--venv", str(venv_path), "--format", "porcelain"])
-
-    captured = capsys.readouterr()
-
-    mocked_map_via_canonicalization.assert_called_once()
-    assert captured.out.splitlines() == expected_unused_packages
+    assert "[YoloYolo] did not find top_level.txt in venv" in actual_output
+    assert "[YoloYolo] found import name via RECORD: yolo ⭐️" in actual_output
+    assert "No unused dependencies found!" in actual_output[-1]
     assert exit_code == 0
 
 
 def test_no_unused_and_found_via_canonicalization(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    create_venv: Tuple[Path, Path],
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
 ):
     """The dependency is found by canonicalization of dep name."""
-    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
-    dependency_names_from_deps_file = ["dotty-dict"]
-    venv_path = tmp_path / "venv"
+    mock_dependencies_from_pyproject_toml(dependency_names=["Yo-Lo"])
+    mock_imports_from_source_code(import_names=["Yo_Lo"])
+    venv_path, _site_packages_path = create_venv
 
-    expected_unused_packages = []
-
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
+    exit_code = cli.main(
+        ["--venv", str(venv_path), "--format", "no-color", "--verbose"]
     )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
-        return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
+    actual_output = capsys.readouterr().err.splitlines()
 
-    exit_code = cli.main(["--venv", str(venv_path), "--format", "porcelain"])
-
-    captured = capsys.readouterr()
-
-    assert captured.out.splitlines() == expected_unused_packages
+    assert "[Yo-Lo] did not find top_level.txt in venv" in actual_output
+    assert "[Yo-Lo] did not find RECORD in venv" in actual_output
+    assert "[Yo-Lo] relying on canonicalization fallback: Yo_Lo 🤞" in actual_output
+    assert "No unused dependencies found!" in actual_output[-1]
     assert exit_code == 0
 
 
 def test_unused_found(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    create_venv: Tuple[Path, Path],
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
 ):
     """Unused dependency was detected."""
-    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
-    dependency_names_from_deps_file = ["dotty-dict"]
-    venv_path = tmp_path / "venv"
+    mock_dependencies_from_pyproject_toml(dependency_names=["yolo"])
+    mock_imports_from_source_code(import_names=["dummy"])
+    venv_path, _site_packages_path = create_venv
 
-    expected_unused_packages = ["dotty-dict"]
-
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
-    )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
-        return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_canonical_name",
-        return_value="",
-    )
+    expected_unused_packages = ["yolo"]
 
     exit_code = cli.main(["--venv", str(venv_path), "--format", "porcelain"])
 
@@ -180,37 +104,20 @@ def test_unused_found(
 
 def test_detected_indirectly_used_but_not_imported_and_excluded(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
+    venv_with_top_level_txt: Callable,
 ):
     """Excluded dependency is used but never imported by source code."""
-    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
-    dependency_names_from_deps_file = ["dotty-dict", "pyodbc"]
-    excluded_dependencies = "pyodbc"
-    venv_path = tmp_path / "venv"
-    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
-    dist_info_path = site_packages_path / "pyodbc-1.2.3.dist-info"
-    dist_info_path.mkdir(parents=True)
-    top_level_txt_path = dist_info_path / "top_level.txt"
-    top_level_txt_path.write_text("pyodbc\n")
-    expected_unused_packages = []
+    mock_dependencies_from_pyproject_toml(dependency_names=["hello", "bye"])
+    mock_imports_from_source_code(import_names=["hello"])
+    excluded_dependencies = "bye"
 
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
+    venv_path, _top_level_txt_path = venv_with_top_level_txt(
+        dependency_name="hello", contents=["hello"]
     )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
-        return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
+
+    expected_unused_packages: List[str] = []
 
     exit_code = cli.main(
         [
@@ -238,36 +145,19 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
 )
 def test_unused_found_because_excluded_but_not_installed(
     capsys: CaptureFixture,
-    mocker: MockerFixture,
-    tmp_path: Path,
+    mock_dependencies_from_pyproject_toml: Callable,
+    mock_imports_from_source_code: Callable,
+    create_venv: Tuple[Path, Path],
     use_feature: str,
     expected_exit_code: int,
 ):
     """Excluded dependency is used but never imported by source code."""
-    imports_from_code = [ImportInfo(module=[], name=["dotty_dict"])]
-    dependency_names_from_deps_file = ["dotty-dict"]
-    excluded_dependencies = "pyodbc"
-    venv_path = tmp_path / "venv"
-    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
-    site_packages_path.mkdir(parents=True)
-    expected_unused_packages = []
+    mock_dependencies_from_pyproject_toml(dependency_names=["hello", "bye"])
+    mock_imports_from_source_code(import_names=["hello"])
+    excluded_dependencies = "bye"
 
-    mocker.patch(
-        "creosote.parsers.get_module_names_from_code",
-        return_value=imports_from_code,
-    )
-    mocker.patch(
-        "creosote.parsers.DependencyReader.load_pyproject",
-        return_value=dependency_names_from_deps_file,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_top_level_txt_file",
-        return_value=False,
-    )
-    mocker.patch(
-        "creosote.resolvers.DepsResolver.map_dep_to_import_via_record_file",
-        return_value=False,
-    )
+    venv_path, _site_packages_path = create_venv
+    expected_unused_packages: List[str] = []
 
     args = [
         "--venv",

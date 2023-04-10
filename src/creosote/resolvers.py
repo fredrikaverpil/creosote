@@ -149,7 +149,6 @@ class DepsResolver:
         imports found in the source code by the AST parser.
         """
         logger.debug("Attempting to find import names...")
-        found_via_top_level_txt = False
 
         for dep_info in self.dependencies:
             # find the import name in the top_level.txt file
