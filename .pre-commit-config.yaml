@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v2.6.1
+    rev: v2.7.0
     hooks:
       - id: creosote
         args:
@@ -8,3 +8,4 @@ repos:
           - --paths=src
           - --deps-file=pyproject.toml
           - --sections=project.dependencies
+#          - --pep582

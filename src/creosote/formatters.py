@@ -27,13 +27,16 @@ def configure_logger(verbose: bool, format_: str) -> None:
         )
 
 
-def print_results(unused_dependency_names: List[str], format_: str) -> None:
+def print_results(
+    unused_dependency_names: List[str], format_: str, pep582_enabled: bool = False
+) -> None:
+    environment = "pypackages" if pep582_enabled else "venv"
     if unused_dependency_names:
         if format_ == "porcelain":
             print("\n".join(unused_dependency_names))
         else:
             logger.error(
-                "Oh no, bloated venv! 🤢 🪣\n"
+                f"Oh no, bloated {environment}! 🤢 🪣\n"
                 f"Unused dependencies found: {', '.join(unused_dependency_names)}"
             )
     else:

@@ -75,6 +75,12 @@ def parse_args(args):
         choices=["default", "no-color", "porcelain"],
         help="output format",
     )
+    parser.add_argument(
+        "--pep582",
+        dest="pep582_enabled",
+        action="store_true",
+        help="enable PEP-582 support",
+    )
 
     if Features.ARGS_CAN_BE_SPECIFIED_MULTIPLE_TIMES.value in sys.argv:
         # v3.0 behavior
@@ -188,11 +194,19 @@ def main(args_=None):
         sections=args.sections,
         exclude_deps=args.exclude_deps,
     )
+
     dependency_names = deps_reader.read()
+    pep582_enabled = args.pep582_enabled or deps_reader.pep582_enabled
+    # print(deps_reader.pep582_enabled, args.pep582_enabled)
+    if pep582_enabled:
+        args.venvs = ["__pypackages__"]
+        logger.info("PEP-582 environment enabled")
 
     # Warn if excluded dependencies are not installed
     excluded_deps_and_not_installed = parsers.get_excluded_deps_which_are_not_installed(
-        excluded_deps=args.exclude_deps, venvs=args.venvs
+        excluded_deps=args.exclude_deps,
+        venvs=args.venvs,
+        pep582_enabled=pep582_enabled,
     )
 
     # Resolve
@@ -206,7 +220,9 @@ def main(args_=None):
 
     # Print final results
     formatters.print_results(
-        unused_dependency_names=unused_dependency_names, format_=args.format
+        unused_dependency_names=unused_dependency_names,
+        format_=args.format,
+        pep582_enabled=pep582_enabled,
     )
 
     # Return with exit code

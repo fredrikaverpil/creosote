@@ -42,7 +42,8 @@ class DepsResolver:
         except ImportError:
             return False
 
-    def gather_filepaths(self, venv: str, glob_str: str) -> List[Path]:
+    @staticmethod
+    def gather_filepaths(venv: str, glob_str: str) -> List[Path]:
         logger.debug(f"Gathering all top_level.txt files in venv {venv}...")
         venv_path = pathlib.Path(venv)
         filepaths = list(venv_path.glob(glob_str))
@@ -54,7 +55,7 @@ class DepsResolver:
         """Gathers all top_level.txt filepaths in the venv.
 
         Note:
-            The path may contain case sensitive variations of the
+            The path may contain case-sensitive variations of the
             dependency name, like e.g. GitPython for gitpython.
         """
 
@@ -65,7 +66,7 @@ class DepsResolver:
         """Gathers all RECORD filepaths in the venv.
 
         Note:
-            The path may contain case sensitive variations of the
+            The path may contain case-sensitive variations of the
             dependency name, like e.g. GitPython for gitpython.
         """
         glob_str = "**/*.dist-info/RECORD"
@@ -161,7 +162,7 @@ class DepsResolver:
             if not found_via_top_level_txt and not found_via_record:
                 logger.debug(
                     f"[{dep_info.name}] relying on canonicalization "
-                    f"fallback: {dep_info.canonicalized_dep_name } 🤞"
+                    f"fallback: {dep_info.canonicalized_dep_name} 🤞"
                 )
 
     def associate_dep_with_import(self, dep_info: DependencyInfo, import_name: str):

@@ -41,12 +41,13 @@ creosote --help
 
 ### ☘️ Required arguments
 
-| Argument      | Default value          | Description                                                                                            |
-| ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--venv`      | `.venv`                | The path to your virtual environment or site-packages folder.                                          |
-| `--paths`     | `src`                  | The path to your source code, one or more files/folders.                                               |
-| `--deps-file` | `pyproject.toml`       | The path to the file specifying your dependencies, like `pyproject.toml`, `requirements_*.txt \| .in`. |
-| `--sections`  | `project.dependencies` | One or more toml sections to parse, e.g. `project.dependencies`.                                       |
+| Argument      | Default value        | Description                                                                             |
+|---------------|----------------------|-----------------------------------------------------------------------------------------|
+| `--venv`      | `.venv`              | The path to your virtual environment or site-packages folder.                           |
+| `--paths`     | `src`                | The path to your source code, one or more files/folders.                                |
+| `--deps-file` | `pyproject.toml`     | The path to the file specifying your dependencies, like `pyproject.toml`, `requirements_*.txt \| .in`. |
+| `--sections`  | `project.dependencies` | One or more toml sections to parse, e.g. `project.dependencies`.                        |
+| `--pep582`    | not set              | Including this flag will enable PDM PEP-582 support.                                    |
 
 
 The creosote tool will first scan the given python file(s) for all its imports. Then it fetches all dependency names (from the dependencies spec file). Finally, all imports are associated with their corresponding dependency name (requires the virtual environment for resolving). If a dependency does not have any imports associated, it is considered unused.
@@ -77,17 +78,32 @@ The intent is to run Creosote in CI (or with [pre-commit](https://pre-commit.com
 ### Which dependency specification tooling/standards are supported?
 
 | Tool/standard                                                                                                               | Supported | `--deps-file` value | Example `--sections` values                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------- | :-------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+|-----------------------------------------------------------------------------------------------------------------------------| :-------: | ------------------- |---------------------------------------------------------------------------------------------------------------------|
 | [PDM](https://pdm.fming.dev/latest/)                                                                                        |     ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |
 | [Pipenv](https://pipenv.pypa.io/en/latest/)                                                                                 |     ✅     | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
 | [Poetry](https://python-poetry.org/)                                                                                        |     ✅     | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
 | Legacy Setuptools (`setup.py`)                                                                                              |     ❌     |                     |                                                                                                                     |
 | [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) |     ✅     | `*.[txt\|in]`       | N/A                                                                                                                 |
 | [PEP-621](https://peps.python.org/pep-0621/)                                                                                |     ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
+| [PEP-582](https://peps.python.org/pep-0582/)                                                                                |     ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                                                  |
 
 #### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
 When using `requirements.txt` files to specify dependencies, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input. When using [pip-tools](https://pip-tools.readthedocs.io/en/latest/), you likely want to point Creosote to scan your `*.in` file(s).
+
+#### 📔 Notes on [PEP-582](https://peps.python.org/pep-0582) (`__pypackages__`)
+
+Creosote supports PEP-528 through PDM. PEP-528 support can be enabled in the following ways...
+
+From the command line:
+```bash
+$ creosote --p src --pep582 
+````
+In pyproject.toml (this will enable it for pre-commit as well):
+```toml
+[tool.pdm.options]
+config = ["python.use_venv", "true"]
+```
 
 ### Can I specify multiple toml sections?
 
@@ -134,7 +150,6 @@ repos:
 ```
 
 </details>
-
 
 ### What's with the name "creosote"?
 

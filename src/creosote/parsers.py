@@ -25,6 +25,7 @@ class DependencyReader:
         self.deps_file = deps_file
         self.sections = sections
         self.exclude_deps = exclude_deps + always_excluded_deps
+        self.pep582_enabled = False
 
     def read(self) -> List[str]:
         logger.debug(f"Parsing {self.deps_file} for dependencies...")
@@ -50,10 +51,16 @@ class DependencyReader:
             )
 
         logger.info(
-            f"Found dependencies in {self.deps_file}: " f"{', '.join(dep_names)}"
+            f"Found dependencies in {self.deps_file}: {', '.join(dep_names)}"
         )
-
         return dep_names
+
+    @staticmethod
+    def detect_pep528(dotty_contents: Dotty) -> bool:
+        pdm_config = dotty_contents.get("tool.pdm.options.config", [])
+        for i, c in enumerate(pdm_config):
+            return c == "python.use_venv" and pdm_config[i + 1] == "true"
+        return False
 
     def load_pyproject_pep621(self, section_contents: List[str]) -> List[str]:
         if not isinstance(section_contents, list):
@@ -68,7 +75,8 @@ class DependencyReader:
                 logger.warning(f"Could not parse dependency string: {dep_name}")
         return section_deps
 
-    def load_pyproject_poetry(self, section_contents: Dict[str, Any]):
+    @staticmethod
+    def load_pyproject_poetry(section_contents: Dict[str, Any]):
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
@@ -81,6 +89,8 @@ class DependencyReader:
         dotty_contents: Dotty = dotty(contents)
         dep_names = []
 
+        self.pep582_enabled = self.detect_pep528(dotty_contents)
+
         for section in sections:
             try:
                 section_contents = dotty_contents[section]
@@ -89,7 +99,6 @@ class DependencyReader:
 
             logger.debug(f"{sections}: {section_contents}")
 
-            section_dep_names = []
             if section.startswith("project"):
                 logger.debug(f"Detected PEP-621 toml section in {deps_file}")
                 section_dep_names = self.load_pyproject_pep621(section_contents)
@@ -97,8 +106,8 @@ class DependencyReader:
                 logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
                 section_dep_names = self.load_pyproject_pep621(section_contents)
             elif section.startswith("tool.pdm"):
-                logger.debug(f"Detected PDM toml section in {deps_file}")
                 section_dep_names = self.load_pyproject_pep621(section_contents)
+                logger.debug(f"Detected PDM toml section in {deps_file}")
             elif section.startswith("tool.poetry"):
                 logger.debug(f"Detected Poetry toml section in {deps_file}")
                 section_dep_names = self.load_pyproject_poetry(
@@ -114,7 +123,8 @@ class DependencyReader:
 
         return sorted(dep_names)
 
-    def load_requirements(self, deps_file: str) -> List[str]:
+    @staticmethod
+    def load_requirements(deps_file: str) -> List[str]:
         """Read dependency names from requirements.txt-format file."""
         dep_from_req = RequirementsFile.from_file(deps_file).requirements
         return sorted([dep.name for dep in dep_from_req if dep.name is not None])
@@ -208,8 +218,11 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
     return imports_with_dupes_removed
 
 
-def get_installed_dependency_names(venv: str) -> List[str]:
-    site_packages = Path(venv).glob("**/site-packages").__next__()
+def get_installed_dependency_names(venv: Path) -> List[str] | None:
+    pkg_dir = "lib" if str(venv).split("/")[0] == "__pypackages__" else "site-packages"
+    if not venv.exists():
+        return []
+    site_packages = venv.glob(f"**/{pkg_dir}").__next__()
     dep_names = []
     for path in site_packages.glob("**/*.dist-info"):
         dep_names.append(path.name.split("-")[0])
@@ -217,7 +230,7 @@ def get_installed_dependency_names(venv: str) -> List[str]:
 
 
 def get_excluded_deps_which_are_not_installed(
-    excluded_deps: List[str], venvs: List[str]
+    excluded_deps: List[str], venvs: List[str], pep582_enabled: bool
 ) -> List[str]:
     dependency_names: List[str] = []
     if not excluded_deps:
@@ -225,14 +238,20 @@ def get_excluded_deps_which_are_not_installed(
 
     for excluded_dep_name in excluded_deps:
         for venv in venvs:
-            if excluded_dep_name not in get_installed_dependency_names(venv):
+            installed_dep_names = get_installed_dependency_names(Path(venv))
+            if (
+                excluded_dep_name not in installed_dep_names
+                and excluded_dep_name.replace("-", "_") not in installed_dep_names
+            ):
                 dependency_names.append(excluded_dep_name)
 
     dependency_names = list(set(dependency_names))
 
+    environment = "pypackages" if pep582_enabled else "virtual"
+
     if dependency_names:
         logger.warning(
-            "Excluded dependencies not found in virtual environment: "
+            f"Excluded dependencies not found in {environment} environment: "
             f"{', '.join(dependency_names)}"
         )
     return dependency_names
