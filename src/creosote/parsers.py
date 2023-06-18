@@ -209,9 +209,8 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
 
 
 def get_installed_dependency_names(venv: str) -> List[str]:
-    site_packages = Path(venv).glob("**/site-packages").__next__()
     dep_names = []
-    for path in site_packages.glob("**/*.dist-info"):
+    for path in Path(venv).glob("**/*.dist-info"):
         dep_names.append(path.name.split("-")[0])
     return dep_names
 
