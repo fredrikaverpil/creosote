@@ -78,7 +78,7 @@ The intent is to run Creosote in CI (or with [pre-commit](https://pre-commit.com
 
 | Tool/standard                                                                                                               | Supported | `--deps-file` value | Example `--sections` values                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------- | :-------: | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [PDM](https://pdm.fming.dev/latest/)                                                                                        |     ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |
+| [PDM](https://pdm.fming.dev/latest/) and [https://peps.python.org/pep-0582/](PEP-582)                                                                                        |     ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`,<br>`tool.pdm.dev-dependencies`                  |
 | [Pipenv](https://pipenv.pypa.io/en/latest/)                                                                                 |     ✅     | `pyproject.toml`    | `packages`,<br>`dev-packages`                                                                                       |
 | [Poetry](https://python-poetry.org/)                                                                                        |     ✅     | `pyproject.toml`    | `tool.poetry.dependencies`,<br>`tool.poetry.dev-dependencies` (legacy),<br>`tool.poetry.group.<GROUP>.dependencies` |
 | Legacy Setuptools (`setup.py`)                                                                                              |     ❌     |                     |                                                                                                                     |
@@ -88,6 +88,14 @@ The intent is to run Creosote in CI (or with [pre-commit](https://pre-commit.com
 #### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
 When using `requirements.txt` files to specify dependencies, there is no way to tell which part of `requirements.txt` specifies production vs developer dependencies. Therefore, you have to break your `requirements.txt` file into e.g. `requirements-prod.txt` and `requirements-dev.txt` and use any of them as input. When using [pip-tools](https://pip-tools.readthedocs.io/en/latest/), you likely want to point Creosote to scan your `*.in` file(s).
+
+#### 📓 Notes on [PEP-582](https://peps.python.org/pep-0582/) (`__pypackages__`)
+
+Creosote supports the `__pypackages__` folder, although PEP-582 was rejected. There is no reason to remove support for this today, but in case supporting this becomes cumbersome in the future, supporting PEP-582 might be dropped.
+
+```bash
+creosote --venv __pypackages__
+```
 
 ### Can I specify multiple toml sections?
 
