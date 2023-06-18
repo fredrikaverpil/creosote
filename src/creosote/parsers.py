@@ -11,7 +11,6 @@ from pip_requirements_parser import RequirementsFile
 from creosote.models import ImportInfo
 
 
-
 class DependencyReader:
     """Read dependencies from various dependency file formats."""
 
