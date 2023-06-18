@@ -1,14 +1,20 @@
 import ast
 import re
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union, cast
-
-import toml
-from dotty_dict import Dotty, dotty
-from loguru import logger
-from pip_requirements_parser import RequirementsFile
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import Generator
+from typing import List
+from typing import Union
 
 from creosote.models import ImportInfo
+
+import toml
+from dotty_dict import Dotty
+from dotty_dict import dotty
+from loguru import logger
+from pip_requirements_parser import RequirementsFile
 
 
 class DependencyReader:
@@ -50,9 +56,7 @@ class DependencyReader:
                 f"Dependency specs file {self.deps_file} is not supported."
             )
 
-        logger.info(
-            f"Found dependencies in {self.deps_file}: {', '.join(dep_names)}"
-        )
+        logger.info(f"Found dependencies in {self.deps_file}: {', '.join(dep_names)}")
         return dep_names
 
     @staticmethod
@@ -218,7 +222,7 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
     return imports_with_dupes_removed
 
 
-def get_installed_dependency_names(venv: Path) -> List[str] | None:
+def get_installed_dependency_names(venv: Path) -> List[str]:
     pkg_dir = "lib" if str(venv).split("/")[0] == "__pypackages__" else "site-packages"
     if not venv.exists():
         return []
