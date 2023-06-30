@@ -36,7 +36,9 @@ class DependencyReader:
         always_excluded_deps = ["python"]  # occurs in Poetry setup
         deps_to_exclude = always_excluded_deps + self.exclude_deps
 
-        if self.deps_file.endswith(".toml"):  # pyproject.toml expected
+        if self.deps_file.endswith(".toml") or self.deps_file.endswith(
+            "Pipfile"
+        ):  # pyproject.toml or Pipfile expected
             for dep_name in self.load_pyproject(self.deps_file, self.sections):
                 if dep_name not in deps_to_exclude:
                     dep_names.append(dep_name)
@@ -44,6 +46,7 @@ class DependencyReader:
             for dep_name in self.load_requirements(self.deps_file):
                 if dep_name not in deps_to_exclude:
                     dep_names.append(dep_name)
+
         else:
             raise NotImplementedError(
                 f"Dependency specs file {self.deps_file} is not supported."
@@ -73,7 +76,12 @@ class DependencyReader:
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
 
-    def load_pyproject(self, deps_file: str, sections: List[str]):
+    def load_pipfile(self, section_contents: Dict[str, str]):
+        if not isinstance(section_contents, dict):
+            raise TypeError("Unexpected dependency format, dict expected.")
+        return section_contents.keys()
+
+    def load_pyproject(self, deps_file: str, sections: List[str]) -> List[str]:
         """Read dependency names from pyproject.toml."""
         with open(deps_file, "r", encoding="utf-8") as infile:
             contents = toml.loads(infile.read())
@@ -95,7 +103,7 @@ class DependencyReader:
                 section_dep_names = self.load_pyproject_pep621(section_contents)
             elif section.startswith("packages") or section.startswith("dev-packages"):
                 logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
-                section_dep_names = self.load_pyproject_pep621(section_contents)
+                section_dep_names = self.load_pipfile(section_contents)
             elif section.startswith("tool.pdm"):
                 logger.debug(f"Detected PDM toml section in {deps_file}")
                 section_dep_names = self.load_pyproject_pep621(section_contents)
