@@ -1,6 +1,25 @@
+from typing import List
+
 import pytest
 
 from creosote.parsers import DependencyReader
+
+
+@pytest.mark.parametrize(
+    ["sections", "expected_dependencies"],
+    [
+        (["packages"], ["dotty-dict", "loguru", "toml"]),
+        (["dev-packages"], ["pytest"]),
+    ],
+)
+def test_read_toml_pipfile(sections: List[str], expected_dependencies: List[str]):
+    reader = DependencyReader(
+        deps_file="tests/deps_files/Pipfile",
+        sections=sections,
+        exclude_deps=[],
+    )
+    dependencies = reader.read()
+    assert dependencies == expected_dependencies
 
 
 @pytest.mark.parametrize(
