@@ -46,7 +46,6 @@ class DependencyReader:
             for dep_name in self.read_requirements(self.deps_file):
                 if dep_name not in deps_to_exclude:
                     dep_names.append(dep_name)
-
         else:
             raise NotImplementedError(
                 f"Dependency specs file {self.deps_file} is not supported."
@@ -58,35 +57,32 @@ class DependencyReader:
 
         return dep_names
 
-    def get_deps_from_pep621_toml(self, section_contents: List[str]) -> List[str]:
+    def get_deps_from_pep621_toml(
+        self, section_contents: Union[List[str], Dict[str, List[str]]]
+    ) -> List[str]:
         """Get dependency names from toml file using the PEP621 spec.
 
         The dependency strings are expected to follow PEP508.
         """
 
-        section_deps = []
-
+        dep_strings = []
         if isinstance(section_contents, list):
             for dep_string in section_contents:
-                parsed_dep = self.parse_dep_string(dep_string)
-                if parsed_dep:
-                    section_deps.append(parsed_dep)
-                else:
-                    logger.warning(f"Could not parse dependency string: {dep_string}")
-
+                dep_strings.append(dep_string)
         elif isinstance(section_contents, dict):
-            for group_name in section_contents:
-                for dep_string in section_contents[group_name]:
-                    parsed_dep = self.parse_dep_string(dep_string)
-                    if parsed_dep:
-                        section_deps.append(parsed_dep)
-                    else:
-                        logger.warning(
-                            f"Could not parse dependency string: {dep_string}"
-                        )
-
+            for _, dep_string_list in section_contents.items():
+                for dep_string in dep_string_list:
+                    dep_strings.append(dep_string)
         else:
             raise TypeError("Unexpected dependency format, list expected.")
+
+        section_deps = []
+        for dep_string in dep_strings:
+            parsed_dep = self.parse_dep_string(dep_string)
+            if parsed_dep:
+                section_deps.append(parsed_dep)
+            else:
+                logger.warning(f"Could not parse dependency string: {dep_string}")
 
         return section_deps
 
