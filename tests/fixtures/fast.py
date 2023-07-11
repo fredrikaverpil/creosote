@@ -27,7 +27,7 @@ def mock_dependencies_from_pyproject_toml(mocker: MockerFixture):
     def _(dependency_names: List[str]):
         # TODO: mock deeper down than this
         return mocker.patch(
-            "creosote.parsers.DependencyReader.load_pyproject",
+            "creosote.parsers.DependencyReader.read_toml",
             return_value=dependency_names,
         )
 

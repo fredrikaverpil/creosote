@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union, cast
+from typing import Dict, Generator, List, Union, cast
 
 import toml
 from dotty_dict import Dotty, dotty
@@ -39,11 +39,11 @@ class DependencyReader:
         if self.deps_file.endswith(".toml") or self.deps_file.endswith(
             "Pipfile"
         ):  # pyproject.toml or Pipfile expected
-            for dep_name in self.load_pyproject(self.deps_file, self.sections):
+            for dep_name in self.read_toml(self.deps_file, self.sections):
                 if dep_name not in deps_to_exclude:
                     dep_names.append(dep_name)
         elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
-            for dep_name in self.load_requirements(self.deps_file):
+            for dep_name in self.read_requirements(self.deps_file):
                 if dep_name not in deps_to_exclude:
                     dep_names.append(dep_name)
 
@@ -58,7 +58,11 @@ class DependencyReader:
 
         return dep_names
 
-    def load_pyproject_pep621(self, section_contents: List[str]) -> List[str]:
+    def get_deps_from_pep621_toml(self, section_contents: List[str]) -> List[str]:
+        """Get dependency names from toml file using the PEP621 spec.
+
+        The dependency strings are expected to follow PEP508.
+        """
         if not isinstance(section_contents, list):
             raise TypeError("Unexpected dependency format, list expected.")
 
@@ -71,18 +75,18 @@ class DependencyReader:
                 logger.warning(f"Could not parse dependency string: {dep_name}")
         return section_deps
 
-    def load_pyproject_poetry(self, section_contents: Dict[str, Any]):
+    def get_deps_from_toml_section_keys(
+        self,
+        section_contents: Dict[str, Union[str, Dict[str, str]]],
+    ):
+        """Get dependency names from toml section's dict keys."""
+        # NOTE: this function is used for both Poetry and Pipenv toml files
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
 
-    def load_pipfile(self, section_contents: Dict[str, str]):
-        if not isinstance(section_contents, dict):
-            raise TypeError("Unexpected dependency format, dict expected.")
-        return section_contents.keys()
-
-    def load_pyproject(self, deps_file: str, sections: List[str]) -> List[str]:
-        """Read dependency names from pyproject.toml."""
+    def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
+        """Read dependency names from toml spec file."""
         with open(deps_file, "r", encoding="utf-8") as infile:
             contents = toml.loads(infile.read())
 
@@ -100,16 +104,18 @@ class DependencyReader:
             section_dep_names = []
             if section.startswith("project"):
                 logger.debug(f"Detected PEP-621 toml section in {deps_file}")
-                section_dep_names = self.load_pyproject_pep621(section_contents)
-            elif section.startswith("packages") or section.startswith("dev-packages"):
-                logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
-                section_dep_names = self.load_pipfile(section_contents)
+                section_dep_names = self.get_deps_from_pep621_toml(section_contents)
             elif section.startswith("tool.pdm"):
                 logger.debug(f"Detected PDM toml section in {deps_file}")
-                section_dep_names = self.load_pyproject_pep621(section_contents)
+                section_dep_names = self.get_deps_from_pep621_toml(section_contents)
             elif section.startswith("tool.poetry"):
                 logger.debug(f"Detected Poetry toml section in {deps_file}")
-                section_dep_names = self.load_pyproject_poetry(
+                section_dep_names = self.get_deps_from_toml_section_keys(
+                    cast(dict, section_contents)
+                )
+            elif section.startswith("packages") or section.startswith("dev-packages"):
+                logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
+                section_dep_names = self.get_deps_from_toml_section_keys(
                     cast(dict, section_contents)
                 )
             else:
@@ -122,7 +128,7 @@ class DependencyReader:
 
         return sorted(dep_names)
 
-    def load_requirements(self, deps_file: str) -> List[str]:
+    def read_requirements(self, deps_file: str) -> List[str]:
         """Read dependency names from requirements.txt-format file."""
         dep_from_req = RequirementsFile.from_file(deps_file).requirements
         return sorted([dep.name for dep in dep_from_req if dep.name is not None])
