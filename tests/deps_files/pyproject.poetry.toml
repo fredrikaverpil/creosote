@@ -24,3 +24,4 @@ types-toml = "*"
 
 [tool.poetry.group.directrefs.dependencies]
 typing_extensions = { git = "https://github.com/python/typing_extensions.git", branch = "main" }
+

@@ -8,6 +8,65 @@ from creosote.parsers import DependencyReader
 @pytest.mark.parametrize(
     ["sections", "expected_dependencies"],
     [
+        (
+            ["project.dependencies"],
+            ["dotty-dict", "loguru", "toml"],
+        ),
+        (
+            ["project.optional-dependencies"],
+            [
+                "black",
+                "creosote",
+                "loguru-mypy",
+                "mypy",
+                "pytest",
+                "ruff",
+                "types-toml",
+                "typing_extensions",
+            ],
+        ),
+    ],
+)
+def test_read_toml_pep621(sections: List[str], expected_dependencies: List[str]):
+    reader = DependencyReader(
+        deps_file="tests/deps_files/pyproject.pep621.toml",
+        sections=sections,
+        exclude_deps=[],
+    )
+    dependencies = reader.read()
+    assert dependencies == expected_dependencies
+
+
+@pytest.mark.parametrize(
+    ["sections", "expected_dependencies"],
+    [
+        (
+            ["tool.poetry.dependencies"],
+            ["dotty-dict", "loguru", "toml"],
+        ),
+        (
+            ["tool.poetry.group.dev.dependencies"],
+            ["black", "loguru-mypy", "mypy", "pytest", "ruff", "types-toml"],
+        ),
+        (
+            ["tool.poetry.group.directrefs.dependencies"],
+            ["typing_extensions"],
+        ),
+    ],
+)
+def test_read_toml_poetry(sections: List[str], expected_dependencies: List[str]):
+    reader = DependencyReader(
+        deps_file="tests/deps_files/pyproject.poetry.toml",
+        sections=sections,
+        exclude_deps=[],
+    )
+    dependencies = reader.read()
+    assert dependencies == expected_dependencies
+
+
+@pytest.mark.parametrize(
+    ["sections", "expected_dependencies"],
+    [
         (["packages"], ["dotty-dict", "loguru", "toml"]),
         (["dev-packages"], ["pytest"]),
     ],
