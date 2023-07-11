@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Dict, Generator, List, Union, cast
+from typing import Any, Dict, Generator, List, Union, cast
 
 import toml
 from dotty_dict import Dotty, dotty
@@ -63,24 +63,38 @@ class DependencyReader:
 
         The dependency strings are expected to follow PEP508.
         """
-        if not isinstance(section_contents, list):
-            raise TypeError("Unexpected dependency format, list expected.")
 
         section_deps = []
-        for dep_name in section_contents:
-            parsed_dep = self.parse_dep_string(dep_name)
-            if parsed_dep:
-                section_deps.append(parsed_dep)
-            else:
-                logger.warning(f"Could not parse dependency string: {dep_name}")
+
+        if isinstance(section_contents, list):
+            for dep_string in section_contents:
+                parsed_dep = self.parse_dep_string(dep_string)
+                if parsed_dep:
+                    section_deps.append(parsed_dep)
+                else:
+                    logger.warning(f"Could not parse dependency string: {dep_string}")
+
+        elif isinstance(section_contents, dict):
+            for group_name in section_contents:
+                for dep_string in section_contents[group_name]:
+                    parsed_dep = self.parse_dep_string(dep_string)
+                    if parsed_dep:
+                        section_deps.append(parsed_dep)
+                    else:
+                        logger.warning(
+                            f"Could not parse dependency string: {dep_string}"
+                        )
+
+        else:
+            raise TypeError("Unexpected dependency format, list expected.")
+
         return section_deps
 
     def get_deps_from_toml_section_keys(
         self,
-        section_contents: Dict[str, Union[str, Dict[str, str]]],
+        section_contents: Dict[str, Any],
     ):
         """Get dependency names from toml section's dict keys."""
-        # NOTE: this function is used for both Poetry and Pipenv toml files
         if not isinstance(section_contents, dict):
             raise TypeError("Unexpected dependency format, dict expected.")
         return section_contents.keys()
