@@ -166,7 +166,7 @@ class DepsResolver:
 
     def associate_dep_with_import(self, dep_info: DependencyInfo, import_name: str):
         for imp in self.imports.copy():
-            if not imp.module and import_name in imp.name:  # noqa: SIM114
+            if not imp.module and import_name in imp.name:
                 # import <imp.name>
                 dep_info.associated_imports.append(imp)
 
