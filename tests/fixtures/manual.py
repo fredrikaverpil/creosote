@@ -24,6 +24,7 @@ def with_poetry_packages(_stash_away_project_toml, capsys, request):
         subprocess.run(
             ["poetry", "add", *request.param],  # noqa: S603, S607
             stdout=subprocess.DEVNULL,
+            check=True,
         )
     try:
         yield
@@ -32,6 +33,7 @@ def with_poetry_packages(_stash_away_project_toml, capsys, request):
             subprocess.run(
                 ["poetry", "remove", *request.param],  # noqa: S603, S607
                 stdout=subprocess.DEVNULL,
+                check=True,
             )
             pathlib.Path("poetry.lock").unlink()
             Path(repo_root / "pyproject.toml").rename(
@@ -49,6 +51,7 @@ def with_pyproject_pep621_packages(_stash_away_project_toml, capsys, request):
         subprocess.run(
             ["pip", "install", *request.param],  # noqa: S603, S607
             stdout=subprocess.DEVNULL,
+            check=True,
         )
     try:
         yield
@@ -57,6 +60,7 @@ def with_pyproject_pep621_packages(_stash_away_project_toml, capsys, request):
             subprocess.run(
                 ["pip", "uninstall", "-y", *request.param],  # noqa: S603, S607
                 stdout=subprocess.DEVNULL,
+                check=True,
             )
             Path(repo_root / "pyproject.toml").rename(
                 deps_files / "pyproject.pep621.toml"
@@ -73,6 +77,7 @@ def with_requirements_txt_packages(_stash_away_project_toml, capsys, request):
         subprocess.run(
             ["pip", "install", *request.param],  # noqa: S603, S607
             stdout=subprocess.DEVNULL,
+            check=True,
         )
     try:
         yield
@@ -81,5 +86,6 @@ def with_requirements_txt_packages(_stash_away_project_toml, capsys, request):
             subprocess.run(
                 ["pip", "uninstall", "-y", *request.param],  # noqa: S603, S607
                 stdout=subprocess.DEVNULL,
+                check=True,
             )
             Path(repo_root / "requirements.txt").rename(deps_files / "requirements.txt")
