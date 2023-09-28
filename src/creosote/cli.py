@@ -1,12 +1,49 @@
 import argparse
-import glob
+import dataclasses
 import sys
+import toml
+import typing
+
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import List, Literal
 
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
 from creosote.__about__ import __version__
+
+
+@dataclass
+class Config:
+    """Structured configuration data.
+
+    It is important that these attributes exactly match
+    the ``dest`` specified in ``add_argument``.
+    """
+    format: Literal["default", "no-color", "porcelain"] = "default"
+    paths: List[str] = field(default_factory=lambda: ["src"])
+    sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
+    exclude_deps: List[str] = field(default_factory=list)
+    deps_file: str = "pyproject.toml"
+    venvs: List[str] = field(default_factory=lambda: [".venv"])
+    features: List[str] = field(default_factory=list)
+
+
+def load_defaults(src="pyproject.toml") -> Config:
+    """Load pyproject.toml defaults form user config.
+
+    Expects user configuration at ``[tool.creosote]``.
+    """
+    with open(src, "r", encoding="utf-8") as f:
+        project_config = toml.loads(f.read())
+    creosote_config = project_config.get("tool", {}).get("creosote", {})
+    # Convert all hyphens to underscores
+    creosote_config = {
+        k.replace("-", "_"): v
+        for k, v in creosote_config.items()
+    }
+    return Config(**creosote_config)
 
 
 class Features(Enum):
@@ -44,7 +81,7 @@ class CustomAppendAction(argparse.Action):
         self.called_times += 1
 
 
-def parse_args(args):
+def parse_args(args: List, defaults: Config):
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
@@ -70,8 +107,7 @@ def parse_args(args):
         "-f",
         "--format",
         dest="format",
-        default="default",
-        choices=["default", "no-color", "porcelain"],
+        choices=typing.get_args(defaults.__annotations__['format']),
         help="output format",
     )
     parser.add_argument(
@@ -80,7 +116,6 @@ def parse_args(args):
         dest="paths",
         metavar="PATH",
         action=CustomAppendAction,
-        default=["src"],
         help="path(s) to Python source code to scan for imports",
     )
     parser.add_argument(
@@ -89,7 +124,6 @@ def parse_args(args):
         dest="sections",
         metavar="TOML_SECTION",
         action=CustomAppendAction,
-        default=["project.dependencies"],
         help="pyproject.toml section(s) to scan for dependencies",
     )
     parser.add_argument(
@@ -97,7 +131,6 @@ def parse_args(args):
         dest="exclude_deps",
         metavar="DEPENDENCY",
         action="append",
-        default=[],
         help="dependency(ies) to exclude from the scan",
     )
     parser.add_argument(
@@ -105,7 +138,6 @@ def parse_args(args):
         "--deps-file",
         dest="deps_file",
         metavar="PATH",
-        default="pyproject.toml",
         help="path to the pyproject.toml or requirements[.txt|.in] file",
     )
     parser.add_argument(
@@ -114,7 +146,6 @@ def parse_args(args):
         dest="venvs",
         metavar="PATH",
         action=CustomAppendAction,
-        default=[".venv"],
         help="path(s) to the virtual environment (or site-packages)",
     )
     parser.add_argument(
@@ -123,12 +154,12 @@ def parse_args(args):
         metavar="FEATURE",
         action="append",
         choices=[v.value for v in Features.__members__.values()],
-        default=[],
         help=(
             "enable new/experimental functionality, "
             "that may be backward incompatible"
         ),
     )
+    parser.set_defaults(**dataclasses.asdict(defaults))
 
     parsed_args = parser.parse_args(args)
 
@@ -136,7 +167,7 @@ def parse_args(args):
 
 
 def main(args_=None):
-    args = parse_args(args_)
+    args = parse_args(args_, defaults=load_defaults())
 
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 

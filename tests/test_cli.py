@@ -153,8 +153,6 @@ def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
     """Excluded dependency is used but never imported by source code."""
     mock_dependencies_from_pyproject_toml(dependency_names=["hello", "bye"])
     mock_imports_from_source_code(import_names=["hello"])
-    excluded_dependencies = "bye"
-    excluded_dependencies = ["bye",]
 
     venv_path, _site_packages_path = create_venv
     expected_unused_packages: List[str] = []
