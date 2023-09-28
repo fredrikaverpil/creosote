@@ -111,7 +111,6 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
     """Excluded dependency is used but never imported by source code."""
     mock_dependencies_from_pyproject_toml(dependency_names=["hello", "bye"])
     mock_imports_from_source_code(import_names=["hello"])
-    excluded_dependencies = "bye"
 
     venv_path, _top_level_txt_path = venv_with_top_level_txt(
         dependency_name="hello", contents=["hello"]
@@ -123,8 +122,8 @@ def test_detected_indirectly_used_but_not_imported_and_excluded(
         [
             "--venv",
             str(venv_path),
-            "--exclude-deps",
-            excluded_dependencies,
+            "--exclude-dep",
+            "bye",
             "--format",
             "porcelain",
         ]
@@ -155,6 +154,7 @@ def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
     mock_dependencies_from_pyproject_toml(dependency_names=["hello", "bye"])
     mock_imports_from_source_code(import_names=["hello"])
     excluded_dependencies = "bye"
+    excluded_dependencies = ["bye",]
 
     venv_path, _site_packages_path = create_venv
     expected_unused_packages: List[str] = []
@@ -162,8 +162,8 @@ def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
     args = [
         "--venv",
         str(venv_path),
-        "--exclude-deps",
-        excluded_dependencies,
+        "--exclude-dep",
+        "bye",
         "--format",
         "porcelain",
     ]
