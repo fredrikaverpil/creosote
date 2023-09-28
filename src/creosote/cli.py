@@ -13,7 +13,6 @@ class Features(Enum):
     """Features that can be enabled via the --use-feature flag."""
 
     FAIL_EXCLUDED_AND_NOT_INSTALLED = "fail-excluded-and-not-installed"
-    ARGS_CAN_BE_SPECIFIED_MULTIPLE_TIMES = "v3-args"
 
 
 class CustomAppendAction(argparse.Action):
@@ -75,63 +74,32 @@ def parse_args(args):
         choices=["default", "no-color", "porcelain"],
         help="output format",
     )
-
-    if Features.ARGS_CAN_BE_SPECIFIED_MULTIPLE_TIMES.value in sys.argv:
-        # v3.0 behavior
-        parser.add_argument(
-            "-p",
-            "--path",
-            dest="paths",
-            metavar="PATH",
-            action=CustomAppendAction,
-            default=["src"],
-            help="path(s) to Python source code to scan for imports",
-        )
-        parser.add_argument(
-            "-s",
-            "--section",
-            dest="sections",
-            metavar="TOML_SECTION",
-            action=CustomAppendAction,
-            default=["project.dependencies"],
-            help="pyproject.toml section(s) to scan for dependencies",
-        )
-        parser.add_argument(
-            "--exclude-dep",
-            dest="exclude_deps",
-            metavar="DEPENDENCY",
-            action="append",
-            default=[],
-            help="dependency(ies) to exclude from the scan",
-        )
-    else:
-        # v2.x behavior
-        parser.add_argument(
-            "-p",
-            "--paths",
-            dest="paths",
-            default=glob.glob("src"),
-            nargs="*",
-            help="paths(s) to Python source code to scan for imports",
-        )
-        parser.add_argument(
-            "-s",
-            "--sections",
-            dest="sections",
-            metavar="TOML_SECTION",
-            nargs="*",
-            default=["project.dependencies"],
-            help="pyproject.toml section(s) to scan for dependencies",
-        )
-        parser.add_argument(
-            "--exclude-deps",
-            dest="exclude_deps",
-            metavar="DEPENDENCY",
-            nargs="*",
-            default=[],
-            help="dependencies to exclude from the scan",
-        )
-
+    parser.add_argument(
+        "-p",
+        "--path",
+        dest="paths",
+        metavar="PATH",
+        action=CustomAppendAction,
+        default=["src"],
+        help="path(s) to Python source code to scan for imports",
+    )
+    parser.add_argument(
+        "-s",
+        "--section",
+        dest="sections",
+        metavar="TOML_SECTION",
+        action=CustomAppendAction,
+        default=["project.dependencies"],
+        help="pyproject.toml section(s) to scan for dependencies",
+    )
+    parser.add_argument(
+        "--exclude-dep",
+        dest="exclude_deps",
+        metavar="DEPENDENCY",
+        action="append",
+        default=[],
+        help="dependency(ies) to exclude from the scan",
+    )
     parser.add_argument(
         "-d",
         "--deps-file",
