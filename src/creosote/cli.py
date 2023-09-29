@@ -1,13 +1,12 @@
 import argparse
 import dataclasses
 import sys
-import toml
 import typing
-
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Literal
 
+import toml
 from loguru import logger
 
 from creosote import formatters, parsers, resolvers
@@ -21,7 +20,8 @@ class Config:
     It is important that these attributes exactly match
     the ``dest`` specified in ``add_argument``.
     """
-    format: Literal["default", "no-color", "porcelain"] = "default"
+
+    format: Literal["default", "no-color", "porcelain"] = "default"  # noqa: A003
     paths: List[str] = field(default_factory=lambda: ["src"])
     sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
     exclude_deps: List[str] = field(default_factory=list)
@@ -39,10 +39,7 @@ def load_defaults(src="pyproject.toml") -> Config:
         project_config = toml.loads(f.read())
     creosote_config = project_config.get("tool", {}).get("creosote", {})
     # Convert all hyphens to underscores
-    creosote_config = {
-        k.replace("-", "_"): v
-        for k, v in creosote_config.items()
-    }
+    creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
     return Config(**creosote_config)
 
 
@@ -107,7 +104,7 @@ def parse_args(args: List, defaults: Config):
         "-f",
         "--format",
         dest="format",
-        choices=typing.get_args(defaults.__annotations__['format']),
+        choices=typing.get_args(defaults.__annotations__["format"]),
         help="output format",
     )
     parser.add_argument(
