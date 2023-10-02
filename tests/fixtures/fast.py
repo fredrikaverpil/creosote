@@ -37,7 +37,7 @@ def mock_dependencies_from_pyproject_toml(mocker: MockerFixture):
 @pytest.fixture()
 def create_venv(tmp_path: Path) -> Generator[Tuple[Path, Path], None, None]:
     venv_path = tmp_path / "venv"
-    site_packages_path = venv_path / "lib" / "python3.7" / "site-packages"
+    site_packages_path = venv_path / "lib" / "python3.8" / "site-packages"
     site_packages_path.mkdir(parents=True)
     yield venv_path, site_packages_path
 
