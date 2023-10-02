@@ -2,7 +2,7 @@
 name = "creosote"
 version = "0.0.1"
 description = 'This file is only used for testing with creosote.'
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = []
