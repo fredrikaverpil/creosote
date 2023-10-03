@@ -50,7 +50,7 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
     if creosote_config:
         logger.debug(f"Loaded creosote config: {creosote_config}")
     else:
-        logger.debug(f"Empty/missing [tool.creosote] section.")
+        logger.debug("Empty/missing [tool.creosote] section.")
     # Convert all hyphens to underscores
     creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
     return Config(**creosote_config)
