@@ -1,5 +1,6 @@
 import argparse
 import dataclasses
+import os
 import sys
 import typing
 from dataclasses import dataclass, field
@@ -26,7 +27,7 @@ class Config:
     sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
     exclude_deps: List[str] = field(default_factory=list)
     deps_file: str = "pyproject.toml"
-    venvs: List[str] = field(default_factory=lambda: [".venv"])
+    venvs: List[str] = field(default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")])
     features: List[str] = field(default_factory=list)
 
 
