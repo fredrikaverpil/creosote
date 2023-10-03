@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Callable, List, Tuple
 
+import os
 import pytest
 from _pytest.capture import CaptureFixture
 
@@ -179,3 +180,16 @@ def test_load_defaults_no_file(tmp_path):
     missing_pyproject = tmp_path / "pyproject.toml"
     config = cli.load_defaults(missing_pyproject)
     assert config == cli.Config()  # Should return a default config
+
+
+def test_load_defaults_no_venv():
+    # Unset VIRTUAL_ENV environment variable
+    os.environ.pop('VIRTUAL_ENV', None)
+    config = cli.Config()
+    assert config.venvs == [".venv"]
+
+
+def test_load_defaults_set_venv():
+    os.environ['VIRTUAL_ENV'] = "foo"
+    config = cli.Config()
+    assert config.venvs == ["foo"]
