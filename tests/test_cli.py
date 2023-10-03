@@ -173,3 +173,9 @@ def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
 
     assert captured.out.splitlines() == expected_unused_packages
     assert exit_code == expected_exit_code
+
+
+def test_load_defaults_no_file(tmp_path):
+    missing_pyproject = tmp_path / "pyproject.toml"
+    config = cli.load_defaults(missing_pyproject)
+    assert config == cli.Config()  # Should return a default config

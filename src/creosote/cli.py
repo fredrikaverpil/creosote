@@ -35,8 +35,11 @@ def load_defaults(src="pyproject.toml") -> Config:
 
     Expects user configuration at ``[tool.creosote]``.
     """
-    with open(src, "r", encoding="utf-8") as f:
-        project_config = toml.loads(f.read())
+    try:
+        with open(src, "r", encoding="utf-8") as f:
+            project_config = toml.loads(f.read())
+    except FileNotFoundError:
+        project_config = {}
     creosote_config = project_config.get("tool", {}).get("creosote", {})
     # Convert all hyphens to underscores
     creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
