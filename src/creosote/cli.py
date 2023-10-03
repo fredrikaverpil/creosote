@@ -31,7 +31,7 @@ class Config:
     features: List[str] = field(default_factory=list)
 
 
-def load_defaults(src="pyproject.toml") -> Config:
+def load_defaults(src: str = "pyproject.toml") -> Config:
     """Load pyproject.toml defaults form user config.
 
     Expects user configuration at ``[tool.creosote]``.
@@ -116,7 +116,7 @@ def parse_args(args: List, defaults: Config):
         "--path",
         dest="paths",
         metavar="PATH",
-        action=CustomAppendAction,
+        action=CustomAppendAction,  # TODO: add tests for v3-args before releasing 3.0.0
         help="path(s) to Python source code to scan for imports",
     )
     parser.add_argument(
@@ -124,14 +124,14 @@ def parse_args(args: List, defaults: Config):
         "--section",
         dest="sections",
         metavar="TOML_SECTION",
-        action=CustomAppendAction,
+        action=CustomAppendAction,  # TODO: add tests for v3-args before releasing 3.0.0
         help="pyproject.toml section(s) to scan for dependencies",
     )
     parser.add_argument(
         "--exclude-dep",
         dest="exclude_deps",
         metavar="DEPENDENCY",
-        action="append",
+        action="append",  # TODO: add tests for v3-args before releasing 3.0.0
         help="dependency(ies) to exclude from the scan",
     )
     parser.add_argument(
