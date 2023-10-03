@@ -153,33 +153,37 @@ def configure_parser(parser: argparse.ArgumentParser, defaults: Config) -> None:
 
 
 def main(args_=None):
-    parser = argparse.ArgumentParser(
-        description=(
-            "Prevent bloated virtual environments by identifing installed, "
-            "but unused, dependencies"
-        ),
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    init_parser = argparse.ArgumentParser(
+        add_help=False,
     )
     # Immediately parse verbosity
-    parser.add_argument(
+    init_parser.add_argument(
         "--verbose",
         dest="verbose",
         action="store_true",
         help="increase output verbosity",
     )
-    parser.add_argument(
+    init_parser.add_argument(
         "-f",
         "--format",
         dest="format",
         choices=typing.get_args(Config.__annotations__["format"]),
         help="output format",
     )
-    args, _ = parser.parse_known_args(args_)
+    args, _ = init_parser.parse_known_args(args_)
 
     # Configure logger early
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
     # Now that the logger is configured, configure the rest of the parser.
+    parser = argparse.ArgumentParser(
+        description=(
+            "Prevent bloated virtual environments by identifing installed, "
+            "but unused, dependencies"
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        parents=[init_parser],
+    )
     configure_parser(parser, defaults=load_defaults())
     args = parser.parse_args(args_)
 
