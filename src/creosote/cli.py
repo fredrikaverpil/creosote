@@ -27,7 +27,9 @@ class Config:
     sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
     exclude_deps: List[str] = field(default_factory=list)
     deps_file: str = "pyproject.toml"
-    venvs: List[str] = field(default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")])
+    venvs: List[str] = field(
+        default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")]
+    )
     features: List[str] = field(default_factory=list)
 
 
@@ -36,12 +38,19 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
 
     Expects user configuration at ``[tool.creosote]``.
     """
+    logger.debug(f"Attempting to load configuration from {src}")
     try:
         with open(src, "r", encoding="utf-8") as f:
             project_config = toml.loads(f.read())
+        logger.debug(f"{src} configuration loaded.")
     except FileNotFoundError:
+        logger.debug(f"{src} configuration file not found.")
         project_config = {}
     creosote_config = project_config.get("tool", {}).get("creosote", {})
+    if creosote_config:
+        logger.debug(f"Loaded creosote config: {creosote_config}")
+    else:
+        logger.debug(f"Empty/missing [tool.creosote] section.")
     # Convert all hyphens to underscores
     creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
     return Config(**creosote_config)
@@ -82,14 +91,7 @@ class CustomAppendAction(argparse.Action):
         self.called_times += 1
 
 
-def parse_args(args: List, defaults: Config):
-    parser = argparse.ArgumentParser(
-        description=(
-            "Prevent bloated virtual environments by identifing installed, "
-            "but unused, dependencies"
-        ),
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
+def configure_parser(parser: argparse.ArgumentParser, defaults: Config) -> None:
     parser.add_argument(
         "-V",
         "--version",
@@ -97,19 +99,6 @@ def parse_args(args: List, defaults: Config):
         action="version",
         version=__version__,
         help="show version and exit",
-    )
-    parser.add_argument(
-        "--verbose",
-        dest="verbose",
-        action="store_true",
-        help="increase output verbosity",
-    )
-    parser.add_argument(
-        "-f",
-        "--format",
-        dest="format",
-        choices=typing.get_args(defaults.__annotations__["format"]),
-        help="output format",
     )
     parser.add_argument(
         "-p",
@@ -162,15 +151,37 @@ def parse_args(args: List, defaults: Config):
     )
     parser.set_defaults(**dataclasses.asdict(defaults))
 
-    parsed_args = parser.parse_args(args)
-
-    return parsed_args
-
 
 def main(args_=None):
-    args = parse_args(args_, defaults=load_defaults())
+    parser = argparse.ArgumentParser(
+        description=(
+            "Prevent bloated virtual environments by identifing installed, "
+            "but unused, dependencies"
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    # Immediately parse verbosity
+    parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="increase output verbosity",
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        dest="format",
+        choices=typing.get_args(Config.__annotations__["format"]),
+        help="output format",
+    )
+    args, _ = parser.parse_known_args(args_)
 
+    # Configure logger early
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
+
+    # Now that the logger is configured, configure the rest of the parser.
+    configure_parser(parser, defaults=load_defaults())
+    args = parser.parse_args(args_)
 
     logger.debug(f"Creosote version: {__version__}")
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
