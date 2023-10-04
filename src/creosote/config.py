@@ -99,7 +99,7 @@ def parse_args(args):
         "--path",
         dest="paths",
         metavar="PATH",
-        action=CustomAppendAction,  # TODO: add tests for v3-args before releasing 3.0.0
+        action=CustomAppendAction,
         help="path(s) to Python source code to scan for imports",
     )
     parser.add_argument(
@@ -107,14 +107,14 @@ def parse_args(args):
         "--section",
         dest="sections",
         metavar="TOML_SECTION",
-        action=CustomAppendAction,  # TODO: add tests for v3-args before releasing 3.0.0
+        action=CustomAppendAction,
         help="pyproject.toml section(s) to scan for dependencies",
     )
     parser.add_argument(
         "--exclude-dep",
         dest="exclude_deps",
         metavar="DEPENDENCY",
-        action="append",  # TODO: add tests for v3-args before releasing 3.0.0
+        action="append",
         help="dependency(ies) to exclude from the scan",
     )
     parser.add_argument(
