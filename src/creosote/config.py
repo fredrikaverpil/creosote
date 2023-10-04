@@ -1,12 +1,14 @@
 import argparse
 import dataclasses
 import os
+import sys
 import typing
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Literal
 
 import toml
+from loguru import logger
 
 from creosote.__about__ import __version__
 
@@ -65,7 +67,24 @@ class CustomAppendAction(argparse.Action):
         self.called_times += 1
 
 
+def show_migration_message():
+    """Show warning if you are using v2.x args with v3.x code."""
+
+    args = sys.argv[1:]
+    outdated_args = ["--exclude-deps", "--paths", "--sections"]
+    for outdated_arg in outdated_args:
+        if outdated_arg in args:
+            logger.error(
+                "Creosote was updated to v3.x with breaking changes. "
+                "You need to update your CLI arguments. "
+                "See the migration guide at https://github.com/fredrikaverpil/creosote"
+            )
+            sys.exit(1)
+
+
 def parse_args(args):
+    show_migration_message()
+
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
