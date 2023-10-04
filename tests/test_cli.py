@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple
 import pytest
 from _pytest.capture import CaptureFixture
 
-from creosote import cli
+from creosote import cli, config
 
 
 def test_no_unused_and_found_in_top_level_txt(
@@ -178,46 +178,48 @@ def test_unused_found_because_excluded_but_not_installed(  # noqa: PLR0913
 
 def test_load_defaults_no_file(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
-    config = cli.load_defaults(pyproject)
-    assert config == cli.Config()  # Should return a default config
+    configuration = config.load_defaults(pyproject)
+    assert configuration == config.Config()  # Should return a default config
 
 
 def test_load_defaults_no_tool_section(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[foo]")
-    config = cli.load_defaults(pyproject)
-    assert config == cli.Config()  # Should return a default config
+    configuration = config.load_defaults(pyproject)
+    assert configuration == config.Config()  # Should return a default config
 
 
 def test_load_defaults_no_tool_creosote_section(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.foo]")
-    config = cli.load_defaults(pyproject)
-    assert config == cli.Config()  # Should return a default config
+    configuration = config.load_defaults(pyproject)
+    assert configuration == config.Config()  # Should return a default config
 
 
 def test_load_defaults_tool_creosote_section_simple(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text('[tool.creosote]\nvenvs=["foo"]')
-    config = cli.load_defaults(pyproject)
-    assert config == cli.Config(venvs=["foo"])
+    configuration = config.load_defaults(pyproject)
+    assert configuration == config.Config(venvs=["foo"])
 
 
 def test_load_defaults_tool_creosote_section_complex(tmp_path):
     """More close to a real configuration."""
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text(
-        """[tool.creosote]
-venvs=[".virtual_environment"]
-paths=["src"]
-deps-file="requirements.txt"
-exclude-deps=[
-  "importlib_resources",
-  "pydantic",
-]"""
+        """
+        [tool.creosote]
+        venvs=[".virtual_environment"]
+        paths=["src"]
+        deps-file="requirements.txt"
+        exclude-deps=[
+            "importlib_resources",
+            "pydantic",
+        ]
+    """
     )
-    config = cli.load_defaults(pyproject)
-    assert config == cli.Config(
+    configuration = config.load_defaults(pyproject)
+    assert configuration == config.Config(
         venvs=[".virtual_environment"],
         paths=["src"],
         deps_file="requirements.txt",
@@ -231,11 +233,11 @@ exclude-deps=[
 def test_load_defaults_no_venv():
     # Unset VIRTUAL_ENV environment variable
     os.environ.pop("VIRTUAL_ENV", None)
-    config = cli.Config()
-    assert config.venvs == [".venv"]
+    configuration = config.Config()
+    assert configuration.venvs == [".venv"]
 
 
 def test_load_defaults_set_venv():
     os.environ["VIRTUAL_ENV"] = "foo"
-    config = cli.Config()
-    assert config.venvs == ["foo"]
+    configuration = config.Config()
+    assert configuration.venvs == ["foo"]
