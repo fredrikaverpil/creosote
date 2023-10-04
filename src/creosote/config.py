@@ -1,5 +1,4 @@
 import argparse
-import dataclasses
 import os
 import sys
 import typing
@@ -85,6 +84,8 @@ def show_migration_message():
 def parse_args(args):
     show_migration_message()
 
+    defaults = load_defaults()
+
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
@@ -103,6 +104,7 @@ def parse_args(args):
         "--format",
         dest="format",
         choices=typing.get_args(Config.__annotations__["format"]),
+        default=defaults.format,
         help="output format",
     )
     parser.add_argument(
@@ -119,6 +121,7 @@ def parse_args(args):
         dest="paths",
         metavar="PATH",
         action=CustomAppendAction,
+        default=defaults.paths,
         help="path(s) to Python source code to scan for imports",
     )
     parser.add_argument(
@@ -127,6 +130,7 @@ def parse_args(args):
         dest="sections",
         metavar="TOML_SECTION",
         action=CustomAppendAction,
+        default=defaults.sections,
         help="pyproject.toml section(s) to scan for dependencies",
     )
     parser.add_argument(
@@ -134,6 +138,7 @@ def parse_args(args):
         dest="exclude_deps",
         metavar="DEPENDENCY",
         action="append",
+        default=defaults.exclude_deps,
         help="dependency(ies) to exclude from the scan",
     )
     parser.add_argument(
@@ -141,6 +146,7 @@ def parse_args(args):
         "--deps-file",
         dest="deps_file",
         metavar="PATH",
+        default=defaults.deps_file,
         help="path to the pyproject.toml or requirements[.txt|.in] file",
     )
     parser.add_argument(
@@ -149,6 +155,7 @@ def parse_args(args):
         dest="venvs",
         metavar="PATH",
         action=CustomAppendAction,
+        default=defaults.venvs,
         help="path(s) to the virtual environment (or site-packages)",
     )
     parser.add_argument(
@@ -157,14 +164,13 @@ def parse_args(args):
         metavar="FEATURE",
         action="append",
         choices=[v.value for v in Features.__members__.values()],
+        default=defaults.features,
         help=(
             "enable new/experimental functionality, "
             "that may be backward incompatible"
         ),
     )
 
-    defaults = load_defaults()
-    parser.set_defaults(**dataclasses.asdict(defaults))
     parsed_args = parser.parse_args(args)
     return parsed_args, defaults
 
