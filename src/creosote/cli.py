@@ -4,16 +4,18 @@ from loguru import logger
 
 from creosote import formatters, parsers, resolvers
 from creosote.__about__ import __version__
-from creosote.config import Features, parse_args, parse_args_for_formatting
+from creosote.config import Features, parse_args
 
 
 def main(args_=None):
-    init_parser, fmt_args = parse_args_for_formatting(args_)
-    formatters.configure_logger(verbose=fmt_args.verbose, format_=fmt_args.format)
-    args = parse_args(init_parser, args_)
+    args, default_config = parse_args(args_)
+    formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
     logger.debug(f"Creosote version: {__version__}")
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
+    logger.debug(
+        f"Default configuration (may have loaded pyproject.toml): {default_config}"
+    )
     logger.debug(f"Arguments: {args}")
 
     if args.features:
