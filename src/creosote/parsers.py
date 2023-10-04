@@ -246,7 +246,11 @@ def get_excluded_deps_which_are_not_installed(
     if not excluded_deps:
         return dependency_names
 
-    for excluded_dep_name in excluded_deps:
+    excluded_deps_canonicalized = [
+        canonicalize_module_name(arg) for arg in excluded_deps
+    ]
+
+    for excluded_dep_name in excluded_deps_canonicalized:
         for venv in venvs:
             if excluded_dep_name not in get_installed_dependency_names(venv):
                 dependency_names.append(excluded_dep_name)
@@ -259,3 +263,7 @@ def get_excluded_deps_which_are_not_installed(
             f"{', '.join(dependency_names)}"
         )
     return dependency_names
+
+
+def canonicalize_module_name(module_name: str) -> str:
+    return module_name.replace("-", "_").replace(".", "_").strip()
