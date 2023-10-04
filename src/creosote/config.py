@@ -1,7 +1,6 @@
 import argparse
 import dataclasses
 import os
-import sys
 import typing
 from dataclasses import dataclass, field
 from enum import Enum
@@ -10,7 +9,6 @@ from typing import List, Literal
 import toml
 from loguru import logger
 
-from creosote import formatters, parsers, resolvers
 from creosote.__about__ import __version__
 
 
