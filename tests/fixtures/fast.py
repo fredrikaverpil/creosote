@@ -58,6 +58,25 @@ def venv_with_top_level_txt(
 
 
 @pytest.fixture()
+def venv_with_top_level_txts(
+    create_venv: Tuple[Path, Path]
+) -> Generator[Callable, None, None]:
+    def _(dependency_names: List[str], contents: List[str]) -> Tuple[Path, List[Path]]:
+        venv_path, site_packages_path = create_venv
+
+        top_level_txt_paths = []
+        for dependency_name in dependency_names:
+            dist_info_path = site_packages_path / f"{dependency_name}-1.2.3.dist-info"
+            dist_info_path.mkdir(parents=True)
+            top_level_txt_path = dist_info_path / "top_level.txt"
+            top_level_txt_path.write_text("\n".join(contents))
+            top_level_txt_paths.append(top_level_txt_path)
+        return venv_path, top_level_txt_paths
+
+    yield _
+
+
+@pytest.fixture()
 def venv_with_record(create_venv: Tuple[Path, Path]) -> Generator[Callable, None, None]:
     def _(dependency_name: str, contents: List[str]) -> Tuple[Path, Path]:
         venv_path, site_packages_path = create_venv

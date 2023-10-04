@@ -103,6 +103,43 @@ def test_unused_found(
     assert exit_code == 1
 
 
+def test_multiple_args(
+    capsys: CaptureFixture,
+    mock_dependencies_from_pyproject_toml: Callable,
+    venv_with_top_level_txts: Callable,
+):
+    """Excluded dependency is used but never imported by source code."""
+    mock_dependencies_from_pyproject_toml(dependency_names=["foo", "bar"])
+
+    venv_path, _top_level_txt_path = venv_with_top_level_txts(
+        dependency_names=["foo", "bar"], contents=["baz"]
+    )
+
+    expected_unused_packages: List[str] = []
+
+    exit_code = cli.main(
+        [
+            "--venv",
+            str(venv_path),
+            "--path",
+            "src/creosote/cli.py",
+            "--path",
+            "src/creosote/config.py",
+            "--exclude-dep",
+            "foo",
+            "--exclude-dep",
+            "bar",
+            "--format",
+            "porcelain",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert captured.out.splitlines() == expected_unused_packages
+    assert exit_code == 0
+
+
 def test_detected_indirectly_used_but_not_imported_and_excluded(
     capsys: CaptureFixture,
     mock_dependencies_from_pyproject_toml: Callable,
