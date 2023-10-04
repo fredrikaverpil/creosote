@@ -7,7 +7,6 @@ from enum import Enum
 from typing import List, Literal
 
 import toml
-from loguru import logger
 
 from creosote.__about__ import __version__
 
@@ -66,38 +65,27 @@ class CustomAppendAction(argparse.Action):
         self.called_times += 1
 
 
-def parse_args_for_formatting(args):
-    init_parser = argparse.ArgumentParser(
-        add_help=False,
-    )
-    # Immediately parse verbosity
-    init_parser.add_argument(
-        "--verbose",
-        dest="verbose",
-        action="store_true",
-        help="increase output verbosity",
-    )
-    init_parser.add_argument(
-        "-f",
-        "--format",
-        dest="format",
-        choices=typing.get_args(Config.__annotations__["format"]),
-        help="output format",
-    )
-    fmt_args, _ = init_parser.parse_known_args(args)
-    return init_parser, fmt_args
-
-
-def parse_args(init_parser: argparse.ArgumentParser, args):
+def parse_args(args):
     parser = argparse.ArgumentParser(
         description=(
             "Prevent bloated virtual environments by identifing installed, "
             "but unused, dependencies"
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        parents=[init_parser],
     )
-
+    parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="increase output verbosity",
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        dest="format",
+        choices=typing.get_args(Config.__annotations__["format"]),
+        help="output format",
+    )
     parser.add_argument(
         "-V",
         "--version",
@@ -159,7 +147,7 @@ def parse_args(init_parser: argparse.ArgumentParser, args):
     defaults = load_defaults()
     parser.set_defaults(**dataclasses.asdict(defaults))
     parsed_args = parser.parse_args(args)
-    return parsed_args
+    return parsed_args, defaults
 
 
 def load_defaults(src: str = "pyproject.toml") -> Config:
@@ -167,19 +155,13 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
 
     Expects user configuration at ``[tool.creosote]``.
     """
-    logger.debug(f"Attempting to load configuration from {src}")
+
     try:
         with open(src, "r", encoding="utf-8") as f:
             project_config = toml.loads(f.read())
-        logger.debug(f"{src} configuration loaded.")
     except FileNotFoundError:
-        logger.debug(f"{src} configuration file not found.")
         project_config = {}
     creosote_config = project_config.get("tool", {}).get("creosote", {})
-    if creosote_config:
-        logger.debug(f"Loaded creosote config: {creosote_config}")
-    else:
-        logger.debug("Empty/missing [tool.creosote] section.")
     # Convert all hyphens to underscores
     creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
     return Config(**creosote_config)
