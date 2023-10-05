@@ -112,7 +112,7 @@ def test_creosote_project_success(
                     "toml>=0.10.2,<0.11",
                 ],
             ],
-            id="Pipenv dev packages",
+            id="PEP-508 requirements.txt",
         ),
         pytest.param(
             *[
@@ -312,7 +312,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
                     "yolo",  # NOTE: this is the unused dependency
                 ],
             ],
-            id="Pipenv dev packages",
+            id="PEP-508 requirements.txt",
         ),
         pytest.param(
             *[
