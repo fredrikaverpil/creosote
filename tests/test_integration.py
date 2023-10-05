@@ -493,8 +493,10 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
         raise NotImplementedError("Case not implemented.")
 
 
-def test_multiple_paths(venv_manager: VenvManager, capsys: CaptureFixture) -> None:
-    """This tests the case where multiple paths are passed as arguments."""
+def test_repeated_arguments_are_accepted(
+    venv_manager: VenvManager, capsys: CaptureFixture
+) -> None:
+    """The same argument is passed multiple times, when supported."""
 
     # arrange
 
@@ -507,13 +509,21 @@ def test_multiple_paths(venv_manager: VenvManager, capsys: CaptureFixture) -> No
             "dependencies = [",
             '"dotty-dict>=1.3.1,<1.4",',
             '"loguru>=0.6.0,<0.8",',
+            "]",
+            "",
+            "[project.optional-dependencies]",
+            "my_group = [",
             '"pip-requirements-parser>=32.0.1,<33.1",',
             '"toml>=0.10.2,<0.11",',
+            "]",
+            "lets_ignore = [",
+            '"ignore_me",',
+            '"ignore_me_too",',
             "]",
         ],
     )
 
-    toml_section = "project.dependencies"
+    toml_sections = ["project.dependencies", "project.optional-dependencies"]
 
     deps_and_imports_map = {
         "dotty-dict": "from dotty_dict import Dotty, dotty",
@@ -521,6 +531,8 @@ def test_multiple_paths(venv_manager: VenvManager, capsys: CaptureFixture) -> No
         "pip-requirements-parser": "from pip_requirements_parser import RequirementsFile",  # noqa: E501
         "toml": "import toml",
     }
+
+    exclude_deps = ["ignore_me", "ignore_me_too"]
 
     installed_dependencies = deps_and_imports_map.keys()
     imports = deps_and_imports_map.values()
@@ -548,16 +560,22 @@ def test_multiple_paths(venv_manager: VenvManager, capsys: CaptureFixture) -> No
     args = [
         "--venv",
         str(venv_path),
+        "--venv",
+        str(venv_path),  # not really testing this properly...
         "--deps-file",
         str(deps_filepath),
-        "--section",
-        toml_section,
         "--format",
         "no-color",
     ]
 
+    for toml_section in toml_sections:
+        args.extend(["--section", toml_section])
+
     for source_file in source_files:
         args.extend(["--path", str(source_file)])
+
+    for exlude_dep in exclude_deps:
+        args.extend(["--exclude-dep", exlude_dep])
 
     exit_code = cli.main(args)
     actual_output = capsys.readouterr().err.splitlines()
