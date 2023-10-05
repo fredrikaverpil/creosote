@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import Generator, List, Tuple
 
@@ -77,6 +78,14 @@ class VenvManager:
         return filepath
 
 
+def remove(filepath: Path) -> None:
+    if filepath.exists():
+        if filepath.is_file():
+            filepath.unlink()  # Delete a file
+        else:
+            shutil.rmtree(filepath)  # Delete a directory
+
+
 @pytest.fixture()
 def venv_manager(tmp_path: Path) -> Generator[VenvManager, None, None]:
     """The virtual environment manager.
@@ -88,4 +97,11 @@ def venv_manager(tmp_path: Path) -> Generator[VenvManager, None, None]:
     virtual environment in a temporary directory, which is removed
     after the test is run.
     """
-    yield VenvManager(tmp_path)
+    # setup
+    vm = VenvManager(tmp_path)
+
+    # yield
+    yield vm
+
+    # cleanup
+    remove(tmp_path)
