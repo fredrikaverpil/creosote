@@ -1,4 +1,8 @@
-"""Fixtures used for the fast, mocked tests."""
+"""Legacy fixtures used for legacy tests.
+
+Please do not add to this file. Instead try to
+extend fixtures/integration.py or fixtures/unittest.py
+"""
 
 from pathlib import Path
 from typing import Callable, Generator, List, Tuple
