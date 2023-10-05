@@ -2,7 +2,7 @@
 
 Notes:
     Do not define fixtures in this file. Instead, place them under
-    tests/pytest/fixtures.
+    tests/fixtures.
 
     Fixtures defined via `pytest_plugins` may not be defined in
     non-top-level `conftest.py` file. More info:
