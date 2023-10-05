@@ -40,20 +40,20 @@ def test_creosote_project_success(
             ],
         )
 
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        "src",  # use this project's "src" folder
+        "--deps-file",
+        "pyproject.toml",  # use this project's own pyproject.toml
+        "--format",
+        "no-color",
+    ]
+
     # act
 
-    exit_code = cli.main(
-        [
-            "--venv",
-            str(venv_path),
-            "--path",
-            "src",  # use this project's "src" folder
-            "--deps-file",
-            "pyproject.toml",  # use this project's own pyproject.toml
-            "--format",
-            "no-color",
-        ]
-    )
+    exit_code = cli.main(args)
     actual_output = capsys.readouterr().err.splitlines()
 
     # assert
@@ -230,8 +230,6 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
         ],
     )
 
-    # act
-
     args = [
         "--venv",
         str(venv_path),
@@ -249,6 +247,8 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
         # this is the case for requirements.txt
         args.remove("--section")
         args.remove(toml_section)
+
+    # act
 
     exit_code = cli.main(args)
     actual_output = capsys.readouterr().err.splitlines()
@@ -448,8 +448,6 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
         ],
     )
 
-    # act
-
     args = [
         "--venv",
         str(venv_path),
@@ -470,6 +468,8 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
 
     if exclude_unused_dep:
         args.extend(["--exclude-dep", "yolo"])
+
+    # act
 
     exit_code = cli.main(args)
     actual_output = capsys.readouterr().err.splitlines()
@@ -555,8 +555,6 @@ def test_repeated_arguments_are_accepted(
             )
         )
 
-    # act
-
     args = [
         "--venv",
         str(venv_path),
@@ -577,10 +575,13 @@ def test_repeated_arguments_are_accepted(
     for exlude_dep in exclude_deps:
         args.extend(["--exclude-dep", exlude_dep])
 
-    exit_code = cli.main(args)
-    actual_output = capsys.readouterr().err.splitlines()
     num_paths = len([arg for arg in args if arg == "--path"])
     number_of_paths = 4
+
+    # act
+
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
 
     # assert
 
