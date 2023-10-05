@@ -103,6 +103,19 @@ def test_creosote_project_success(
         ),
         pytest.param(
             *[
+                "requirements.txt",
+                "",  # NOTE: this is not needed for requirements.txt
+                [
+                    "dotty-dict>=1.3.1,<1.4",
+                    "loguru>=0.6.0,<0.8",
+                    "pip-requirements-parser>=32.0.1,<33.1",
+                    "toml>=0.10.2,<0.11",
+                ],
+            ],
+            id="Pipenv dev packages",
+        ),
+        pytest.param(
+            *[
                 "pyproject.toml",
                 "tool.pdm.dev-dependencies",
                 [
@@ -219,20 +232,25 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
 
     # act
 
-    exit_code = cli.main(
-        [
-            "--venv",
-            str(venv_path),
-            "--path",
-            str(source_file),
-            "--deps-file",
-            str(deps_filepath),
-            "--section",
-            toml_section,
-            "--format",
-            "no-color",
-        ]
-    )
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        toml_section,
+        "--format",
+        "no-color",
+    ]
+
+    if not toml_section:
+        # this is the case for requirements.txt
+        args.remove("--section")
+        args.remove(toml_section)
+
+    exit_code = cli.main(args)
     actual_output = capsys.readouterr().err.splitlines()
 
     # assert
@@ -281,6 +299,20 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
                 ],
             ],
             id="PEP-621 optional dependencies",
+        ),
+        pytest.param(
+            *[
+                "requirements.txt",
+                "",  # NOTE: this is not needed for requirements.txt
+                [
+                    "dotty-dict>=1.3.1,<1.4",
+                    "loguru>=0.6.0,<0.8",
+                    "pip-requirements-parser>=32.0.1,<33.1",
+                    "toml>=0.10.2,<0.11",
+                    "yolo",  # NOTE: this is the unused dependency
+                ],
+            ],
+            id="Pipenv dev packages",
         ),
         pytest.param(
             *[
@@ -430,6 +462,11 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
         "--format",
         "no-color",
     ]
+
+    if not toml_section:
+        # this is the case for requirements.txt
+        args.remove("--section")
+        args.remove(toml_section)
 
     if exclude_unused_dep:
         args.extend(["--exclude-dep", "yolo"])
