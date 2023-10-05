@@ -1,12 +1,3 @@
-"""Old, legacy tests.
-
-Please do not extend or modify these tests. They use
-legacy fixtures and have proven to just be very
-messy and hard to grok. Please see
-test_integration.py first - and if that does not fit
-the needs, add unit tests in separate test files.
-"""
-
 from typing import List
 
 import pytest
