@@ -77,7 +77,6 @@ select = [
   "SIM", # flake8-simplify
   "TID", # flake8-tidy-imports
   # "ARG",  # flake8-unused-arguments
-  "PDV", # pandas-vet
   "PGH", # pygrep-hooks
   "PLC", # pylint
   "PLE", # pylint
