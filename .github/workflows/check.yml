@@ -24,8 +24,8 @@ jobs:
           cache: pip
 
       - run: pip install '.[lint]'
-      - run: ruff src tests
-      - run: black --check --diff src
+      - run: ruff check --diff src tests
+      - run: ruff format --diff src tests
 
   type:
     strategy:
