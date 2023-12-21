@@ -20,7 +20,7 @@ jobs:
         run: "pip wheel --no-deps --use-pep517 --wheel-dir=dist ."
 
       - name: save artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheel
           path: dist
