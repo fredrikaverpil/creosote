@@ -236,6 +236,15 @@ $ creosote@123 --venv .venv ...
 $ pipx uninstall creosote@123
 ```
 
+You can also clone down the repo and run creosote from the git repo:
+
+```bash
+$ python -m venv .venv
+$ source .venv/bin/activate  # linux/macOS syntax
+$ pip install -e '.[dev]'  # install the dependencies group 'dev'
+$ creosote -venv .venv ...
+```
+
 ### 🚀 Releasing
 
 1. Bump version in `src/creosote/__about__.py` and `.pre-commit-config.yaml`.
