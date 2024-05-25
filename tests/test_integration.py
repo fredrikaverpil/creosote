@@ -587,3 +587,78 @@ def test_repeated_arguments_are_accepted(
     assert num_paths == len(source_files) == number_of_paths
     assert "No unused dependencies found! ✨" in actual_output
     assert exit_code == 0
+
+
+def test_repeated_arguments_are_accepted(
+    venv_manager: VenvManager, capsys: CaptureFixture
+) -> None:
+    """Asserts that ruamel.yaml is supported."""
+
+    # arrange
+
+    venv_path, site_packages_path = venv_manager.create_venv()
+
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            '"ruamel.yaml",',
+            "]",
+        ],
+    )
+
+    toml_sections = ["project.dependencies"]
+
+    deps_and_imports_map = {
+        "ruamel.yaml": "from ruamel.yaml import YAML",
+    }
+
+    installed_dependencies = deps_and_imports_map.keys()
+    imports = deps_and_imports_map.values()
+
+    for dependency_name in installed_dependencies:
+        venv_manager.create_record(
+            site_packages_path=site_packages_path,
+            dependency_name=dependency_name,
+            contents=[
+                "ruamel.yaml-0.18.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4",
+                "ruamel/yaml/__init__.py,sha256=2t1h--HjEw1ll5f5Y90KY7zXf4_4V1z5mSIEgoDZ1-o,1920",
+                "ruamel/yaml/__pycache__/__init__.cpython-38.pyc,,",
+                "ruamel/yaml/anchor.py,sha256=tuPKumHX6SstzrNylamMffqJvOwnPspP3_z2Nbaezj0,481",
+            ],
+        )
+
+    source_files = []
+    for idx, import_ in enumerate(imports):
+        source_files.append(
+            venv_manager.create_source_file(
+                relative_filepath=f"src/file{idx}.py",
+                contents=[import_],
+            )
+        )
+
+    args = [
+        "--venv",
+        str(venv_path),
+        "--deps-file",
+        str(deps_filepath),
+        "--format",
+        "no-color",
+    ]
+
+    for toml_section in toml_sections:
+        args.extend(["--section", toml_section])
+
+    for source_file in source_files:
+        args.extend(["--path", str(source_file)])
+
+    # act
+
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+
+    assert "No unused dependencies found! ✨" in actual_output
+    assert exit_code == 0
