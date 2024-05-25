@@ -23,9 +23,9 @@ class DepsResolver:
         self.venvs: List[str] = venvs
 
         self.top_level_txt_pattern = re.compile(
-            r"\/([\w]*).[\d\.]*.dist-info\/top_level.txt"
+            r"\/([\w\.]*).[\d\.]*.dist-info\/top_level.txt"
         )
-        self.record_pattern = re.compile(r"\/([\w]*).[\d\.]*.dist-info\/RECORD")
+        self.record_pattern = re.compile(r"\/([\w\.]*).[\d\.]*.dist-info\/RECORD")
 
         self.top_level_filepaths: List[pathlib.Path] = []
         self.record_filepaths: List[pathlib.Path] = []
@@ -99,13 +99,16 @@ class DepsResolver:
         return False
 
     def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
-        dep_name = self.canonicalize_module_name(dep_info.name)
+        dep_name_canonicalized = self.canonicalize_module_name(dep_info.name)
 
         for record_filepath in self.record_filepaths:
             normalized_record_filepath = record_filepath.as_posix()
             matches = self.record_pattern.findall(normalized_record_filepath)
             for import_name_from_record in matches:
-                if import_name_from_record.lower() == dep_name.lower():
+                if (
+                    import_name_from_record.lower() == dep_name_canonicalized.lower()
+                    or import_name_from_record.lower() == dep_info.name.lower()
+                ):
                     with open(record_filepath, "r", encoding="utf-8") as infile:
                         lines = infile.readlines()
 
