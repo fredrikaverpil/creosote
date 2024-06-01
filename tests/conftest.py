@@ -9,7 +9,6 @@ Notes:
     https://docs.pytest.org/en/7.0.x/deprecations.html#pytest-plugins-in-non-top-level-conftest-files
 """
 
-
 import os
 from pathlib import Path
 

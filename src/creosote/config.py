@@ -20,7 +20,7 @@ class Config:
     the ``dest`` specified in ``add_argument``.
     """
 
-    format: Literal["default", "no-color", "porcelain"] = "default"  # noqa: A003
+    format: Literal["default", "no-color", "porcelain"] = "default"
     paths: List[str] = field(default_factory=lambda: ["src"])
     sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
     exclude_deps: List[str] = field(default_factory=list)

@@ -12,7 +12,6 @@ The general idea:
 
 """
 
-
 from typing import List
 
 import pytest
