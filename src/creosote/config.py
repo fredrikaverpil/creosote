@@ -181,7 +181,7 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
     """
 
     try:
-        with open(src, "r", encoding="utf-8") as f:
+        with open(src, "r", encoding="utf-8", errors="replace") as f:
             project_config = toml.loads(f.read())
     except FileNotFoundError:
         project_config = {}

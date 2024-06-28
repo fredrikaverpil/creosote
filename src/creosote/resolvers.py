@@ -86,7 +86,9 @@ class DepsResolver:
             matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
             for import_name_from_top_level in matches:
                 if import_name_from_top_level.lower() == dep_name.lower():
-                    with open(top_level_filepath, "r", encoding="utf-8") as infile:
+                    with open(
+                        top_level_filepath, "r", encoding="utf-8", errors="replace"
+                    ) as infile:
                         lines = infile.readlines()
                     dep_info.top_level_import_names = [line.strip() for line in lines]
                     import_names = ", ".join(dep_info.top_level_import_names)
@@ -109,7 +111,9 @@ class DepsResolver:
                     import_name_from_record.lower() == dep_name_canonicalized.lower()
                     or import_name_from_record.lower() == dep_info.name.lower()
                 ):
-                    with open(record_filepath, "r", encoding="utf-8") as infile:
+                    with open(
+                        record_filepath, "r", encoding="utf-8", errors="replace"
+                    ) as infile:
                         lines = infile.readlines()
 
                     import_names_found = []

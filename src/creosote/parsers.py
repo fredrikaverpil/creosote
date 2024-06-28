@@ -97,7 +97,7 @@ class DependencyReader:
 
     def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
         """Read dependency names from toml spec file."""
-        with open(deps_file, "r", encoding="utf-8") as infile:
+        with open(deps_file, "r", encoding="utf-8", errors="replace") as infile:
             contents = toml.loads(infile.read())
 
         dotty_contents: Dotty = dotty(contents)
@@ -185,7 +185,7 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
     Credit:
         https://stackoverflow.com/a/9049549/2448495
     """
-    with open(path, encoding="utf-8") as fh:
+    with open(path, encoding="utf-8", errors="replace") as fh:
         root = ast.parse(fh.read(), path)
 
     for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
