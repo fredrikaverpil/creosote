@@ -4,6 +4,7 @@ import sys
 import typing
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 from typing import List, Literal
 
 import toml
@@ -175,7 +176,7 @@ def parse_args(args):
 
 
 def load_defaults(src: str = "pyproject.toml") -> Config:
-    """Load pyproject.toml defaults form user config.
+    """Load pyproject.toml defaults from user config.
 
     Expects user configuration at ``[tool.creosote]``.
     """
@@ -189,3 +190,15 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
     # Convert all hyphens to underscores
     creosote_config = {k.replace("-", "_"): v for k, v in creosote_config.items()}
     return Config(**creosote_config)
+
+
+def fail_fast(args: argparse.Namespace) -> bool:
+    """Check if we should fail fast."""
+    if is_missing_file(args.deps_file):
+        logger.error(f"File not found: {args.deps_file}")
+        return True
+    return False
+
+
+def is_missing_file(file_path: str) -> bool:
+    return not Path(file_path).is_file()
