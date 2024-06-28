@@ -1,0 +1,18 @@
+name: release
+on:
+  pull_request: # temp, remove before merging
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  please:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: python
+          version-file: src/creosote/__about__.py
