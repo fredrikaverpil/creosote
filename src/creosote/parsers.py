@@ -185,24 +185,30 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
     Credit:
         https://stackoverflow.com/a/9049549/2448495
     """
+
+    root = None
     with open(path, encoding="utf-8", errors="replace") as fh:
-        root = ast.parse(fh.read(), path)
+        try:
+            root = ast.parse(fh.read(), path)
+        except SyntaxError as e:
+            logger.warning(f"Syntax error, cannot AST-parse {path}: {e}")
 
-    for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
-        if isinstance(node, ast.Import):
-            module = []
-        elif isinstance(node, ast.ImportFrom):
-            module = node.module.split(".") if node.module else []
-        else:
-            continue
+    if root:
+        for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
+            if isinstance(node, ast.Import):
+                module = []
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module.split(".") if node.module else []
+            else:
+                continue
 
-        if hasattr(node, "names"):
-            for n in node.names:
-                yield ImportInfo(
-                    module=module,
-                    name=n.name.split("."),
-                    alias=n.asname,
-                )
+            if hasattr(node, "names"):
+                for n in node.names:
+                    yield ImportInfo(
+                        module=module,
+                        name=n.name.split("."),
+                        alias=n.asname,
+                    )
 
 
 def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
