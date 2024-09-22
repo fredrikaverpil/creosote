@@ -1,11 +1,14 @@
 import ast
 import re
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union, cast
 
+import nbformat
 import toml
 from dotty_dict import Dotty, dotty
 from loguru import logger
+from nbconvert import PythonExporter
 from pip_requirements_parser import RequirementsFile
 
 from creosote.models import ImportInfo
@@ -185,6 +188,19 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
     Credit:
         https://stackoverflow.com/a/9049549/2448495
     """
+    is_notebook = False
+    if Path(path).suffix == ".ipynb":
+        with open(path) as f:
+            notebook_content = nbformat.read(f, as_version=4)
+
+        # Convert the notebook to a temporary .py file
+        body, _ = PythonExporter().from_notebook_node(notebook_content)
+
+        # delete_on_close parameter only supported in Python 3.12+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp_file:
+            temp_file.write(body.encode("utf-8"))
+            path = temp_file.name
+            is_notebook = True
 
     root = None
     with open(path, encoding="utf-8", errors="replace") as fh:
@@ -209,6 +225,8 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
                         name=n.name.split("."),
                         alias=n.asname,
                     )
+    if is_notebook:
+        Path(path).unlink()
 
 
 def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
@@ -218,6 +236,7 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
     for path in paths:
         if Path(path).is_dir():
             resolved_paths.extend(list(Path(path).glob("**/*.py")))
+            resolved_paths.extend(list(Path(path).glob("**/*.ipynb")))
         else:
             resolved_paths.append(Path(path).resolve())
 
