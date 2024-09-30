@@ -30,7 +30,14 @@ def test_creosote_project_success(
     # arrange
 
     venv_path, site_packages_path = venv_manager.create_venv()
-    for dependency_name in ["dotty-dict", "loguru", "pip-requirements-parser", "toml"]:
+    for dependency_name in [
+        "dotty-dict",
+        "loguru",
+        "nbconvert",
+        "nbformat",
+        "pip-requirements-parser",
+        "toml",
+    ]:
         venv_manager.create_record(
             site_packages_path=site_packages_path,
             dependency_name=dependency_name,
