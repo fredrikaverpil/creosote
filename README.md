@@ -181,6 +181,10 @@ This feature is intended for dependencies you must specify in your dependencies 
 $ creosote --exclude-dep pyodbc --exclude-dep pg8000
 ```
 
+### Can I run Creosote on Jupyter notebook (*.ipynb) files?
+
+Yes, any Jupyter notebook files will be temporarily converted to python files using [nbconvert](https://github.com/jupyter/nbconvert) and then Creosote will run on those.
+
 ### Can I run Creosote in a GitHub Action workflow?
 
 Yes, please see the `action` job example in [`.github/workflows/test.yml`](https://github.com/fredrikaverpil/creosote/blob/main/.github/workflows/test.yml).
