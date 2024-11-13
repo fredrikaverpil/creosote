@@ -79,13 +79,15 @@ class DepsResolver:
         Return True if import name was found in the top_level.txt,
         otherwise return False.
         """
-        dep_name = self.canonicalize_module_name(dep_info.name)
 
         for top_level_filepath in self.top_level_filepaths:
             normalized_top_level_filepath = top_level_filepath.as_posix()
             matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
-            for import_name_from_top_level in matches:
-                if import_name_from_top_level.lower() == dep_name.lower():
+            for name_from_top_level in matches:
+                if (
+                    self.canonicalize_module_name(name_from_top_level).lower()
+                    == self.canonicalize_module_name(dep_info.name).lower()
+                ):
                     with open(
                         top_level_filepath, "r", encoding="utf-8", errors="replace"
                     ) as infile:
@@ -101,15 +103,13 @@ class DepsResolver:
         return False
 
     def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
-        dep_name_canonicalized = self.canonicalize_module_name(dep_info.name)
-
         for record_filepath in self.record_filepaths:
             normalized_record_filepath = record_filepath.as_posix()
             matches = self.record_pattern.findall(normalized_record_filepath)
-            for import_name_from_record in matches:
+            for name_from_record in matches:
                 if (
-                    import_name_from_record.lower() == dep_name_canonicalized.lower()
-                    or import_name_from_record.lower() == dep_info.name.lower()
+                    self.canonicalize_module_name(name_from_record).lower()
+                    == self.canonicalize_module_name(dep_info.name).lower()
                 ):
                     with open(
                         record_filepath, "r", encoding="utf-8", errors="replace"
