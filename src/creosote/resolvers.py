@@ -99,7 +99,7 @@ class DepsResolver:
                         f"via top_level.txt: {import_names} ⭐️"
                     )
                     return True
-        logger.debug(f"[{dep_info.name}] did not find top_level.txt in venv")
+        logger.debug(f"[{dep_info.name}] did not find dep in a top_level.txt file")
         return False
 
     def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
@@ -133,7 +133,7 @@ class DepsResolver:
                             )
                             return True
 
-        logger.debug(f"[{dep_info.name}] did not find RECORD in venv")
+        logger.debug(f"[{dep_info.name}] did not find dep in a RECORD file")
         return False
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
