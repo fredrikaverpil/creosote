@@ -1,9 +1,8 @@
 name: release
 on:
   push:
-    # FIXME: add this before merging
-    # branches:
-    #   - main
+    branches:
+      - main
 permissions:
   contents: write
   pull-requests: write
