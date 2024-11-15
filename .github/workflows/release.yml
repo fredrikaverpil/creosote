@@ -1,8 +1,9 @@
 name: release
 on:
   push:
-    branches:
-      - main
+    # FIXME: add this before merging
+    # branches:
+    #   - main
 permissions:
   contents: write
   pull-requests: write
@@ -15,4 +16,5 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE }}
           release-type: python
-          version-file: "__about__.py"
+          version-file: src/creosote/__about__.py
+          config-file: .github/release-please-config.json
