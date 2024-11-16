@@ -1,13 +1,8 @@
 {
   "packages": {
-    "src/creosote": {
-      "release-type": "python",
-      "include-v-in-tag": false,
-      "version-file": "src/creosote/__about__.py",
-      "release-branch": "main"
-    },
     ".": {
       "release-type": "python",
+      "version-file": "src/creosote/__about__.py",
       "include-v-in-tag": true,
       "release-branch": "main",
       "extra-files": [
