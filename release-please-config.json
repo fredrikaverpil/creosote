@@ -3,12 +3,7 @@
     ".": {
       "release-type": "python",
       "version-file": "src/creosote/__about__.py",
-      "include-component-in-tag": false,
-      "tag-separator": "",
-      "bump-minor-pre-major": true,
-      "versioning": {
-        "tag-prefix": "v"
-      },
+      "include-v-in-tag": true,
       "extra-files": [
         {
           "type": "yaml",
