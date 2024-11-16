@@ -1,9 +1,10 @@
 {
   "packages": {
     ".": {
+      "release-branch": "main",
       "release-type": "python",
       "include-v-in-tag": true,
-      "release-branch": "main",
+      "pull-request-header": ":warning: **IMPORTANT**: Release will be prefixed by 'v' (as in v1.2.3). Therefore it is crucial that the pre-commit hook is tweaked in this PR to point to the correct release tag, as this does not work today. Also, the `__about__.py` file must be manually bumped.",
       "extra-files": [
         {
           "type": "yaml",
