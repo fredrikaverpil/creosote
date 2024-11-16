@@ -30,7 +30,7 @@ dependencies = [
   "nbconvert>=7.16.4,<8.0",
   "nbformat>=5.10.4,<6.0",
   "pip-requirements-parser>=32.0.1,<33.1",
-  "tomli>=2.1.0,<3.0.0",
+  "tomli>=2.1.0,<3.0.0 ; python_version < '3.11'",
 ]
 
 [tool.hatch.version]
@@ -39,7 +39,7 @@ path = "src/creosote/__about__.py"
 [project.optional-dependencies]
 # PEP-440
 lint = ["ruff>=0.5.0,<0.8"]
-types = ["mypy", "loguru-mypy", "types-toml"]
+types = ["mypy", "loguru-mypy"]
 test = ["pytest", "pytest-mock", "coverage"]
 dev = ["creosote[lint,types,test]"]
 
@@ -101,7 +101,7 @@ ignore = []
 python_version = "3.8"
 
 [[tool.mypy.overrides]]
-module = ["dotty_dict.*", "pip_requirements_parser.*"]
+module = ["dotty_dict.*", "pip_requirements_parser.*", "tomli.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
