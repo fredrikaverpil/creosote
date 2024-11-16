@@ -9,7 +9,7 @@
           "type": "yaml",
           "path": ".pre-commit-config.yaml",
           "jsonpath": "$.repos[?(@.repo == 'https://github.com/fredrikaverpil/creosote')].rev",
-          "version-template": "v${VERSION}"
+          "version-template": "${TAG_NAME}"
         }
       ]
     }
