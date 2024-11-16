@@ -115,7 +115,7 @@ class DependencyReader:
             logger.debug(f"{sections}: {section_contents}")
 
             section_dep_names = []
-            if section.startswith("project"):
+            if section.startswith("project."):
                 logger.debug(f"Detected PEP-621 toml section in {deps_file}")
                 section_dep_names = self.get_deps_from_pep621_toml(section_contents)
             elif section.startswith("tool.pdm"):
