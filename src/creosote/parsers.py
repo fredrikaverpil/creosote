@@ -1,11 +1,17 @@
 import ast
 import re
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union, cast
 
 import nbformat
-import tomli
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 from dotty_dict import Dotty, dotty
 from loguru import logger
 from nbconvert import PythonExporter
@@ -130,7 +136,7 @@ class DependencyReader:
     def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
         """Read dependency names from toml spec file."""
         with open(deps_file, "rb") as infile:
-            contents = tomli.load(infile)
+            contents = tomllib.load(infile)
 
         dotty_contents: Dotty = dotty(contents)
         dep_names = []
