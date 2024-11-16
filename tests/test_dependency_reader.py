@@ -49,7 +49,7 @@ def test_read_toml_pep621(sections: List[str], expected_dependencies: List[str])
                 "sphinx",
                 "sphinx-rtd-theme",
                 "types-requests",
-                # "useful-types",  # NOTE: not supported by toml yet
+                "useful-types",
             ],
         ),
     ],

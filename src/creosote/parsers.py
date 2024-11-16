@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Union, cast
 
 import nbformat
-import toml
+import tomli
 from dotty_dict import Dotty, dotty
 from loguru import logger
 from nbconvert import PythonExporter
@@ -129,8 +129,8 @@ class DependencyReader:
 
     def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
         """Read dependency names from toml spec file."""
-        with open(deps_file, "r", encoding="utf-8", errors="replace") as infile:
-            contents = toml.loads(infile.read())
+        with open(deps_file, "rb") as infile:
+            contents = tomli.load(infile)
 
         dotty_contents: Dotty = dotty(contents)
         dep_names = []

@@ -30,7 +30,7 @@ dependencies = [
   "nbconvert>=7.16.4,<8.0",
   "nbformat>=5.10.4,<6.0",
   "pip-requirements-parser>=32.0.1,<33.1",
-  "toml>=0.10.2,<0.11",
+  "tomli>=2.1.0,<3.0.0",
 ]
 
 [tool.hatch.version]
