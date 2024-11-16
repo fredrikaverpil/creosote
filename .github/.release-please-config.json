@@ -2,7 +2,7 @@
   "packages": {
     ".": {
       "release-type": "python",
-      "include-v-in-tag": false,
+      "include-v-in-tag": true,
       "release-branch": "main",
       "extra-files": [
         {
