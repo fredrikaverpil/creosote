@@ -16,4 +16,5 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE }}
           config-file: .github/.release-please-config.json
+          # https://github.com/googleapis/release-please-action#package-options
           manifest-file: .github/.release-please-manifest.json
