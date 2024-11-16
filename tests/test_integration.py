@@ -36,7 +36,7 @@ def test_creosote_project_success(
         "nbconvert",
         "nbformat",
         "pip-requirements-parser",
-        "toml",
+        "tomli",
     ]:
         venv_manager.create_record(
             site_packages_path=site_packages_path,
@@ -66,7 +66,7 @@ def test_creosote_project_success(
 
     assert actual_output == [
         "Found dependencies in pyproject.toml: "
-        "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser, toml",
+        "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser, tomli",
         "No unused dependencies found! ✨",
     ]
     assert exit_code == 0
