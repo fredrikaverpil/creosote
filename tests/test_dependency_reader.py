@@ -41,6 +41,33 @@ def test_read_toml_pep621(sections: List[str], expected_dependencies: List[str])
     ["sections", "expected_dependencies"],
     [
         (
+            ["dependency-groups"],
+            [
+                "coverage",
+                "mypy",
+                "pytest",
+                "sphinx",
+                "sphinx-rtd-theme",
+                "types-requests",
+                "useful-types",
+            ],
+        ),
+    ],
+)
+def test_read_toml_pep735(sections: List[str], expected_dependencies: List[str]):
+    reader = DependencyReader(
+        deps_file="tests/deps_files/pyproject.pep735.toml",
+        sections=sections,
+        exclude_deps=[],
+    )
+    dependencies = reader.read()
+    assert dependencies == expected_dependencies
+
+
+@pytest.mark.parametrize(
+    ["sections", "expected_dependencies"],
+    [
+        (
             ["tool.poetry.dependencies"],
             ["dotty-dict", "loguru", "toml"],
         ),

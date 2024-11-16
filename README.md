@@ -181,6 +181,7 @@ depending on your objectives.
 | Legacy Setuptools (`setup.py`)                                                                                              |    ❌     |                     |                                                                                                                     |
 | [PEP-508](https://peps.python.org/pep-0508/) (`requirements.txt`, [pip-tools](https://pip-tools.readthedocs.io/en/latest/)) |    ✅     | `*.[txt\|in]`       | N/A                                                                                                                 |
 | [PEP-621](https://peps.python.org/pep-0621/)                                                                                |    ✅     | `pyproject.toml`    | `project.dependencies`,<br>`project.optional-dependencies.<GROUP>`                                                  |
+| [PEP-735](https://peps.python.org/pep-0735/)                                                                                |    ✅     | `pyproject.toml`    | `dependency-groups`                                                                                                 |
 
 #### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 

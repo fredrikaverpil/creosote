@@ -7,7 +7,11 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Literal
 
-import toml
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 from loguru import logger
 
 from creosote.__about__ import __version__
@@ -182,8 +186,8 @@ def load_defaults(src: str = "pyproject.toml") -> Config:
     """
 
     try:
-        with open(src, "r", encoding="utf-8", errors="replace") as f:
-            project_config = toml.loads(f.read())
+        with open(src, "rb") as f:
+            project_config = tomllib.load(f)
     except FileNotFoundError:
         project_config = {}
     creosote_config = project_config.get("tool", {}).get("creosote", {})
