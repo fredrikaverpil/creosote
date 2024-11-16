@@ -3,20 +3,19 @@
     "src/creosote": {
       "release-type": "python",
       "include-v-in-tag": false,
-      "version-file": "__about__.py",
-      "release-branch": "main",
+      "version-file": "src/creosote/__about__.py",
+      "release-branch": "main"
     },
-
     ".": {
       "release-type": "python",
       "include-v-in-tag": true,
       "release-branch": "main",
-
       "extra-files": [
         {
           "type": "yaml",
           "path": ".pre-commit-config.yaml",
-          "jsonpath": "$.repos[?(@.repo == 'https://github.com/fredrikaverpil/creosote')].rev"
+          "jsonpath": "$.repos[?(@.repo == 'https://github.com/fredrikaverpil/creosote')].rev",
+          "version-template": "v${VERSION}"
         }
       ]
     }
