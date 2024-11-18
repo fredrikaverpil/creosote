@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/fredrikaverpil/creosote/compare/v3.1.2...v3.2.0) (2024-11-18)
+
+
+### Features
+
+* **parser:** add PEP-735 support for dependency-groups ([#231](https://github.com/fredrikaverpil/creosote/issues/231)) ([55d638e](https://github.com/fredrikaverpil/creosote/commit/55d638e57eb9c5eb2b75d3571397a70c919bd025))
+
 ## [3.1.2](https://github.com/fredrikaverpil/creosote/compare/v3.1.1...v3.1.2) (2024-11-16)
 
 

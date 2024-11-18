@@ -4,7 +4,7 @@
       "release-branch": "main",
       "release-type": "python",
       "include-v-in-tag": true,
-      "pull-request-header": ":warning: **IMPORTANT**: Release will be prefixed by 'v' (as in v1.2.3). Therefore it is crucial that the pre-commit hook is tweaked in this PR to point to the correct release tag, as this does not work today. Also, the `__about__.py` file must be manually bumped.\n\n Also, manual review of `publish` workflow must be approved to publish to pypi.",
+      "pull-request-header": " ## :warning: Manual changes required\n\n * `.pre-commit-config.yaml`: The Release will be prefixed by `v` (as in `v1.2.3`) but release-please does not edit the file with the `v` prefix.\n * `src/creosote/__about__.py`: The file must be manually bumped, until hopefully https://github.com/googleapis/release-please/issues/2433 has been considered.\n * Manual review of the `publish` workflow must be approved to publish to pypi.\n\n",
       "extra-files": [
         {
           "type": "yaml",
