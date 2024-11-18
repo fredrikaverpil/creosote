@@ -1,11 +1,17 @@
 import ast
 import re
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union, cast
 
 import nbformat
-import toml
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 from dotty_dict import Dotty, dotty
 from loguru import logger
 from nbconvert import PythonExporter
@@ -89,6 +95,35 @@ class DependencyReader:
 
         return section_deps
 
+    def get_deps_from_pep735_toml(
+        self, section_contents: Union[List[str], Dict[str, List[str]]]
+    ) -> List[str]:
+        """Get dependency names from toml file using the PEP735 spec.
+
+        The dependency strings are expected to follow PEP508.
+        """
+
+        dep_strings = []
+        if isinstance(section_contents, dict):
+            for _, dep_string_list in section_contents.items():
+                for dep_string in dep_string_list:
+                    if type(dep_string) != str:
+                        logger.debug(f"Skipping non-string entry: {dep_string}")
+                        continue
+                    dep_strings.append(dep_string)
+        else:
+            raise TypeError("Unexpected dependency format, list expected.")
+
+        section_deps = []
+        for dep_string in dep_strings:
+            parsed_dep = self.parse_dep_string(dep_string)
+            if parsed_dep:
+                section_deps.append(parsed_dep)
+            else:
+                logger.warning(f"Could not parse dependency string: {dep_string}")
+
+        return section_deps
+
     def get_deps_from_toml_section_keys(
         self,
         section_contents: Dict[str, Any],
@@ -100,8 +135,8 @@ class DependencyReader:
 
     def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
         """Read dependency names from toml spec file."""
-        with open(deps_file, "r", encoding="utf-8", errors="replace") as infile:
-            contents = toml.loads(infile.read())
+        with open(deps_file, "rb") as infile:
+            contents = tomllib.load(infile)
 
         dotty_contents: Dotty = dotty(contents)
         dep_names = []
@@ -121,6 +156,9 @@ class DependencyReader:
             elif section.startswith("tool.pdm"):
                 logger.debug(f"Detected PDM toml section in {deps_file}")
                 section_dep_names = self.get_deps_from_pep621_toml(section_contents)
+            elif section.startswith("dependency-groups"):
+                logger.debug(f"Detected PEP-735 toml section in {deps_file}")
+                section_dep_names = self.get_deps_from_pep735_toml(section_contents)
             elif section.startswith("tool.poetry"):
                 logger.debug(f"Detected Poetry toml section in {deps_file}")
                 section_dep_names = self.get_deps_from_toml_section_keys(
