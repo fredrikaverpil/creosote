@@ -38,7 +38,7 @@ path = "src/creosote/__about__.py"
 
 [project.optional-dependencies]
 # PEP-440
-lint = ["ruff>=0.5.0,<0.8"]
+lint = ["ruff>=0.5.0,<0.9"]
 types = ["mypy", "loguru-mypy"]
 test = ["pytest", "pytest-mock", "coverage"]
 dev = ["creosote[lint,types,test]"]
