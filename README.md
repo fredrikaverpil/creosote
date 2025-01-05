@@ -323,7 +323,7 @@ creosote --venv .venv
 After merging, release-please will open a PR. However, this PR requires changes:
 
 1. Review version string changes made by release-please.
-2. Bump version in `src/creosote/__about__.py` and `.pre-commit-config.yaml`.
+2. Manually bump version in `.pre-commit-config.yaml`.
 3. GitHub Action will run automatically on creating
    [a release](https://github.com/fredrikaverpil/creosote/releases) and deploy
    the release onto PyPi.

@@ -21,8 +21,4 @@ jobs:
           # FIXME: breaking change?
           # There is a mismatch with how files are written with the version string and
           # the tag is written prefixed with "v". Might have to go away from tagging with "v".
-          # 
-          # FIXME: breaking change?
-          # I need to update __about__.py and not the __init__.py file:
-          # Upstream issue: https://github.com/googleapis/release-please/issues/2433
           manifest-file: .github/.release-please-manifest.json
