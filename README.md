@@ -5,48 +5,6 @@
 
 Identify unused dependencies and avoid a bloated virtual environment.
 
-## 🌀 Migration guide: creosote 2.x to 3.x
-
-<details>
-<summary>Expand me to read the guide.</summary>
-
-<br>Creosote was updated to 3.0.0 because the way arguments were supplied has
-now changed. This also brings `pyproject.toml` configuration support.
-
-### Argument name change
-
-The argument naming has changed:
-
-| 2.x argument name | 3.x argument name |
-| ----------------- | ----------------- |
-| `--exclude-deps`  | `--exclude-dep`   |
-| `--paths`         | `--path`          |
-| `--sections`      | `--section`       |
-
-### Multiple argument values
-
-With creosote 2.x, you were able to provide multiple values following some
-arguments, example:
-
-```bash
-creosote -p file1.py file2.py
-```
-
-With creosote 3.x, you must now provide multiple arguments as a key/value pair:
-
-```bash
-creosote -p file1.py -p file2.py
-```
-
-This new creosote 3.x behavior applies to the following 3.x CLI arguments:
-
-- `--venv`
-- `--exclude-dep`
-- `-p` or `--path`
-- `-s` or `--section`
-
-</details>
-
 ## ⚡️ Quickstart
 
 Install creosote in separate virtual environment, using e.g.
@@ -273,6 +231,48 @@ Because it makes me happy to see this tool can help others! 🥰
 
 - [Creosote - Identify unused dependencies and avoid a bloated virtual environment](https://www.reddit.com/r/Python/comments/11n717z/creosote_identify_unused_dependencies_and_avoid_a/)
   — Reddit
+
+## 🌀 Migration guide: creosote 2.x to 3.x
+
+<details>
+<summary>Expand me to read the guide.</summary>
+
+<br>Creosote was updated to 3.0.0 because the way arguments were supplied has
+now changed. This also brings `pyproject.toml` configuration support.
+
+### Argument name change
+
+The argument naming has changed:
+
+| 2.x argument name | 3.x argument name |
+| ----------------- | ----------------- |
+| `--exclude-deps`  | `--exclude-dep`   |
+| `--paths`         | `--path`          |
+| `--sections`      | `--section`       |
+
+### Multiple argument values
+
+With creosote 2.x, you were able to provide multiple values following some
+arguments, example:
+
+```bash
+creosote -p file1.py file2.py
+```
+
+With creosote 3.x, you must now provide multiple arguments as a key/value pair:
+
+```bash
+creosote -p file1.py -p file2.py
+```
+
+This new creosote 3.x behavior applies to the following 3.x CLI arguments:
+
+- `--venv`
+- `--exclude-dep`
+- `-p` or `--path`
+- `-s` or `--section`
+
+</details>
 
 ## 👩‍🔬 Development/debugging info
 
