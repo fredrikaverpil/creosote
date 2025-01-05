@@ -36,19 +36,22 @@ dependencies = [
 [tool.hatch.version]
 path = "src/creosote/__about__.py"
 
-[project.optional-dependencies]
-# PEP-440
-lint = ["ruff>=0.5.0,<0.8"]
-types = ["mypy", "loguru-mypy"]
-test = ["pytest", "pytest-mock", "coverage"]
-dev = ["creosote[lint,types,test]"]
-
 [project.urls]
 Source = "https://github.com/fredrikaverpil/creosote"
 Tracker = "https://github.com/fredrikaverpil/creosote/issues"
 
 [project.scripts]
 creosote = "creosote.cli:main"
+
+[dependency-groups]
+lint = ["ruff>=0.7.4"]
+types = ["loguru-mypy>=0.0.4", "mypy>=1.14.0"]
+test = ["pytest-mock>=3.14.0", "pytest>=8.3.4", "coverage>=7.6.1"]
+lsp = ["basedpyright>=1.23.1"]
+dap = ["debugpy>=1.8.11"]
+
+[tool.uv]
+package = true
 
 [tool.ruff]
 src = ["src", "tests"]

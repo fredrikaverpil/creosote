@@ -17,15 +17,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: cpython_setup
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - run: pip install '.[lint]'
-      - run: ruff check --diff src tests
-      - run: ruff format --diff src tests
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync --group lint
+      - run: uv run ruff check --diff src tests
+      - run: uv run ruff format --diff src tests
 
   type:
     strategy:
@@ -36,11 +35,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: cpython_setup
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - run: pip install '.[types]'
-      - run: mypy src
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync --group types
+      - run: uv run mypy src

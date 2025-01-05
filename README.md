@@ -49,11 +49,11 @@ This new creosote 3.x behavior applies to the following 3.x CLI arguments:
 
 ## ⚡️ Quickstart
 
-Install creosote in separate virtual environment (using e.g.
-[`pipx`](https://github.com/pypa/pipx)):
+Install creosote in separate virtual environment, using e.g.
+[`uv tool`](https://docs.astral.sh/uv/concepts/tools/):
 
 ```bash
-pipx install creosote
+uv tool install creosote
 ```
 
 Scan virtual environment for unused dependencies
@@ -242,7 +242,7 @@ Yes, see example in
 [`.pre-commit-config.yaml`](https://github.com/fredrikaverpil/creosote/blob/main/.pre-commit-config.yaml).
 
 <details>
-<summary>Here's another example setup, if already have Creosote installed onto $PATH (via e.g. pipx).</summary>
+<summary>Here's another example setup, if already have Creosote installed onto $PATH (via e.g. `uv`).</summary>
 
 ```yaml
 # .pre-commit-config.yaml
@@ -278,27 +278,44 @@ Because it makes me happy to see this tool can help others! 🥰
 
 ### Install in-development builds
 
-You can run in-development versions of Creosote. Examples below:
+You can run in-development versions of Creosote.
+
+#### uv
 
 ```bash
 # Creosote build from main branch
-$ pipx install --suffix=@main --force git+https://github.com/fredrikaverpil/creosote.git@main
-$ creosote@main --venv .venv ...
-$ pipx uninstall creosote@main
+uv tool install --force git+https://github.com/fredrikaverpil/creosote.git@main
+creosote --venv .venv
+uv tool uninstall creosote
 
 # Creosote build from PR #123
-$ pipx install --suffix=@123 --force git+https://github.com/fredrikaverpil/creosote.git@refs/pull/123/head
-$ creosote@123 --venv .venv ...
-$ pipx uninstall creosote@123
+uv tool install --force git+https://github.com/fredrikaverpil/creosote.git@refs/pull/123/head
+creosote --venv .venv
+iv tool uninstall creosote
 ```
 
-You can also clone down the repo and run creosote from the git repo:
+#### pipx
 
 ```bash
-$ python -m venv .venv
-$ source .venv/bin/activate  # linux/macOS syntax
-$ pip install -e '.[dev]'  # install the dependencies group 'dev'
-$ creosote -venv .venv ...
+# Creosote build from main branch
+pipx install --suffix=@main --force git+https://github.com/fredrikaverpil/creosote.git@main
+creosote@main --venv .venv ...
+pipx uninstall creosote@main
+
+# Creosote build from PR #123
+pipx install --suffix=@123 --force git+https://github.com/fredrikaverpil/creosote.git@refs/pull/123/head
+creosote@123 --venv .venv ...
+pipx uninstall creosote@123
+```
+
+#### install from source
+
+```bash
+git clone https://github.com/fredrikaverpil/creosote.git
+cd creosote
+uv sync --all-groups
+source .venv/bin/activate
+creosote --venv .venv
 ```
 
 ### 🚀 Releasing
