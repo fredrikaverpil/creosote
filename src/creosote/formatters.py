@@ -1,5 +1,4 @@
 import sys
-from typing import List
 
 from loguru import logger
 
@@ -27,7 +26,7 @@ def configure_logger(verbose: bool, format_: str) -> None:
         )
 
 
-def print_results(unused_dependency_names: List[str], format_: str) -> None:
+def print_results(unused_dependency_names: list[str], format_: str) -> None:
     if unused_dependency_names:
         if format_ == "porcelain":
             print("\n".join(unused_dependency_names))

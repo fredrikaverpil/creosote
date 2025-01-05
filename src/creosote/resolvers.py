@@ -2,7 +2,6 @@ import os
 import pathlib
 import re
 from pathlib import Path
-from typing import List
 
 from loguru import logger
 
@@ -12,15 +11,15 @@ from creosote.models import DependencyInfo, ImportInfo
 class DepsResolver:
     def __init__(
         self,
-        imports: List[ImportInfo],
-        dependency_names: List[str],
-        venvs: List[str],
+        imports: list[ImportInfo],
+        dependency_names: list[str],
+        venvs: list[str],
     ):
-        self.imports: List[ImportInfo] = imports
-        self.dependencies: List[DependencyInfo] = [
+        self.imports: list[ImportInfo] = imports
+        self.dependencies: list[DependencyInfo] = [
             DependencyInfo(name=dep) for dep in dependency_names
         ]
-        self.venvs: List[str] = venvs
+        self.venvs: list[str] = venvs
 
         self.top_level_txt_pattern: re.Pattern[str] = re.compile(
             r"\/([\w\.]*).[\d\.]*.dist-info\/top_level.txt"
@@ -29,9 +28,9 @@ class DepsResolver:
             r"\/([\w\.]*).[\d\.]*.dist-info\/RECORD"
         )
 
-        self.top_level_filepaths: List[pathlib.Path] = []
-        self.record_filepaths: List[pathlib.Path] = []
-        self.unused_deps: List[DependencyInfo] = []
+        self.top_level_filepaths: list[pathlib.Path] = []
+        self.record_filepaths: list[pathlib.Path] = []
+        self.unused_deps: list[DependencyInfo] = []
 
     @staticmethod
     def canonicalize_module_name(module_name: str) -> str:
@@ -44,7 +43,7 @@ class DepsResolver:
         except ImportError:
             return False
 
-    def gather_filepaths(self, venv: str, glob_str: str) -> List[Path]:
+    def gather_filepaths(self, venv: str, glob_str: str) -> list[Path]:
         logger.debug(f"Gathering all top_level.txt files in venv {venv}...")
         venv_path = pathlib.Path(venv)
         filepaths = list(venv_path.glob(glob_str))
@@ -84,7 +83,7 @@ class DepsResolver:
 
         for top_level_filepath in self.top_level_filepaths:
             normalized_top_level_filepath = top_level_filepath.as_posix()
-            matches: List[str] = self.top_level_txt_pattern.findall(
+            matches: list[str] = self.top_level_txt_pattern.findall(
                 normalized_top_level_filepath
             )
             for name_from_top_level in matches:
@@ -109,7 +108,7 @@ class DepsResolver:
     def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
         for record_filepath in self.record_filepaths:
             normalized_record_filepath = record_filepath.as_posix()
-            matches: List[str] = self.record_pattern.findall(normalized_record_filepath)
+            matches: list[str] = self.record_pattern.findall(normalized_record_filepath)
             for name_from_record in matches:
                 if (
                     self.canonicalize_module_name(name_from_record).lower()
@@ -120,7 +119,7 @@ class DepsResolver:
                     ) as infile:
                         lines = infile.readlines()
 
-                    import_names_found: List[str] = []
+                    import_names_found: list[str] = []
                     for line in lines:
                         candidate, _hash, _size = line.split(",")
                         if candidate.endswith(".py") and "__init__" in candidate:
@@ -214,7 +213,7 @@ class DepsResolver:
             if not dep_info.associated_imports
         ]
 
-    def resolve_unused_dependency_names(self) -> List[str]:
+    def resolve_unused_dependency_names(self) -> list[str]:
         for venv in self.venvs:
             if not Path(venv).exists():
                 logger.warning(
