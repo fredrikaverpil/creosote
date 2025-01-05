@@ -2,10 +2,11 @@ import argparse
 import os
 import sys
 import typing
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Literal, Optional, Sequence, Union
+from typing import Literal, Optional, Union
 
 if sys.version_info >= (3, 11):
     import tomllib  # pyright: ignore[reportUnreachable]
@@ -27,14 +28,14 @@ class Config:
 
     verbose: bool = False
     format: Literal["default", "no-color", "porcelain"] = "default"
-    paths: List[str] = field(default_factory=lambda: ["src"])
-    sections: List[str] = field(default_factory=lambda: ["project.dependencies"])
-    exclude_deps: List[str] = field(default_factory=list)
+    paths: list[str] = field(default_factory=lambda: ["src"])
+    sections: list[str] = field(default_factory=lambda: ["project.dependencies"])
+    exclude_deps: list[str] = field(default_factory=list)
     deps_file: str = "pyproject.toml"
-    venvs: List[str] = field(
+    venvs: list[str] = field(
         default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")]
     )
-    features: List[str] = field(default_factory=list)
+    features: list[str] = field(default_factory=list)
 
 
 class Features(Enum):
@@ -56,9 +57,9 @@ class CustomAppendAction(argparse.Action):
 
     def __init__(  # type: ignore[no-untyped-def]
         self,
-        option_strings: List[str],
+        option_strings: list[str],
         dest: str,
-        nargs: Optional[List[str]] = None,
+        nargs: Optional[list[str]] = None,
         **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ):
         """Initialize the action."""

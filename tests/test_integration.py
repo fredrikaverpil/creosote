@@ -15,7 +15,7 @@ The general idea:
 
 import sys
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import pytest
 from _pytest.capture import CaptureFixture
@@ -194,7 +194,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
     scan_type: str,
     deps_filename: str,
     toml_section: str,
-    deps_file_contents: List[str],
+    deps_file_contents: list[str],
 ) -> None:
     """Test simulated setup without any unused dependencies found."""
 
@@ -400,7 +400,7 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
     scan_type: str,
     deps_filename: str,
     toml_section: str,
-    deps_file_contents: List[str],
+    deps_file_contents: list[str],
     exclude_unused_dep: bool,
     unused_dep_is_installed: bool,
 ) -> None:
@@ -559,7 +559,7 @@ def test_repeated_arguments_are_accepted(
             ],
         )
 
-    source_files: List[Path] = []
+    source_files: list[Path] = []
     for idx, import_ in enumerate(imports):
         source_files.append(
             venv_manager.create_source_file(
@@ -654,7 +654,7 @@ def test_ruamel(
             contents=contents,
         )
 
-    source_files: List[Path] = []
+    source_files: list[Path] = []
     for idx, import_ in enumerate(imports):
         source_files.append(
             venv_manager.create_source_file(

@@ -1,5 +1,3 @@
-from typing import List
-
 import pytest
 
 from creosote.parsers import DependencyReader
@@ -28,7 +26,7 @@ from creosote.parsers import DependencyReader
     ],
 )
 def test_read_toml_pep621(
-    sections: List[str], expected_dependencies: List[str]
+    sections: list[str], expected_dependencies: list[str]
 ) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.pep621.toml",
@@ -57,7 +55,7 @@ def test_read_toml_pep621(
     ],
 )
 def test_read_toml_pep735(
-    sections: List[str], expected_dependencies: List[str]
+    sections: list[str], expected_dependencies: list[str]
 ) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.pep735.toml",
@@ -86,7 +84,7 @@ def test_read_toml_pep735(
     ],
 )
 def test_read_toml_poetry(
-    sections: List[str], expected_dependencies: List[str]
+    sections: list[str], expected_dependencies: list[str]
 ) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.poetry.toml",
@@ -105,7 +103,7 @@ def test_read_toml_poetry(
     ],
 )
 def test_read_toml_pipfile(
-    sections: List[str], expected_dependencies: List[str]
+    sections: list[str], expected_dependencies: list[str]
 ) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/Pipfile",

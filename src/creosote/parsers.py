@@ -2,8 +2,9 @@ import ast
 import re
 import sys
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Dict, Generator, List, Union, cast
+from typing import Union, cast
 
 import nbformat
 from typing_extensions import TypeGuard
@@ -24,16 +25,16 @@ from creosote.models import ImportInfo
 
 GroupName = str
 PackageName = str
-PEP621Type1 = List[PackageName]
-PEP621Type2 = Dict[GroupName, List[PackageName]]
+PEP621Type1 = list[PackageName]
+PEP621Type2 = dict[GroupName, list[PackageName]]
 PEP621Types = Union[PEP621Type1, PEP621Type2]
-PEP735Type1 = Dict[GroupName, List[PackageName]]
-PEP735Type2 = Dict[GroupName, List[Union[Dict[str, PackageName], str]]]
+PEP735Type1 = dict[GroupName, list[PackageName]]
+PEP735Type2 = dict[GroupName, list[Union[dict[str, PackageName], str]]]
 PEP735Types = Union[PEP735Type1, PEP735Type2]
-PoetryType1 = Dict[PackageName, str]
-PoetryType2 = Dict[PackageName, Dict[str, str]]
+PoetryType1 = dict[PackageName, str]
+PoetryType2 = dict[PackageName, dict[str, str]]
 PoetryTypes = Union[PoetryType1, PoetryType2]
-PipfileType = Dict[PackageName, str]
+PipfileType = dict[PackageName, str]
 AllSupportedTypes = Union[
     PEP621Type1,
     PEP621Type2,
@@ -73,24 +74,24 @@ class DependencyReader:
     def __init__(
         self,
         deps_file: str,
-        sections: List[str],
-        exclude_deps: List[str],
+        sections: list[str],
+        exclude_deps: list[str],
     ) -> None:
         always_excluded_deps = ["python"]  # occurs in Poetry setup
 
         self.deps_file: str = deps_file
-        self.sections: List[str] = sections
-        self.exclude_deps: List[str] = exclude_deps + always_excluded_deps
+        self.sections: list[str] = sections
+        self.exclude_deps: list[str] = exclude_deps + always_excluded_deps
 
-    def read(self) -> List[str]:
+    def read(self) -> list[str]:
         logger.debug(f"Parsing {self.deps_file} for dependencies...")
 
         if not Path(self.deps_file).exists():
             raise Exception(f"File {self.deps_file} does not exist")
 
-        dep_names: List[str] = []
-        always_excluded_deps: List[str] = ["python"]  # occurs in Poetry setup
-        deps_to_exclude: List[str] = always_excluded_deps + self.exclude_deps
+        dep_names: list[str] = []
+        always_excluded_deps: list[str] = ["python"]  # occurs in Poetry setup
+        deps_to_exclude: list[str] = always_excluded_deps + self.exclude_deps
 
         if self.deps_file.endswith(".toml") or self.deps_file.endswith(
             "Pipfile"
@@ -114,13 +115,13 @@ class DependencyReader:
 
     def get_deps_from_pep621_toml(
         self, section_contents: PEP621Types
-    ) -> List[PackageName]:
+    ) -> list[PackageName]:
         """Get dependency names from toml file using the PEP621 spec.
 
         The dependency strings are expected to follow PEP508.
         """
 
-        dep_strings: List[str] = []
+        dep_strings: list[str] = []
         if is_list_type(section_contents):
             for dep_string in section_contents:
                 dep_strings.append(dep_string)
@@ -131,7 +132,7 @@ class DependencyReader:
         else:
             raise TypeError("Unexpected dependency format, list expected.")
 
-        section_deps: List[PackageName] = []
+        section_deps: list[PackageName] = []
         for dep_string in dep_strings:
             parsed_dep = self.parse_dep_string(dep_string)
             if parsed_dep:
@@ -143,13 +144,13 @@ class DependencyReader:
 
     def get_deps_from_pep735_toml(
         self, section_contents: PEP735Types
-    ) -> List[PackageName]:
+    ) -> list[PackageName]:
         """Get dependency names from toml file using the PEP735 spec.
 
         The dependency strings are expected to follow PEP508.
         """
 
-        dep_strings: List[str] = []
+        dep_strings: list[str] = []
         if is_dict_of_lists(section_contents):
             for _, dep_string_list in section_contents.items():
                 for dep_string in dep_string_list:
@@ -160,7 +161,7 @@ class DependencyReader:
         else:
             raise TypeError("Unexpected dependency format, list expected.")
 
-        section_deps: List[PackageName] = []
+        section_deps: list[PackageName] = []
         for dep_string in dep_strings:
             parsed_dep = self.parse_dep_string(dep_string)
             if parsed_dep:
@@ -173,20 +174,20 @@ class DependencyReader:
     def get_deps_from_toml_section_keys(
         self,
         section_contents: Union[PoetryTypes, PipfileType],
-    ) -> List[PackageName]:
+    ) -> list[PackageName]:
         """Get dependency names from toml section's dict keys."""
         if is_dict_of_strings(section_contents) or is_dict_of_dicts(section_contents):
             return list(section_contents.keys())
 
         raise TypeError("Unexpected dependency format, dict expected.")
 
-    def read_toml(self, deps_file: str, sections: List[str]) -> List[str]:
+    def read_toml(self, deps_file: str, sections: list[str]) -> list[str]:
         """Read dependency names from toml spec file."""
         with open(deps_file, "rb") as infile:
             contents = tomllib.load(infile)
 
         dotty_contents = dotty_dict.dotty(contents)  # pyright: ignore[reportUnknownMemberType]
-        dep_names: List[str] = []
+        dep_names: list[str] = []
 
         for section in sections:
             try:
@@ -196,7 +197,7 @@ class DependencyReader:
 
             logger.debug(f"{sections}: {section_contents}")
 
-            section_dep_names: List[str] = []
+            section_dep_names: list[str] = []
             if section.startswith("project."):
                 logger.debug(f"Detected PEP-621 toml section in {deps_file}")
                 section_dep_names = self.get_deps_from_pep621_toml(
@@ -232,7 +233,7 @@ class DependencyReader:
 
         return sorted(dep_names)
 
-    def read_requirements(self, deps_file: str) -> List[str]:
+    def read_requirements(self, deps_file: str) -> list[str]:
         """Read dependency names from requirements.txt-format file."""
         dep_from_req = RequirementsFile.from_file(deps_file).requirements
         return sorted([dep.name for dep in dep_from_req if dep.name is not None])
@@ -324,9 +325,9 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
         Path(path).unlink()
 
 
-def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
-    resolved_paths: List[Path] = []
-    imports: List[ImportInfo] = []
+def get_module_names_from_code(paths: list[str]) -> list[ImportInfo]:
+    resolved_paths: list[Path] = []
+    imports: list[ImportInfo] = []
 
     for path in paths:
         if Path(path).is_dir():
@@ -340,7 +341,7 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
         for import_info in get_module_info_from_python_file(path=str(resolved_path)):
             imports.append(import_info)
 
-    imports_with_dupes_removed: List[ImportInfo] = []
+    imports_with_dupes_removed: list[ImportInfo] = []
     for import_info in imports:
         if import_info not in imports_with_dupes_removed:
             imports_with_dupes_removed.append(import_info)
@@ -352,17 +353,17 @@ def get_module_names_from_code(paths: List[str]) -> List[ImportInfo]:
     return imports_with_dupes_removed
 
 
-def get_installed_dependency_names(venv: str) -> List[str]:
-    dep_names: List[str] = []
+def get_installed_dependency_names(venv: str) -> list[str]:
+    dep_names: list[str] = []
     for path in Path(venv).glob("**/*.dist-info"):
         dep_names.append(path.name.split("-")[0])
     return dep_names
 
 
 def get_excluded_deps_which_are_not_installed(
-    excluded_deps: List[str], venvs: List[str]
-) -> List[str]:
-    dependency_names: List[str] = []
+    excluded_deps: list[str], venvs: list[str]
+) -> list[str]:
+    dependency_names: list[str] = []
     if not excluded_deps:
         return dependency_names
 

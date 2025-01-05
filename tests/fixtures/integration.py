@@ -1,6 +1,6 @@
 import shutil
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, List, Tuple
 
 import pytest
 
@@ -9,7 +9,7 @@ class VenvManager:
     def __init__(self, temporary_path: Path) -> None:
         self.temporary_path: Path = temporary_path
 
-    def create_venv(self) -> Tuple[Path, Path]:
+    def create_venv(self) -> tuple[Path, Path]:
         """Create a simulated virtual environment."""
         venv_path = self.temporary_path / "venv"
         site_packages_path = venv_path / "lib" / "python3.9" / "site-packages"
@@ -19,7 +19,7 @@ class VenvManager:
     def create_deps_file(
         self,
         relative_filepath: str,
-        contents: List[str],
+        contents: list[str],
     ) -> Path:
         """Create a file which defines the dependencies.
 
@@ -34,7 +34,7 @@ class VenvManager:
         self,
         site_packages_path: Path,
         dependency_name: str,
-        contents: List[str],
+        contents: list[str],
     ) -> Path:
         """Simulate an installed dependency and its RECORD file.
 
@@ -52,7 +52,7 @@ class VenvManager:
         self,
         site_packages_path: Path,
         dependency_name: str,
-        contents: List[str],
+        contents: list[str],
     ) -> Path:
         """Simulate an installed dependency and its top_level.txt file.
 
@@ -69,7 +69,7 @@ class VenvManager:
     def create_source_file(
         self,
         relative_filepath: str,
-        contents: List[str],
+        contents: list[str],
     ) -> Path:
         """Create a source file with the given contents."""
         filepath = self.temporary_path / relative_filepath
