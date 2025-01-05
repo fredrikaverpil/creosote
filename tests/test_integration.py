@@ -1,5 +1,6 @@
 """This file holds all integration tests.
 
+
 The general idea:
 - Invoke the test by runing the CLI and provide arguments.
 - Assert on the output.
@@ -13,7 +14,8 @@ The general idea:
 """
 
 import sys
-from typing import List
+from pathlib import Path
+from typing import Any, List
 
 import pytest
 from _pytest.capture import CaptureFixture
@@ -24,7 +26,7 @@ from tests.fixtures.integration import VenvManager
 
 def test_creosote_project_success(
     venv_manager: VenvManager,
-    capsys: CaptureFixture,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
 ) -> None:
     """Test running cresote on its own project, successfully."""
 
@@ -39,7 +41,7 @@ def test_creosote_project_success(
         "pip-requirements-parser",
         "tomli",
     ]:
-        venv_manager.create_record(
+        _ = venv_manager.create_record(
             site_packages_path=site_packages_path,
             dependency_name=dependency_name,
             contents=[
@@ -69,7 +71,8 @@ def test_creosote_project_success(
 
     assert actual_output == [
         "Found dependencies in pyproject.toml: "
-        "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser",
+        + "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser, "
+        + "typing-extensions",
         "No unused dependencies found! ✨",
     ]
     assert exit_code == 0
@@ -187,7 +190,7 @@ def test_creosote_project_success(
 @pytest.mark.parametrize(["scan_type"], [["RECORD"], ["top_level.txt"]])
 def test_no_unused_dependencies_found(  # noqa: PLR0913
     venv_manager: VenvManager,
-    capsys: CaptureFixture,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
     scan_type: str,
     deps_filename: str,
     toml_section: str,
@@ -213,7 +216,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
 
     for dependency_name in installed_dependencies:
         if scan_type == "RECORD":
-            venv_manager.create_record(
+            _ = venv_manager.create_record(
                 site_packages_path=site_packages_path,
                 dependency_name=dependency_name,
                 contents=[
@@ -221,7 +224,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
                 ],
             )
         elif scan_type == "top_level.txt":
-            venv_manager.create_top_level_txt(
+            _ = venv_manager.create_top_level_txt(
                 site_packages_path=site_packages_path,
                 dependency_name=dependency_name,
                 contents=["yolo"],
@@ -266,7 +269,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
 
     assert actual_output == [
         f"Found dependencies in {deps_filepath}: "
-        "dotty-dict, loguru, pip-requirements-parser, toml",
+        + "dotty-dict, loguru, pip-requirements-parser, toml",
         "No unused dependencies found! ✨",
     ]
     assert exit_code == 0
@@ -393,7 +396,7 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
 @pytest.mark.parametrize(["unused_dep_is_installed"], [[False], [True]])
 def test_one_unused_dependency_found(  # noqa: PLR0913
     venv_manager: VenvManager,
-    capsys: CaptureFixture,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
     scan_type: str,
     deps_filename: str,
     toml_section: str,
@@ -430,7 +433,7 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
 
     for dependency_name in installed_dependencies:
         if scan_type == "RECORD":
-            venv_manager.create_record(
+            _ = venv_manager.create_record(
                 site_packages_path=site_packages_path,
                 dependency_name=dependency_name,
                 contents=[
@@ -438,7 +441,7 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
                 ],
             )
         elif scan_type == "top_level.txt":
-            venv_manager.create_top_level_txt(
+            _ = venv_manager.create_top_level_txt(
                 site_packages_path=site_packages_path,
                 dependency_name=dependency_name,
                 contents=["yolo"],
@@ -503,7 +506,8 @@ def test_one_unused_dependency_found(  # noqa: PLR0913
 
 
 def test_repeated_arguments_are_accepted(
-    venv_manager: VenvManager, capsys: CaptureFixture
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
 ) -> None:
     """The same argument is passed multiple times, when supported."""
 
@@ -547,7 +551,7 @@ def test_repeated_arguments_are_accepted(
     imports = deps_and_imports_map.values()
 
     for dependency_name in installed_dependencies:
-        venv_manager.create_record(
+        _ = venv_manager.create_record(
             site_packages_path=site_packages_path,
             dependency_name=dependency_name,
             contents=[
@@ -555,7 +559,7 @@ def test_repeated_arguments_are_accepted(
             ],
         )
 
-    source_files = []
+    source_files: List[Path] = []
     for idx, import_ in enumerate(imports):
         source_files.append(
             venv_manager.create_source_file(
@@ -599,8 +603,9 @@ def test_repeated_arguments_are_accepted(
     assert exit_code == 0
 
 
-def test_repeated_arguments_are_accepted(
-    venv_manager: VenvManager, capsys: CaptureFixture
+def test_ruamel(
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
 ) -> None:
     """Asserts that ruamel.yaml is supported."""
 
@@ -649,7 +654,7 @@ def test_repeated_arguments_are_accepted(
             contents=contents,
         )
 
-    source_files = []
+    source_files: List[Path] = []
     for idx, import_ in enumerate(imports):
         source_files.append(
             venv_manager.create_source_file(

@@ -8,10 +8,10 @@ def configure_logger(verbose: bool, format_: str) -> None:
     logger.remove()
 
     if format_ == "porcelain":
-        logger.add(sys.stderr, level="CRITICAL")
+        _ = logger.add(sys.stderr, level="CRITICAL")
         return
     if format_ == "no-color":
-        logger.add(
+        _ = logger.add(
             sys.stderr,
             level="DEBUG" if verbose else "INFO",
             colorize=False,
@@ -19,7 +19,7 @@ def configure_logger(verbose: bool, format_: str) -> None:
         )
     else:
         # default
-        logger.add(
+        _ = logger.add(
             sys.stderr,
             level="DEBUG" if verbose else "INFO",
             colorize=True,
@@ -34,7 +34,7 @@ def print_results(unused_dependency_names: List[str], format_: str) -> None:
         else:
             logger.error(
                 "Oh no, bloated venv! 🤢 🪣\n"
-                f"Unused dependencies found: {', '.join(unused_dependency_names)}"
+                + f"Unused dependencies found: {', '.join(unused_dependency_names)}"
             )
     else:
         logger.info("No unused dependencies found! ✨")

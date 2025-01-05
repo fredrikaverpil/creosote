@@ -26,6 +26,7 @@ dependencies = [
   "nbformat>=5.10.4,<6.0",
   "pip-requirements-parser>=32.0.1,<33.1",
   "tomli>=2.1.0,<3.0.0 ; python_version < '3.11'",
+  "typing-extensions>=4.12.2",
 ]
 
 [project.urls]
@@ -92,8 +93,13 @@ ignore = []
   "S105", # hardcoded password
 ]
 
+[tool.basedpyright]
+pythonVersion = "3.8"
+venvPath = ".venv"
+
 [tool.mypy]
 python_version = "3.8"
+strict = true
 
 [[tool.mypy.overrides]]
 module = ["dotty_dict.*", "pip_requirements_parser.*", "tomli.*"]

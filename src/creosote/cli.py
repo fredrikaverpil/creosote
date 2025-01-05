@@ -1,4 +1,5 @@
 import sys
+from typing import Optional, Sequence
 
 from loguru import logger
 
@@ -7,17 +8,14 @@ from creosote.__about__ import __version__
 from creosote.config import Features, fail_fast, parse_args
 
 
-def main(args_=None):
-    args, default_config = parse_args(args_)
+def main(args_: Optional[Sequence[str]] = None) -> int:
+    args = parse_args(args_)
     if fail_fast(args):
         return 1
     formatters.configure_logger(verbose=args.verbose, format_=args.format)
 
     logger.debug(f"Creosote version: {__version__}")
     logger.debug(f"Command: creosote {' '.join(sys.argv[1:])}")
-    logger.debug(
-        f"Default configuration (may have loaded pyproject.toml): {default_config}"
-    )
     logger.debug(f"Arguments: {args}")
 
     if args.features:
