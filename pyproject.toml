@@ -1,7 +1,7 @@
 [project]
 name = "creosote"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
-version = "3.2.0"
+version = "3.2.1"
 readme = "README.md"
 requires-python = ">=3.8"
 keywords = []
