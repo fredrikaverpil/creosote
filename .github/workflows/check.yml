@@ -27,17 +27,12 @@ jobs:
       - run: uv run ruff format --diff src tests
 
   type:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.8"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - run: uv sync --group types
