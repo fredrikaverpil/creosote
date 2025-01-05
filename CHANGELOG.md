@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/fredrikaverpil/creosote/compare/v3.2.0...v4.0.0) (2025-01-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **python:** drop python 3.8 support ([#260](https://github.com/fredrikaverpil/creosote/issues/260))
+
+### Features
+
+* **python:** drop python 3.8 support ([#260](https://github.com/fredrikaverpil/creosote/issues/260)) ([27e1e0c](https://github.com/fredrikaverpil/creosote/commit/27e1e0c70231633ceec268e8d61e0254070e8860))
+
 ## [3.2.0](https://github.com/fredrikaverpil/creosote/compare/v3.1.2...v3.2.0) (2024-11-18)
 
 
