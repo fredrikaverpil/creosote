@@ -1,10 +1,10 @@
 repos:
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v3.2.1
+    rev: v4.0.0
     hooks:
       - id: creosote
         args:
-          - --venv=.venv
-          - --path=src
-          - --deps-file=pyproject.toml
-          - --section=project.dependencies
+          - '--venv=.venv'
+          - '--path=src'
+          - '--deps-file=pyproject.toml'
+          - '--section=project.dependencies'
