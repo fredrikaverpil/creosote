@@ -17,33 +17,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: cpython_setup
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - name: pytest (linux/macos)
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "VIRTUAL_ENV: $VIRTUAL_ENV"
-          pip install --upgrade pip
-          pip install '.[test]'
-          coverage run -m pytest -s -vv
-          coverage html
-
-      - name: pytest (windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
-          python -m venv .venv
-          .venv/Scripts/Activate.ps1
-          echo "VIRTUAL_ENV: $VIRTUAL_ENV"
-          python -m pip install --upgrade pip
-          pip install '.[test]'
-          coverage run -m pytest -s -vv
-          coverage html
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync --group test
+      - run: uv run coverage run -m pytest -s -vv
+      - run: uv run coverage report
+      - run: uv run coverage html
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
@@ -61,31 +43,23 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: cpython_setup
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - run: uv run creosote --venv .venv --exclude-dep tomli
 
-      # Note: I'm using pip, for faster CI. But you can also uses pipx:
-      # Example:
-      #     - run: pipx install creosote --python '${{ steps.cpython_setup.outputs.python-path }}'
-      - run: pip install --upgrade creosote
-
-      - name: run creosote (linux/macos)
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check pre-commit rev format
+        # this is needed because release-please does not add in the "v" prefix
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          echo "VIRTUAL_ENV: $VIRTUAL_ENV"
-          pip install --upgrade .
-          creosote --venv .venv --exclude-dep tomli
+          if grep "rev:" .pre-commit-config.yaml | grep -v "rev: v"; then
+            echo "Error: Found rev: entries without 'v' prefix"
+            exit 1
+          fi
 
-      - name: run creosote (windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
-          python -m venv .venv
-          .venv/Scripts/Activate.ps1
-          Write-Host "VIRTUAL_ENV: $env:VIRTUAL_ENV"
-          pip install --upgrade .
-          creosote --venv .venv --exclude-dep tomli

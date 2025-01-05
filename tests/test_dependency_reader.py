@@ -27,7 +27,9 @@ from creosote.parsers import DependencyReader
         ),
     ],
 )
-def test_read_toml_pep621(sections: List[str], expected_dependencies: List[str]):
+def test_read_toml_pep621(
+    sections: List[str], expected_dependencies: List[str]
+) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.pep621.toml",
         sections=sections,
@@ -54,7 +56,9 @@ def test_read_toml_pep621(sections: List[str], expected_dependencies: List[str])
         ),
     ],
 )
-def test_read_toml_pep735(sections: List[str], expected_dependencies: List[str]):
+def test_read_toml_pep735(
+    sections: List[str], expected_dependencies: List[str]
+) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.pep735.toml",
         sections=sections,
@@ -81,7 +85,9 @@ def test_read_toml_pep735(sections: List[str], expected_dependencies: List[str])
         ),
     ],
 )
-def test_read_toml_poetry(sections: List[str], expected_dependencies: List[str]):
+def test_read_toml_poetry(
+    sections: List[str], expected_dependencies: List[str]
+) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/pyproject.poetry.toml",
         sections=sections,
@@ -98,7 +104,9 @@ def test_read_toml_poetry(sections: List[str], expected_dependencies: List[str])
         (["dev-packages"], ["pytest"]),
     ],
 )
-def test_read_toml_pipfile(sections: List[str], expected_dependencies: List[str]):
+def test_read_toml_pipfile(
+    sections: List[str], expected_dependencies: List[str]
+) -> None:
     reader = DependencyReader(
         deps_file="tests/deps_files/Pipfile",
         sections=sections,
@@ -119,7 +127,9 @@ def test_read_toml_pipfile(sections: List[str], expected_dependencies: List[str]
         ("Qt_py==1.0.0", "Qt_py"),
     ],
 )
-def test_dependency_without_version_constraint(dependency_string, expected_package):
+def test_dependency_without_version_constraint(
+    dependency_string: str, expected_package: str
+) -> None:
     assert expected_package == DependencyReader.dependency_without_version_constraint(
         dependency_string
     )
@@ -134,7 +144,9 @@ def test_dependency_without_version_constraint(dependency_string, expected_packa
         ("pip @ git+ssh://git@github.com/pypa/pip.git", "pip"),
     ],
 )
-def test_pyproject_directref_package_name(dependency_string, expected_package):
+def test_pyproject_directref_package_name(
+    dependency_string: str, expected_package: str
+) -> None:
     assert expected_package == DependencyReader.dependency_without_direct_reference(
         dependency_string
     )

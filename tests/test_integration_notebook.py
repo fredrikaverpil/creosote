@@ -1,3 +1,5 @@
+from typing import Any
+
 from _pytest.capture import CaptureFixture
 
 from creosote import cli
@@ -6,8 +8,8 @@ from tests.fixtures.integration import VenvManager
 
 def test_jupyter_ok(
     venv_manager: VenvManager,
-    capsys: CaptureFixture,
-):
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+) -> None:
     venv_path, site_packages_path = venv_manager.create_venv()
 
     deps_filename = "pyproject.toml"
@@ -26,7 +28,7 @@ def test_jupyter_ok(
     ]
 
     for dependency_name in installed_dependencies:
-        venv_manager.create_record(
+        _ = venv_manager.create_record(
             site_packages_path=site_packages_path,
             dependency_name=dependency_name,
             contents=[

@@ -7,12 +7,12 @@ import pytest
 
 class VenvManager:
     def __init__(self, temporary_path: Path) -> None:
-        self.temporary_path = temporary_path
+        self.temporary_path: Path = temporary_path
 
     def create_venv(self) -> Tuple[Path, Path]:
         """Create a simulated virtual environment."""
         venv_path = self.temporary_path / "venv"
-        site_packages_path = venv_path / "lib" / "python3.8" / "site-packages"
+        site_packages_path = venv_path / "lib" / "python3.9" / "site-packages"
         site_packages_path.mkdir(parents=True)
         return venv_path, site_packages_path
 
@@ -27,7 +27,7 @@ class VenvManager:
         a requirements.txt file.
         """
         pyproject_path = self.temporary_path / relative_filepath
-        pyproject_path.write_text("\n".join(contents))
+        _ = pyproject_path.write_text("\n".join(contents))
         return pyproject_path
 
     def create_record(
@@ -45,7 +45,7 @@ class VenvManager:
         dist_info_path = site_packages_path / f"{dependency_name}-1.2.3.dist-info"
         dist_info_path.mkdir(parents=True)
         record_path = dist_info_path / "RECORD"
-        record_path.write_text("\n".join(contents))
+        _ = record_path.write_text("\n".join(contents))
         return record_path
 
     def create_top_level_txt(
@@ -63,7 +63,7 @@ class VenvManager:
         dist_info_path = site_packages_path / f"{dependency_name}-1.2.3.dist-info"
         dist_info_path.mkdir(parents=True)
         top_level_txt_path = dist_info_path / "top_level.txt"
-        top_level_txt_path.write_text("\n".join(contents))
+        _ = top_level_txt_path.write_text("\n".join(contents))
         return top_level_txt_path
 
     def create_source_file(
@@ -74,7 +74,7 @@ class VenvManager:
         """Create a source file with the given contents."""
         filepath = self.temporary_path / relative_filepath
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.write_text("\n".join(contents))
+        _ = filepath.write_text("\n".join(contents))
         return filepath
 
 

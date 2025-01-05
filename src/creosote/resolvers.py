@@ -22,10 +22,12 @@ class DepsResolver:
         ]
         self.venvs: List[str] = venvs
 
-        self.top_level_txt_pattern = re.compile(
+        self.top_level_txt_pattern: re.Pattern[str] = re.compile(
             r"\/([\w\.]*).[\d\.]*.dist-info\/top_level.txt"
         )
-        self.record_pattern = re.compile(r"\/([\w\.]*).[\d\.]*.dist-info\/RECORD")
+        self.record_pattern: re.Pattern[str] = re.compile(
+            r"\/([\w\.]*).[\d\.]*.dist-info\/RECORD"
+        )
 
         self.top_level_filepaths: List[pathlib.Path] = []
         self.record_filepaths: List[pathlib.Path] = []
@@ -82,7 +84,9 @@ class DepsResolver:
 
         for top_level_filepath in self.top_level_filepaths:
             normalized_top_level_filepath = top_level_filepath.as_posix()
-            matches = self.top_level_txt_pattern.findall(normalized_top_level_filepath)
+            matches: List[str] = self.top_level_txt_pattern.findall(
+                normalized_top_level_filepath
+            )
             for name_from_top_level in matches:
                 if (
                     self.canonicalize_module_name(name_from_top_level).lower()
@@ -96,7 +100,7 @@ class DepsResolver:
                     import_names = ", ".join(dep_info.top_level_import_names)
                     logger.debug(
                         f"[{dep_info.name}] found import name(s) "
-                        f"via top_level.txt: {import_names} ⭐️"
+                        + f"via top_level.txt: {import_names} ⭐️"
                     )
                     return True
         logger.debug(f"[{dep_info.name}] did not find dep in a top_level.txt file")
@@ -105,7 +109,7 @@ class DepsResolver:
     def map_dep_to_import_via_record_file(self, dep_info: DependencyInfo) -> bool:
         for record_filepath in self.record_filepaths:
             normalized_record_filepath = record_filepath.as_posix()
-            matches = self.record_pattern.findall(normalized_record_filepath)
+            matches: List[str] = self.record_pattern.findall(normalized_record_filepath)
             for name_from_record in matches:
                 if (
                     self.canonicalize_module_name(name_from_record).lower()
@@ -116,7 +120,7 @@ class DepsResolver:
                     ) as infile:
                         lines = infile.readlines()
 
-                    import_names_found = []
+                    import_names_found: List[str] = []
                     for line in lines:
                         candidate, _hash, _size = line.split(",")
                         if candidate.endswith(".py") and "__init__" in candidate:
@@ -129,7 +133,7 @@ class DepsResolver:
                             import_names = ",".join(dep_info.record_import_names)
                             logger.debug(
                                 f"[{dep_info.name}] found import name "
-                                f"via RECORD: {import_names} ⭐️"
+                                + f"via RECORD: {import_names} ⭐️"
                             )
                             return True
 
@@ -139,7 +143,7 @@ class DepsResolver:
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
 
-    def populate_dependency_info(self):
+    def populate_dependency_info(self) -> None:
         """Populate DependencyInfo object with import naming info.
 
         There are three strategies from where the import name can be
@@ -168,10 +172,12 @@ class DepsResolver:
             if not found_via_top_level_txt and not found_via_record:
                 logger.debug(
                     f"[{dep_info.name}] relying on canonicalization "
-                    f"fallback: {dep_info.canonicalized_dep_name } 🤞"
+                    + f"fallback: {dep_info.canonicalized_dep_name } 🤞"
                 )
 
-    def associate_dep_with_import(self, dep_info: DependencyInfo, import_name: str):
+    def associate_dep_with_import(
+        self, dep_info: DependencyInfo, import_name: str
+    ) -> None:
         for imp in self.imports.copy():
             if not imp.module and import_name in imp.name:
                 # import <imp.name>
@@ -181,7 +187,7 @@ class DepsResolver:
                 # from <imp.name> import ...
                 dep_info.associated_imports.append(imp)
 
-    def resolve(self):
+    def resolve(self) -> None:
         """Associate dependency name with import (module) name.
 
         The AST has found imports from the source code. This function
@@ -213,8 +219,8 @@ class DepsResolver:
             if not Path(venv).exists():
                 logger.warning(
                     f"Virtual environment(s) '{', '.join(self.venvs)}' does not exist, "
-                    "cannot resolve top-level names. "
-                    "This may lead to incorrect results."
+                    + "cannot resolve top-level names. "
+                    + "This may lead to incorrect results."
                 )
             self.gather_top_level_filepaths(venv=venv)
             self.gather_record_filepaths(venv=venv)
@@ -225,7 +231,7 @@ class DepsResolver:
 
         logger.debug(
             "Dependencies with populated 'associated_import' attribute are used in "
-            "code. End result of resolve:"
+            + "code. End result of resolve:"
         )
         for dep_info in self.dependencies:
             logger.debug(f"- {dep_info}")
