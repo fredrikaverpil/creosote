@@ -106,6 +106,3 @@ python_version = "3.8"
 [[tool.mypy.overrides]]
 module = ["dotty_dict.*", "pip_requirements_parser.*", "tomli.*"]
 ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-addopts = "--ignore=tests/manual"
