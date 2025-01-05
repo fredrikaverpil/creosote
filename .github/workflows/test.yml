@@ -89,3 +89,21 @@ jobs:
           Write-Host "VIRTUAL_ENV: $env:VIRTUAL_ENV"
           pip install --upgrade .
           creosote --venv .venv --exclude-dep tomli
+
+  pre-commit:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        id: cpython_setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install pre-commit
+      - run: pre-commit install
+      - run: "git commit --allow-empty -m 'chore: pre-commit run'"
