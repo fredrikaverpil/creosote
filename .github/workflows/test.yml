@@ -106,4 +106,15 @@ jobs:
           cache: pip
       - run: pip install pre-commit
       - run: pre-commit install
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - run: "git commit --allow-empty -m 'chore: pre-commit run'"
+
+      - name: Check pre-commit rev format
+        # this is needed because release-please does not add in the "v" prefix
+        run: |
+          if grep "rev:" .pre-commit-config.yaml | grep -v "rev: v"; then
+            echo "Error: Found rev: entries without 'v' prefix"
+            exit 1
+          fi
