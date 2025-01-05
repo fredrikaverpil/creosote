@@ -12,6 +12,7 @@ The general idea:
 
 """
 
+import sys
 from typing import List
 
 import pytest
@@ -626,16 +627,26 @@ def test_repeated_arguments_are_accepted(
     installed_dependencies = deps_and_imports_map.keys()
     imports = deps_and_imports_map.values()
 
+    if sys.platform == "win32":
+        contents = [
+            "ruamel.yaml-0.18.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4",
+            "ruamel\\yaml\\__init__.py,sha256=2t1h--HjEw1ll5f5Y90KY7zXf4_4V1z5mSIEgoDZ1-o,1920",
+            "ruamel\\yaml\\__pycache__\\__init__.cpython-38.pyc,,",
+            "ruamel\\yaml\\anchor.py,sha256=tuPKumHX6SstzrNylamMffqJvOwnPspP3_z2Nbaezj0,481",
+        ]
+    else:
+        contents = [
+            "ruamel.yaml-0.18.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4",
+            "ruamel/yaml/__init__.py,sha256=2t1h--HjEw1ll5f5Y90KY7zXf4_4V1z5mSIEgoDZ1-o,1920",
+            "ruamel/yaml/__pycache__/__init__.cpython-38.pyc,,",
+            "ruamel/yaml/anchor.py,sha256=tuPKumHX6SstzrNylamMffqJvOwnPspP3_z2Nbaezj0,481",
+        ]
+
     for dependency_name in installed_dependencies:
-        venv_manager.create_record(
+        _ = venv_manager.create_record(
             site_packages_path=site_packages_path,
             dependency_name=dependency_name,
-            contents=[
-                "ruamel.yaml-0.18.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4",
-                "ruamel/yaml/__init__.py,sha256=2t1h--HjEw1ll5f5Y90KY7zXf4_4V1z5mSIEgoDZ1-o,1920",
-                "ruamel/yaml/__pycache__/__init__.cpython-38.pyc,,",
-                "ruamel/yaml/anchor.py,sha256=tuPKumHX6SstzrNylamMffqJvOwnPspP3_z2Nbaezj0,481",
-            ],
+            contents=contents,
         )
 
     source_files = []
