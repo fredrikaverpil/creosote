@@ -9,6 +9,3 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    allow:
-      - dependency-name: "*"
-        dependency-type: all
