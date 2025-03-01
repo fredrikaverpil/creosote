@@ -33,8 +33,12 @@ PEP735Type2 = dict[GroupName, list[Union[dict[str, PackageName], str]]]
 PEP735Types = Union[PEP735Type1, PEP735Type2]
 PoetryType1 = dict[PackageName, str]
 PoetryType2 = dict[PackageName, dict[str, str]]
-PoetryTypes = Union[PoetryType1, PoetryType2]
-PipfileType = dict[PackageName, str]
+PoetryType3 = dict[PackageName, Union[str, dict[str, str]]]
+PoetryTypes = Union[PoetryType1, PoetryType2, PoetryType3]
+PipfileType1 = dict[PackageName, str]
+PipfileType2 = dict[PackageName, dict[str, str]]
+PipfileType3 = dict[PackageName, Union[str, dict[str, str]]]
+PipfileTypes = Union[PipfileType1, PipfileType2, PipfileType3]
 AllSupportedTypes = Union[
     PEP621Type1,
     PEP621Type2,
@@ -42,30 +46,41 @@ AllSupportedTypes = Union[
     PEP735Type2,
     PoetryType1,
     PoetryType2,
-    PipfileType,
+    PoetryType3,
+    PipfileType1,
+    PipfileType2,
+    PipfileType3,
 ]
 
 
-def is_list_type(value: AllSupportedTypes) -> TypeGuard[PEP621Type1]:
-    return isinstance(value, list)
+def is_list_type(var: AllSupportedTypes) -> TypeGuard[PEP621Type1]:
+    return isinstance(var, list)
 
 
 def is_dict_of_strings(
-    value: AllSupportedTypes,
-) -> TypeGuard[Union[PoetryType1, PipfileType]]:
-    return isinstance(value, dict) and all(isinstance(v, str) for v in value.values())
+    var: AllSupportedTypes,
+) -> TypeGuard[Union[PoetryType1, PipfileType1]]:
+    return isinstance(var, dict) and all(isinstance(v, str) for v in var.values())
 
 
 def is_dict_of_lists(
-    value: AllSupportedTypes,
+    var: AllSupportedTypes,
 ) -> TypeGuard[Union[PEP621Type2, PEP735Type1]]:
-    return isinstance(value, dict) and all(isinstance(v, list) for v in value.values())
+    return isinstance(var, dict) and all(isinstance(v, list) for v in var.values())
 
 
 def is_dict_of_dicts(
-    value: AllSupportedTypes,
-) -> TypeGuard[PoetryType2]:
-    return isinstance(value, dict) and all(isinstance(v, dict) for v in value.values())
+    var: AllSupportedTypes,
+) -> TypeGuard[Union[PoetryType2, PipfileType2]]:
+    return isinstance(var, dict) and all(isinstance(v, dict) for v in var.values())
+
+
+def is_dict_of_union(
+    var: AllSupportedTypes,
+) -> TypeGuard[Union[PoetryType3, PipfileType3]]:
+    if not isinstance(var, dict):
+        return False
+    return all(isinstance(v, (str, dict)) for v in var.values())
 
 
 class DependencyReader:
@@ -173,10 +188,14 @@ class DependencyReader:
 
     def get_deps_from_toml_section_keys(
         self,
-        section_contents: Union[PoetryTypes, PipfileType],
+        section_contents: Union[PoetryTypes, PipfileTypes],
     ) -> list[PackageName]:
         """Get dependency names from toml section's dict keys."""
-        if is_dict_of_strings(section_contents) or is_dict_of_dicts(section_contents):
+        if is_dict_of_strings(section_contents):
+            return list(section_contents.keys())
+        if is_dict_of_dicts(section_contents):
+            return list(section_contents.keys())
+        if is_dict_of_union(section_contents):
             return list(section_contents.keys())
 
         raise TypeError("Unexpected dependency format, dict expected.")
@@ -221,7 +240,7 @@ class DependencyReader:
             elif section.startswith("packages") or section.startswith("dev-packages"):
                 logger.debug(f"Detected pipenv/Pipfile toml section in {deps_file}")
                 section_dep_names = self.get_deps_from_toml_section_keys(
-                    cast(PipfileType, section_contents)
+                    cast(PipfileType1, section_contents)
                 )
             else:
                 raise TypeError("Unsupported dependency format.")
