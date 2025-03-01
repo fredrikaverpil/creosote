@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/fredrikaverpil/creosote/compare/v4.0.0...v4.0.1) (2025-03-01)
+
+
+### Bug Fixes
+
+* support dependency spec where version can either be str or dict ([#270](https://github.com/fredrikaverpil/creosote/issues/270)) ([4f36024](https://github.com/fredrikaverpil/creosote/commit/4f360248fedde8aff44b9241a1fd746f6de5bdeb))
+
 ## [4.0.0](https://github.com/fredrikaverpil/creosote/compare/v3.2.0...v4.0.0) (2025-01-05)
 
 
