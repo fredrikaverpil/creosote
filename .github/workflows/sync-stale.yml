@@ -1,0 +1,11 @@
+name: stale
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    uses: fredrikaverpil/github/.github/workflows/stale.yml@main
+    secrets: inherit
