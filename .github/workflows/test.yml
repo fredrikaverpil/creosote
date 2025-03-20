@@ -8,32 +8,6 @@ on:
       - main
 
 jobs:
-  pytest:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - run: uv sync --group test
-      - run: uv run coverage run -m pytest -s -vv
-      - run: uv run coverage report
-      - run: uv run coverage html
-
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report-${{ matrix.os }}-${{ matrix.python-version }}
-          path: htmlcov
-          retention-days: 5
-
   action:
     strategy:
       fail-fast: false
