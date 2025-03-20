@@ -1,0 +1,18 @@
+name: pr
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  pull-requests: read
+
+jobs:
+  title:
+    uses: fredrikaverpil/github/.github/workflows/pr.yml@main
+    secrets: inherit

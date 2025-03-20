@@ -1,0 +1,11 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  title:
+    uses: fredrikaverpil/github/.github/workflows/release-please.yml@main
+    secrets: inherit
