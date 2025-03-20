@@ -1,0 +1,26 @@
+name: sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1" # Monday at 8am
+
+jobs:
+  sync:
+    name: workflows
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: run sync-workflows action
+        uses: fredrikaverpil/github/.github/actions/sync-workflows@main
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          commit-message: "ci(workflows): sync with fredrikaverpil/github"
+          title: "ci(workflows): sync with fredrikaverpil/github"
+          body: |
+            This PR syncs the GitHub repo with CI workflows from the [fredrikaverpil/github](https://github.com/fredrikaverpil/github) repository.
+          branch: ci/sync-workflows
+          delete-branch: true
