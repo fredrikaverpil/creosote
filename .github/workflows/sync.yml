@@ -6,31 +6,11 @@ on:
     - cron: "0 8 * * 1" # Monday at 8am
 
 jobs:
-  find-dirs:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.find-dirs.outputs.matrix }}
-    steps:
-      - name: checkout repo
-        uses: actions/checkout@v4
-
-      - name: find project directories
-        id: find-dirs
-        uses: fredrikaverpil/github/.github/actions/find-dirs@main
-        with:
-          file_patterns: "go.mod,pyproject.toml,uv.lock,requirements.txt,package.json"
-
   sync:
     runs-on: ubuntu-latest
-    needs: find-dirs
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
-
-      - name: generate dependabot.yml
-        uses: fredrikaverpil/github/.github/actions/generate-dependabot@main
-        with:
-          matrix: ${{ needs.find-dirs.outputs.matrix }}
 
       - name: run sync-workflows action
         uses: fredrikaverpil/github/.github/actions/sync-workflows@main
