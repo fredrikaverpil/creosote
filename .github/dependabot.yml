@@ -28,17 +28,3 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
-
-  - package-ecosystem: "pip"
-    directories:
-      - tests/deps_files
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    groups:
-      pip-minor-patch:
-        patterns: ["*"]
-        update-types: ["minor", "patch"]
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
