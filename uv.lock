@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.9"
 
 [[package]]
@@ -201,7 +202,7 @@ wheels = [
 
 [[package]]
 name = "creosote"
-version = "4.0.0"
+version = "4.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "dotty-dict" },
@@ -209,7 +210,7 @@ dependencies = [
     { name = "nbconvert" },
     { name = "nbformat" },
     { name = "pip-requirements-parser" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli" },
     { name = "typing-extensions" },
 ]
 
@@ -235,13 +236,13 @@ types = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dotty-dict", specifier = ">=1.3.1,<1.4" },
-    { name = "loguru", specifier = ">=0.6.0,<0.8" },
+    { name = "dotty-dict", specifier = "==1.3.1" },
+    { name = "loguru", specifier = "==0.7.3" },
     { name = "nbconvert", specifier = ">=7.16.4,<8.0" },
-    { name = "nbformat", specifier = ">=5.10.4,<6.0" },
-    { name = "pip-requirements-parser", specifier = ">=32.0.1,<33.1" },
-    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.1.0,<3.0.0" },
-    { name = "typing-extensions", specifier = ">=4.12.2" },
+    { name = "nbformat", specifier = "==5.10.4" },
+    { name = "pip-requirements-parser", specifier = "==32.0.1" },
+    { name = "tomli", specifier = "==2.2.1" },
+    { name = "typing-extensions", specifier = "==4.12.2" },
 ]
 
 [package.metadata.requires-dev]
@@ -578,7 +579,7 @@ wheels = [
 
 [[package]]
 name = "nbconvert"
-version = "7.16.5"
+version = "7.16.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -597,9 +598,9 @@ dependencies = [
     { name = "pygments" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/46/2c/d026c0367f2be2463d4c2f5b538e28add2bc67bc13730abb7f364ae4eb8b/nbconvert-7.16.5.tar.gz", hash = "sha256:c83467bb5777fdfaac5ebbb8e864f300b277f68692ecc04d6dab72f2d8442344", size = 856367 }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/59/f28e15fc47ffb73af68a8d9b47367a8630d76e97ae85ad18271b9db96fdf/nbconvert-7.16.6.tar.gz", hash = "sha256:576a7e37c6480da7b8465eefa66c17844243816ce1ccc372633c6b71c3c0f582", size = 857715 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/9e/2dcc9fe00cf55d95a8deae69384e9cea61816126e345754f6c75494d32ec/nbconvert-7.16.5-py3-none-any.whl", hash = "sha256:e12eac052d6fd03040af4166c563d76e7aeead2e9aadf5356db552a1784bd547", size = 258061 },
+    { url = "https://files.pythonhosted.org/packages/cc/9a/cd673b2f773a12c992f41309ef81b99da1690426bd2f96957a7ade0d3ed7/nbconvert-7.16.6-py3-none-any.whl", hash = "sha256:1375a7b67e0c2883678c48e506dc320febb57685e5ee67faa51b18a90f3a712b", size = 258525 },
 ]
 
 [[package]]
