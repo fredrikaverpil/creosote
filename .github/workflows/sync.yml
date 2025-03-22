@@ -1,3 +1,6 @@
+# MANAGED BY fredrikaverpil/github - DO NOT EDIT
+# This file is automatically updated during sync operations
+# Source: https://github.com/fredrikaverpil/github
 name: sync
 
 on:
@@ -19,9 +22,10 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.SYNC_TOKEN }}
+          branch: ci/sync-workflows
           commit-message: "ci(workflows): sync with fredrikaverpil/github"
           title: "ci(workflows): sync with fredrikaverpil/github"
           body: |
             This PR syncs the GitHub repo with CI workflows from the [fredrikaverpil/github](https://github.com/fredrikaverpil/github) repository.
-          branch: ci/sync-workflows
-          delete-branch: true
+          committer: GitHub Bot <github-actions[bot]@users.noreply.github.com>
+          author: GitHub Bot <github-actions[bot]@users.noreply.github.com>
