@@ -7,13 +7,14 @@ on:
 
 jobs:
   sync:
-    name: workflows
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
+
       - name: run sync-workflows action
         uses: fredrikaverpil/github/.github/actions/sync-workflows@main
+
       - name: create pull request
         uses: peter-evans/create-pull-request@v7
         with:

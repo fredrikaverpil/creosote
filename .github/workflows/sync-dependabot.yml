@@ -1,0 +1,13 @@
+name: dependabot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1" # Monday at 8am
+
+jobs:
+  title:
+    uses: fredrikaverpil/github/.github/workflows/gen-dependabot.yml@main
+    with:
+      exclude_patterns: "tests/**"
+    secrets: inherit
