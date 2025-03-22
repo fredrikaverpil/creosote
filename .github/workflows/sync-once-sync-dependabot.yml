@@ -1,0 +1,16 @@
+# SAFE TO CUSTOMIZE - This file is copied once and not overwritten during sync
+# Source: https://github.com/fredrikaverpil/github
+name: dependabot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1" # Monday at 8am
+
+jobs:
+  generate:
+    uses: fredrikaverpil/github/.github/workflows/gen-dependabot.yml@main
+    # with:
+    #   file_patterns: "go.mod,uv.lock"
+    #   exclude_patterns: "**/tests/**,path/to/specific/directory/**"
+    secrets: inherit

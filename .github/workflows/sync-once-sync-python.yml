@@ -1,3 +1,5 @@
+# SAFE TO CUSTOMIZE - This file is copied once and not overwritten during sync
+# Source: https://github.com/fredrikaverpil/github
 name: python
 
 on:
@@ -11,5 +13,5 @@ jobs:
   ci:
     uses: fredrikaverpil/github/.github/workflows/python.yml@main
     with:
-      python-versions: '["3.9", "3.10", "3.11", "3.12", "3.13"]'
+      python-versions: '["3.13"]'
       os-versions: '["ubuntu-latest"]'
