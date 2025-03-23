@@ -16,3 +16,5 @@ jobs:
     with:
       python-versions: '["3.9", "3.10", "3.11", "3.12", "3.13"]'
       os-versions: '["ubuntu-latest"]'
+      file_patterns: "uv.lock"
+      exclude_patterns: "tests/deps_files/"
