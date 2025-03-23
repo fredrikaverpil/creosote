@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/fredrikaverpil/creosote/compare/v4.0.1...v4.0.2) (2025-03-23)
+
+
+### Documentation
+
+* remove badge ([#279](https://github.com/fredrikaverpil/creosote/issues/279)) ([b9b8b53](https://github.com/fredrikaverpil/creosote/commit/b9b8b53aacd089d463ca2925f0baac38e3798c20))
+
 ## [4.0.1](https://github.com/fredrikaverpil/creosote/compare/v4.0.0...v4.0.1) (2025-03-01)
 
 
