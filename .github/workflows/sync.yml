@@ -1,6 +1,7 @@
 # MANAGED BY fredrikaverpil/github - DO NOT EDIT
 # This file is automatically updated during sync operations
 # Source: https://github.com/fredrikaverpil/github
+
 name: sync
 
 on:
@@ -15,7 +16,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v4
 
-      - name: run sync-workflows action
+      - name: run sync action
         uses: fredrikaverpil/github/.github/actions/sync@main
 
       - name: create pull request

@@ -1,0 +1,61 @@
+# SAFE TO CUSTOMIZE - This file is copied once and not overwritten during sync
+# Source: https://github.com/fredrikaverpil/github
+
+# SAFE TO CUSTOMIZE - This file is copied once and not overwritten during sync
+# Source: https://github.com/fredrikaverpil/github
+
+version: '3'
+
+vars:
+  TASKFILES:
+    sh: find . -type f -name "Taskfile.*.yml" -not -path "*/node_modules/*" -not -path "*/.git/*" | sort
+
+tasks:
+  default:
+    desc: List all available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  all:
+    desc: Run all static checking and tests
+    cmds:
+      - task: format
+      - task: lint
+      - task: test
+
+  format:
+    desc: Run format task from all taskfiles
+    cmds:
+      - cmd: task -t {{.TASKFILE}} format
+        for:
+          var: TASKFILES
+          split: "\n"
+          as: TASKFILE
+
+  lint:
+    desc: Run lint task from all taskfiles
+    cmds:
+      - cmd: task -t {{.TASKFILE}} lint
+        for:
+          var: TASKFILES
+          split: "\n"
+          as: TASKFILE
+
+  test:
+    desc: Run test task from all taskfiles
+    cmds:
+      - cmd: task -t {{.TASKFILE}} test
+        for:
+          var: TASKFILES
+          split: "\n"
+          as: TASKFILE
+
+  install:
+    desc: Run install task from all taskfiles
+    cmds:
+      - cmd: task -t {{.TASKFILE}} install
+        for:
+          var: TASKFILES
+          split: "\n"
+          as: TASKFILE
