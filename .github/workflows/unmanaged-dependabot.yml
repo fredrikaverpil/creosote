@@ -1,5 +1,6 @@
 # SAFE TO CUSTOMIZE - This file is copied once and not overwritten during sync
 # Source: https://github.com/fredrikaverpil/github
+
 name: dependabot
 
 on:
