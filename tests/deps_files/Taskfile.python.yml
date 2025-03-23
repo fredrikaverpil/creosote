@@ -13,13 +13,13 @@ tasks:
   format:
     desc: Format with ruff
     cmds:
-      - uv sync --group lint
+      - task: install
       - uv run ruff format --diff src tests
 
   lint:
     desc: Lint with ruff
     cmds:
-      - uv sync --group lint
+      - task: install
       - uv run ruff check --diff src tests
       - task: mypy
 
@@ -31,7 +31,7 @@ tasks:
   pytest:
     desc: Run tests with pytest and coverage
     cmds:
-      - uv sync --group test
+      - task: install
       - uv run coverage run -m pytest -s -vv
       - uv run coverage report
       - uv run coverage html
@@ -39,7 +39,7 @@ tasks:
   mypy:
     desc: Run mypy types checking
     cmds:
-      - uv sync --group types
+      - task: install
       - uv run mypy src
 
   install:
