@@ -35,15 +35,12 @@ class VenvManager:
         site_packages_path: Path,
         dependency_name: str,
         contents: list[str],
+        version: str = "1.2.3",  # Add version parameter
     ) -> Path:
-        """Simulate an installed dependency and its RECORD file.
-
-        This is the most reliable way for creosote to find a dependency
-        and correlate its import naming against the actual dependency
-        name.
-        """
-        dist_info_path = site_packages_path / f"{dependency_name}-1.2.3.dist-info"
-        dist_info_path.mkdir(parents=True)
+        """Simulate an installed dependency and its RECORD file."""
+        # Use the provided version in the directory name
+        dist_info_path = site_packages_path / f"{dependency_name}-{version}.dist-info"
+        dist_info_path.mkdir(parents=True, exist_ok=True)
         record_path = dist_info_path / "RECORD"
         _ = record_path.write_text("\n".join(contents))
         return record_path
@@ -53,15 +50,12 @@ class VenvManager:
         site_packages_path: Path,
         dependency_name: str,
         contents: list[str],
+        version: str = "1.2.3",  # Add version parameter
     ) -> Path:
-        """Simulate an installed dependency and its top_level.txt file.
-
-        This is a less reliable way for creosote to find a dependency
-        and correlate its import naming against the actual dependency
-        name.
-        """
-        dist_info_path = site_packages_path / f"{dependency_name}-1.2.3.dist-info"
-        dist_info_path.mkdir(parents=True)
+        """Simulate an installed dependency and its top_level.txt file."""
+        # Use the provided version in the directory name
+        dist_info_path = site_packages_path / f"{dependency_name}-{version}.dist-info"
+        dist_info_path.mkdir(parents=True, exist_ok=True)
         top_level_txt_path = dist_info_path / "top_level.txt"
         _ = top_level_txt_path.write_text("\n".join(contents))
         return top_level_txt_path

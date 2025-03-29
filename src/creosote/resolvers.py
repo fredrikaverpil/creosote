@@ -7,6 +7,10 @@ from loguru import logger
 
 from creosote.models import DependencyInfo, ImportInfo
 
+# Define the PEP 440 compliant version pattern (non-capturing)
+# Based on https://packaging.python.org/en/latest/specifications/version-specifiers/#appendix-parsing-version-strings-with-regular-expressions
+VERSION_PATTERN_STR = r"v?(?:(?:[0-9]+!)?(?:[0-9]+(?:\.[0-9]+)*)(?:(?:[-_\.]?(?:a|b|c|rc|alpha|beta|pre|preview)[-_\.]?(?:[0-9]+)?))?(?:(?:-(?:[0-9]+))|(?:[-_\.]?(?:post|rev|r)[-_\.]?(?:[0-9]+)?))?(?:(?:[-_\.]?(?:dev)[-_\.]?(?:[0-9]+)?))?)(?:\+[a-z0-9]+(?:[-_\.][a-z0-9]+)*)?"
+
 
 class DepsResolver:
     def __init__(
@@ -21,11 +25,16 @@ class DepsResolver:
         ]
         self.venvs: list[str] = venvs
 
+        # Capture package names before PEP 440 compliant versions
+        # Package name allows letters, numbers, underscore, dot, hyphen
+        # Version part uses the non-capturing pattern defined above
+        # Compiled with re.IGNORECASE for version specifier case-insensitivity (e.g., rc vs RC)
         self.top_level_txt_pattern: re.Pattern[str] = re.compile(
-            r"\/([\w\.]*).[\d\.]*.dist-info\/top_level.txt"
+            rf"\/([\w\.-]+)-(?:{VERSION_PATTERN_STR})\.dist-info\/top_level\.txt",
+            re.IGNORECASE,
         )
         self.record_pattern: re.Pattern[str] = re.compile(
-            r"\/([\w\.]*).[\d\.]*.dist-info\/RECORD"
+            rf"\/([\w\.-]+)-(?:{VERSION_PATTERN_STR})\.dist-info\/RECORD", re.IGNORECASE
         )
 
         self.top_level_filepaths: list[pathlib.Path] = []

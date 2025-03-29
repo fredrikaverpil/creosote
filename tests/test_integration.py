@@ -687,3 +687,71 @@ def test_ruamel(
 
     assert "No unused dependencies found! ✨" in actual_output
     assert exit_code == 0
+
+
+def test_dependency_with_prerelease_version_found(
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+) -> None:
+    """Tests that a dependency with a pre-release version (PEP 440) is correctly parsed and found."""
+
+    # arrange
+    dependency_name = "google-cloud-storage"
+    version = "3.0.0rc1"
+    # Simulate common import pattern for google cloud libraries
+    import_name_parts = ["google", "cloud", "storage"]
+    import_name = ".".join(import_name_parts)
+    top_level_import_name = import_name_parts[0]  # Often just 'google' in top_level.txt
+
+    venv_path, site_packages_path = venv_manager.create_venv()
+
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            # Define the dependency in the project file
+            f'"{dependency_name}>=3.0.0rc0",',
+            "]",
+        ],
+    )
+
+    # Create the dist-info with the specific pre-release version using the updated fixture
+    _ = venv_manager.create_top_level_txt(
+        site_packages_path=site_packages_path,
+        dependency_name=dependency_name,
+        contents=[top_level_import_name],  # Simulate top_level.txt content
+        version=version,  # Pass the specific version
+    )
+
+    source_file = venv_manager.create_source_file(
+        relative_filepath="src/main.py",
+        contents=[
+            f"import {import_name}",  # Import the library
+            f"print({import_name})",  # Use the import to avoid unused warnings
+        ],
+    )
+
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        "project.dependencies",
+        "--format",
+        "no-color",
+    ]
+
+    # act
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+    assert actual_output == [
+        f"Found dependencies in {deps_filepath}: {dependency_name}",
+        "No unused dependencies found! ✨",
+    ]
+    assert exit_code == 0
