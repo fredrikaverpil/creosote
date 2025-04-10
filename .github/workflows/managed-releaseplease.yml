@@ -13,4 +13,5 @@ on:
 jobs:
   title:
     uses: fredrikaverpil/github/.github/workflows/release-please.yml@main
-    secrets: inherit
+    secrets:
+      SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
