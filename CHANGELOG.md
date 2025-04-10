@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.3](https://github.com/fredrikaverpil/creosote/compare/v4.0.2...v4.0.3) (2025-04-10)
+
+
+### Bug Fixes
+
+* **poetry:** support list ([#311](https://github.com/fredrikaverpil/creosote/issues/311)) ([57cbb43](https://github.com/fredrikaverpil/creosote/commit/57cbb43588c06f3789092ebc380e2fc2d345bab2))
+
 ## [4.0.2](https://github.com/fredrikaverpil/creosote/compare/v4.0.1...v4.0.2) (2025-03-29)
 
 
