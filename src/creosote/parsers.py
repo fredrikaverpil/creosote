@@ -34,7 +34,8 @@ PEP735Types = Union[PEP735Type1, PEP735Type2]
 PoetryType1 = dict[PackageName, str]
 PoetryType2 = dict[PackageName, dict[str, str]]
 PoetryType3 = dict[PackageName, Union[str, dict[str, str]]]
-PoetryTypes = Union[PoetryType1, PoetryType2, PoetryType3]
+PoetryType4 = dict[PackageName, list[dict[str, str]]]
+PoetryTypes = Union[PoetryType1, PoetryType2, PoetryType3, PoetryType4]
 PipfileType1 = dict[PackageName, str]
 PipfileType2 = dict[PackageName, dict[str, str]]
 PipfileType3 = dict[PackageName, Union[str, dict[str, str]]]
@@ -47,6 +48,7 @@ AllSupportedTypes = Union[
     PoetryType1,
     PoetryType2,
     PoetryType3,
+    PoetryType4,
     PipfileType1,
     PipfileType2,
     PipfileType3,
@@ -65,8 +67,19 @@ def is_dict_of_strings(
 
 def is_dict_of_lists(
     var: AllSupportedTypes,
-) -> TypeGuard[Union[PEP621Type2, PEP735Type1]]:
+) -> TypeGuard[Union[PEP621Type2, PEP735Type1, PEP735Type2, PoetryType4]]:
     return isinstance(var, dict) and all(isinstance(v, list) for v in var.values())
+
+
+def is_pep621_dict_of_lists(
+    var: AllSupportedTypes,
+) -> TypeGuard[PEP621Type2]:
+    """Type guard specifically for PEP621Type2."""
+    return (
+        isinstance(var, dict)
+        and all(isinstance(v, list) for v in var.values())
+        and all(all(isinstance(item, str) for item in v) for v in var.values())
+    )
 
 
 def is_dict_of_dicts(
@@ -140,7 +153,7 @@ class DependencyReader:
         if is_list_type(section_contents):
             for dep_string in section_contents:
                 dep_strings.append(dep_string)
-        elif is_dict_of_lists(section_contents):
+        elif is_pep621_dict_of_lists(section_contents):
             for _, dep_string_list in section_contents.items():
                 for dep_string in dep_string_list:
                     dep_strings.append(dep_string)
@@ -186,19 +199,17 @@ class DependencyReader:
 
         return section_deps
 
+    def assert_is_dict(self, obj: object) -> None:
+        if not isinstance(obj, dict):
+            raise TypeError("Unexpected dependency format, dict expected.")
+
     def get_deps_from_toml_section_keys(
         self,
         section_contents: Union[PoetryTypes, PipfileTypes],
     ) -> list[PackageName]:
         """Get dependency names from toml section's dict keys."""
-        if is_dict_of_strings(section_contents):
-            return list(section_contents.keys())
-        if is_dict_of_dicts(section_contents):
-            return list(section_contents.keys())
-        if is_dict_of_union(section_contents):
-            return list(section_contents.keys())
-
-        raise TypeError("Unexpected dependency format, dict expected.")
+        self.assert_is_dict(section_contents)
+        return list(section_contents.keys())
 
     def read_toml(self, deps_file: str, sections: list[str]) -> list[str]:
         """Read dependency names from toml spec file."""
