@@ -361,6 +361,41 @@ def test_no_unused_dependencies_found(  # noqa: PLR0913
         ),
         pytest.param(
             *[
+                "pyproject.toml",
+                "tool.poetry.dependencies",
+                [
+                    "[tool.poetry.dependencies]",
+                    'python = ">=3.11, <3.12"',
+                    'dotty-dict = "^1.3.1"',
+                    'loguru = "^0.6.0"',
+                    'pip-requirements-parser = "^32.0.1"',
+                    'toml = "^0.10.2"',
+                    "yolo = [",  # NOTE: this is the unused dependency
+                    '    { markers = "extra != \'cuda\'", source = "pytorch-cpu"},',
+                    '    { markers = "extra == \'cuda", source = "pytorch-cuda"},',
+                    "]",
+                ],
+            ],
+            id="Poetry with list",
+        ),
+        pytest.param(
+            *[
+                "pyproject.toml",
+                "tool.poetry.dependencies",
+                [
+                    "[tool.poetry.dependencies]",
+                    'python = ">=3.11, <3.12"',
+                    'dotty-dict = "^1.3.1"',
+                    'loguru = "^0.6.0"',
+                    'pip-requirements-parser = "^32.0.1"',
+                    'toml = "^0.10.2"',
+                    'yolo = { source = "private-source" }',  # NOTE: unused dep here
+                ],
+            ],
+            id="Poetry with dict",
+        ),
+        pytest.param(
+            *[
                 "Pipfile",
                 "packages",
                 [
