@@ -14,7 +14,6 @@ updates:
     labels:
       - "dependencies"
 
-
   - package-ecosystem: "uv"
     directories: ["."]
     schedule:
