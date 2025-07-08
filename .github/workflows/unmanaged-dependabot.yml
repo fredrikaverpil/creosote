@@ -4,14 +4,47 @@
 name: dependabot
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * 1" # Monday at 8am
+    - cron: "0 9 * * 1"
 
 jobs:
-  generate:
-    uses: fredrikaverpil/github/.github/workflows/gen-dependabot.yml@main
-    # with:
-    #   file_patterns: "go.mod,uv.lock"
-    #   exclude_patterns: "**/tests/**,path/to/specific/directory/**"
-    secrets: inherit
+  generate-dependabot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Generate Dependabot Config
+        uses: fredrikaverpil/dependabot-generate@main  # not yet stable!
+        with:
+          exclude-paths: ".tools"
+          update-interval: "monthly"
+          additional-yaml: |
+            # custom updates for .tools directory
+              - package-ecosystem: "gomod"
+                directories: ["/.tools"]
+                allow:
+                  - dependency-type: indirect
+                schedule:
+                  interval: "monthly"
+                groups:
+                  gomod-tools:
+                    patterns: ["*"]
+                    update-types: ["minor", "patch"]
+                labels:
+                  - "dependencies"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          commit-message: "chore(dependabot): generate dependabot.yml"
+          title: "chore(dependabot): generate dependabot.yml"
+          body: "This PR adds the generated dependabot.yml file."
+          branch: "chore/dependabot-generate"
+          delete-branch: true
