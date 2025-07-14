@@ -11,7 +11,7 @@ on:
       - main
 
 jobs:
-  title:
+  ci:
     uses: fredrikaverpil/github/.github/workflows/release-please.yml@main
     secrets:
       SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}

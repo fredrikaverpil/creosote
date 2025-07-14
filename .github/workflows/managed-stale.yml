@@ -10,6 +10,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  stale:
+  ci:
     uses: fredrikaverpil/github/.github/workflows/stale.yml@main
     secrets: inherit
