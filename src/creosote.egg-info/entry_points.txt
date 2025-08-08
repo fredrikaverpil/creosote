@@ -1,0 +1,2 @@
+[console_scripts]
+creosote = creosote.cli:main

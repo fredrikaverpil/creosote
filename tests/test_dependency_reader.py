@@ -1,4 +1,5 @@
 import pytest
+from loguru import logger
 
 from creosote.parsers import DependencyReader
 
@@ -148,3 +149,31 @@ def test_pyproject_directref_package_name(
     assert expected_package == DependencyReader.dependency_without_direct_reference(
         dependency_string
     )
+
+
+def test_non_existing_sections_are_ignored() -> None:
+    """Test that non-existing sections are ignored gracefully."""
+    reader = DependencyReader(
+        deps_file="tests/deps_files/pyproject.pep621.toml",
+        sections=["project.dependencies", "project.optional-dependencies.doesnotexist"],
+        exclude_deps=[],
+    )
+    
+    dependencies = reader.read()
+    
+    # Should only get dependencies from existing section
+    assert dependencies == ["dotty-dict", "loguru", "toml"]
+
+
+def test_all_non_existing_sections_returns_empty_list() -> None:
+    """Test that when all sections are non-existing, an empty list is returned."""
+    reader = DependencyReader(
+        deps_file="tests/deps_files/pyproject.pep621.toml",
+        sections=["project.optional-dependencies.doesnotexist", "project.dependencies.another"],
+        exclude_deps=[],
+    )
+    
+    dependencies = reader.read()
+    
+    # Should return empty list when no sections exist
+    assert dependencies == []
