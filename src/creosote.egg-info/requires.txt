@@ -1,9 +1,0 @@
-dotty-dict<1.4,>=1.3.1
-loguru<0.8,>=0.6.0
-nbconvert<8.0,>=7.16.4
-nbformat<6.0,>=5.10.4
-pip-requirements-parser<33.1,>=32.0.1
-typing-extensions>=4.12.2
-
-[:python_version < "3.11"]
-tomli<3.0.0,>=2.1.0

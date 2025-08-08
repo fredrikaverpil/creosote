@@ -3,3 +3,4 @@ dist
 __pycache__
 htmlcov
 .coverage
+*.egg-info
