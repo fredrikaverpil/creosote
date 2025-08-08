@@ -222,8 +222,9 @@ class DependencyReader:
         for section in sections:
             try:
                 section_contents = cast(AllSupportedTypes, dotty_contents[section])
-            except KeyError as err:
-                raise KeyError(f"Could not find toml section {section}.") from err
+            except KeyError:
+                logger.warning(f"Ignoring non-existing section: {section}")
+                continue
 
             logger.debug(f"{sections}: {section_contents}")
 
