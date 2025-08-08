@@ -17,6 +17,6 @@ permissions:
   pull-requests: read
 
 jobs:
-  title:
+  ci:
     uses: fredrikaverpil/github/.github/workflows/pr.yml@main
     secrets: inherit
