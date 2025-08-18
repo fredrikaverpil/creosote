@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Generate Dependabot Config
         uses: fredrikaverpil/dependabot-generate@main  # not yet stable!
         with:
