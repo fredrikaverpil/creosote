@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/fredrikaverpil/creosote/compare/v4.0.3...v4.1.0) (2025-08-18)
+
+
+### Features
+
+* ignore missing deps sections with warning ([#323](https://github.com/fredrikaverpil/creosote/issues/323)) ([18aa596](https://github.com/fredrikaverpil/creosote/commit/18aa59645cc23cb36ceebe11b801c407e065bd56))
+
 ## [4.0.3](https://github.com/fredrikaverpil/creosote/compare/v4.0.2...v4.0.3) (2025-04-10)
 
 
