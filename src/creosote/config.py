@@ -179,8 +179,7 @@ def parse_args(args: Optional[Sequence[str]]) -> Config:
         choices=[v.value for v in Features.__members__.values()],
         default=defaults.features,
         help=(
-            "enable new/experimental functionality, "
-            "that may be backward incompatible"
+            "enable new/experimental functionality, that may be backward incompatible"
         ),
     )
 
