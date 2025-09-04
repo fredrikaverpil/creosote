@@ -180,7 +180,7 @@ class DepsResolver:
             if not found_via_top_level_txt and not found_via_record:
                 logger.debug(
                     f"[{dep_info.name}] relying on canonicalization "
-                    + f"fallback: {dep_info.canonicalized_dep_name } 🤞"
+                    + f"fallback: {dep_info.canonicalized_dep_name} 🤞"
                 )
 
     def associate_dep_with_import(
