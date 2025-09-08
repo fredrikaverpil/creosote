@@ -14,7 +14,8 @@ tasks:
     desc: Format with ruff
     cmds:
       - task: install
-      - uv run ruff format --diff src tests
+      - uv run ruff format src tests
+      - git diff --color=always --exit-code
 
   lint:
     desc: Lint with ruff
