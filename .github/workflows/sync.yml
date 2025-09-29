@@ -7,7 +7,7 @@ name: sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * 1" # Monday at 8am
+    - cron: "0 8 * * 1"  # Monday at 8am
 
 jobs:
   sync:
