@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: build package
         run: "pip wheel --no-deps --use-pep517 --wheel-dir=dist ."
 
       - name: save artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: wheel
           path: dist
@@ -35,7 +35,7 @@ jobs:
       id-token: write
     steps:
       - name: retrieve artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: wheel
           path: dist
