@@ -5,7 +5,7 @@ from typing import Optional
 
 from loguru import logger
 
-from creosote import formatters, parsers, resolvers
+from creosote import formatters, models, parsers, resolvers
 from creosote.__about__ import __version__
 from creosote.config import Features, fail_fast, parse_args
 
@@ -33,7 +33,7 @@ def main(args_: Optional[Sequence[str]] = None) -> int:
         )
         imports.extend(
             [
-                resolvers.ImportInfo(module=[], name=[django_import], alias=None)
+                models.ImportInfo(module=[], name=[django_import], alias=None)
                 for django_import in django_imports
             ]
         )

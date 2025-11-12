@@ -439,9 +439,7 @@ class InstalledAppsVisitor(ast.NodeVisitor):
                             app_name = element.value.split(".")[0]
                             self.installed_apps.append(app_name)
                 else:
-                    logger.warning(
-                        "INSTALLED_APPS is not a list or tuple, skipping."
-                    )
+                    logger.warning("INSTALLED_APPS is not a list or tuple, skipping.")
         self.generic_visit(node)
 
 
@@ -461,8 +459,6 @@ def get_modules_from_django_settings(settings_file: Path) -> List[str]:
     if not visitor.installed_apps:
         logger.warning(f"Could not find INSTALLED_APPS in {settings_file}.")
     else:
-        logger.info(
-            f"Found {len(visitor.installed_apps)} apps in {settings_file}."
-        )
+        logger.info(f"Found {len(visitor.installed_apps)} apps in {settings_file}.")
 
     return visitor.installed_apps
