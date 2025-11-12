@@ -1,5 +1,6 @@
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Optional
 
 from loguru import logger
@@ -24,6 +25,18 @@ def main(args_: Optional[Sequence[str]] = None) -> int:
 
     # Get imports from source code
     imports = parsers.get_module_names_from_code(args.paths)
+
+    # Get imports from Django settings file
+    if args.django_settings:
+        django_imports = parsers.get_modules_from_django_settings(
+            Path(args.django_settings)
+        )
+        imports.extend(
+            [
+                resolvers.ImportInfo(module=[], name=[django_import], alias=None)
+                for django_import in django_imports
+            ]
+        )
 
     # Read dependencies from pyproject.toml or requirements.txt
     deps_reader = parsers.DependencyReader(

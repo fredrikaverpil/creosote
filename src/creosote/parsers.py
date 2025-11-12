@@ -4,7 +4,7 @@ import sys
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import Union, cast
+from typing import List, Union, cast
 
 import nbformat
 from typing_extensions import TypeGuard
@@ -419,3 +419,50 @@ def get_excluded_deps_which_are_not_installed(
 
 def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
+
+
+class InstalledAppsVisitor(ast.NodeVisitor):
+    """Visit `ast` nodes and extract module names from `INSTALLED_APPS`."""
+
+    def __init__(self) -> None:
+        self.installed_apps: List[str] = []
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Visit `ast.Assign` node."""
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == "INSTALLED_APPS":
+                if isinstance(node.value, (ast.List, ast.Tuple)):
+                    for element in node.value.elts:
+                        if isinstance(element, ast.Constant) and isinstance(
+                            element.value, str
+                        ):
+                            app_name = element.value.split(".")[0]
+                            self.installed_apps.append(app_name)
+                else:
+                    logger.warning(
+                        "INSTALLED_APPS is not a list or tuple, skipping."
+                    )
+        self.generic_visit(node)
+
+
+def get_modules_from_django_settings(settings_file: Path) -> List[str]:
+    """Parse a Django settings file and extract modules from INSTALLED_APPS."""
+    if not settings_file.is_file():
+        logger.warning(f"Django settings file not found: {settings_file}")
+        return []
+
+    logger.debug(f"Parsing Django settings file: {settings_file}")
+    content = settings_file.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(settings_file))
+
+    visitor = InstalledAppsVisitor()
+    visitor.visit(tree)
+
+    if not visitor.installed_apps:
+        logger.warning(f"Could not find INSTALLED_APPS in {settings_file}.")
+    else:
+        logger.info(
+            f"Found {len(visitor.installed_apps)} apps in {settings_file}."
+        )
+
+    return visitor.installed_apps

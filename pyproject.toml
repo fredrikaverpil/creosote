@@ -41,6 +41,9 @@ types = ["loguru-mypy>=0.0.4", "mypy>=1.14.0"]
 test = ["pytest-mock>=3.14.0", "pytest>=8.3.4", "coverage>=7.6.1"]
 lsp = ["basedpyright>=1.23.1"]
 dap = ["debugpy>=1.8.11"]
+dev = [
+    "go-task-bin>=3.45.5",
+]
 
 [tool.uv]
 package = true
