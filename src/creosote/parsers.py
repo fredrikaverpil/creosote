@@ -421,25 +421,53 @@ def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
 
 
-class InstalledAppsVisitor(ast.NodeVisitor):
+class DjangoSettingsVisitor(ast.NodeVisitor):
     """Visit `ast` nodes and extract module names from `INSTALLED_APPS`."""
 
     def __init__(self) -> None:
         self.installed_apps: List[str] = []
+        self.lists: dict[str, list[str]] = {}
+
+    def visit(self, node: ast.AST) -> None:
+        """Walk the tree to find all list assignments first."""
+        for sub_node in ast.walk(node):
+            if isinstance(sub_node, ast.Assign):
+                self.visit_Assign_for_list(sub_node)
+        super().visit(node)
+
+    def visit_Assign_for_list(self, node: ast.Assign) -> None:
+        """Find all list/tuple assignments and store their values."""
+        if isinstance(node.value, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.value.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.lists[target.id] = apps
+
+    def _resolve_value(self, node: ast.expr) -> list[str]:
+        """Recursively resolve the value of a node."""
+        if isinstance(node, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            return apps
+        elif isinstance(node, ast.Name) and node.id in self.lists:
+            return self.lists[node.id]
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            left = self._resolve_value(node.left)
+            right = self._resolve_value(node.right)
+            return left + right
+        return []
 
     def visit_Assign(self, node: ast.Assign) -> None:
         """Visit `ast.Assign` node."""
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id == "INSTALLED_APPS":
-                if isinstance(node.value, (ast.List, ast.Tuple)):
-                    for element in node.value.elts:
-                        if isinstance(element, ast.Constant) and isinstance(
-                            element.value, str
-                        ):
-                            app_name = element.value.split(".")[0]
-                            self.installed_apps.append(app_name)
-                else:
-                    logger.warning("INSTALLED_APPS is not a list or tuple, skipping.")
+                self.installed_apps.extend(self._resolve_value(node.value))
+                return  # Found it, no need to visit children of this node
         self.generic_visit(node)
 
 
@@ -453,12 +481,14 @@ def get_modules_from_django_settings(settings_file: Path) -> List[str]:
     content = settings_file.read_text(encoding="utf-8")
     tree = ast.parse(content, filename=str(settings_file))
 
-    visitor = InstalledAppsVisitor()
+    visitor = DjangoSettingsVisitor()
     visitor.visit(tree)
 
     if not visitor.installed_apps:
         logger.warning(f"Could not find INSTALLED_APPS in {settings_file}.")
     else:
-        logger.info(f"Found {len(visitor.installed_apps)} apps in {settings_file}.")
+        logger.info(
+            f"Found {len(visitor.installed_apps)} apps in {settings_file}."
+        )
 
     return visitor.installed_apps

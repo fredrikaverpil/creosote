@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import pytest
@@ -60,14 +61,29 @@ from creosote.parsers import get_modules_from_django_settings
             ["a", "b"],
             id="multiple_definitions",
         ),
+        pytest.param(
+            (
+                "PREREQ_APPS = ['django.contrib.auth', 'impersonate']\n"
+                "PROJECT_APPS = ['ebbs', 'events']\n"
+                "INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS"
+            ),
+            ["django", "impersonate", "ebbs", "events"],
+            id="concatenated_lists",
+        ),
     ],
 )
 def test_get_modules_from_django_settings(
-    tmp_path: Path, content: str, expected_modules: list[str], caplog
+    tmp_path: Path,
+    content: str,
+    expected_modules: list[str],
+    caplog: pytest.LogCaptureFixture,
 ):
     """Test parsing of a Django settings file for INSTALLED_APPS."""
+    # Add caplog handler to logger to fix "I/O operation on closed file"
+    # See: https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-caplog-fixture-from-pytest-for-testing-logs
     logger.remove()
     logger.add(caplog.handler, format="{message}")
+    caplog.set_level(logging.INFO)
 
     settings_file = tmp_path / "settings.py"
     settings_file.write_text(content, encoding="utf-8")
@@ -77,7 +93,7 @@ def test_get_modules_from_django_settings(
     assert sorted(modules) == sorted(expected_modules)
 
 
-def test_get_modules_from_django_settings_file_not_found(caplog):
+def test_get_modules_from_django_settings_file_not_found(caplog: pytest.LogCaptureFixture):
     """Test parsing a non-existent Django settings file."""
     logger.remove()
     logger.add(caplog.handler, format="{message}")
@@ -89,7 +105,9 @@ def test_get_modules_from_django_settings_file_not_found(caplog):
     assert f"Django settings file not found: {non_existent_file}" in caplog.text
 
 
-def test_get_modules_from_django_settings_no_apps_found_warning(tmp_path: Path, caplog):
+def test_get_modules_from_django_settings_no_apps_found_warning(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
     """Test that a warning is logged if INSTALLED_APPS is not found."""
     logger.remove()
     logger.add(caplog.handler, format="{message}")
@@ -101,7 +119,9 @@ def test_get_modules_from_django_settings_no_apps_found_warning(tmp_path: Path, 
     assert f"Could not find INSTALLED_APPS in {settings_file}" in caplog.text
 
 
-def test_get_modules_from_django_settings_not_a_list_warning(tmp_path: Path, caplog):
+def test_get_modules_from_django_settings_not_a_list_warning(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
     """Test that a warning is logged if INSTALLED_APPS is not a list/tuple."""
     logger.remove()
     logger.add(caplog.handler, format="{message}")
@@ -110,4 +130,4 @@ def test_get_modules_from_django_settings_not_a_list_warning(tmp_path: Path, cap
 
     get_modules_from_django_settings(settings_file)
 
-    assert "INSTALLED_APPS is not a list or tuple, skipping." in caplog.text
+    assert "Could not find INSTALLED_APPS in" in caplog.text
