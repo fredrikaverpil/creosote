@@ -114,7 +114,9 @@ def test_get_modules_from_django_settings(
     assert sorted(modules) == sorted(expected_modules)
 
 
-def test_get_modules_from_django_settings_file_not_found(caplog: pytest.LogCaptureFixture):
+def test_get_modules_from_django_settings_file_not_found(
+    caplog: pytest.LogCaptureFixture,
+):
     """Test parsing a non-existent Django settings file."""
     logger.remove()
     logger.add(caplog.handler, format="{message}")

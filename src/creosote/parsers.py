@@ -487,7 +487,9 @@ def get_modules_from_django_settings(settings_file: Path) -> List[str]:
     visitor.visit(tree)
 
     if not visitor.found_modules:
-        logger.warning(f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}.")
+        logger.warning(
+            f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}."
+        )
     else:
         logger.info(
             f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}."
