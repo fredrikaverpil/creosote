@@ -70,6 +70,27 @@ from creosote.parsers import get_modules_from_django_settings
             ["django", "impersonate", "ebbs", "events"],
             id="concatenated_lists",
         ),
+        pytest.param(
+            (
+                "MIDDLEWARE = [\n"
+                "    'django.middleware.security.SecurityMiddleware',\n"
+                "    'whitenoise.middleware.WhiteNoiseMiddleware',\n"
+                "]"
+            ),
+            ["django", "whitenoise"],
+            id="middleware_only",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['rest_framework']\n"
+                "MIDDLEWARE = [\n"
+                "    'django.middleware.security.SecurityMiddleware',\n"
+                "    'whitenoise.middleware.WhiteNoiseMiddleware',\n"
+                "]"
+            ),
+            ["rest_framework", "django", "whitenoise"],
+            id="installed_apps_and_middleware",
+        ),
     ],
 )
 def test_get_modules_from_django_settings(
@@ -116,7 +137,10 @@ def test_get_modules_from_django_settings_no_apps_found_warning(
 
     get_modules_from_django_settings(settings_file)
 
-    assert f"Could not find INSTALLED_APPS in {settings_file}" in caplog.text
+    assert (
+        f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}"
+        in caplog.text
+    )
 
 
 def test_get_modules_from_django_settings_not_a_list_warning(
@@ -130,4 +154,7 @@ def test_get_modules_from_django_settings_not_a_list_warning(
 
     get_modules_from_django_settings(settings_file)
 
-    assert "Could not find INSTALLED_APPS in" in caplog.text
+    assert (
+        f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}"
+        in caplog.text
+    )
