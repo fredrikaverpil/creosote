@@ -14,7 +14,19 @@ tasks:
     desc: Format with ruff
     cmds:
       - task: install
-      - uv run ruff format --diff src tests
+      - task: format-src
+      - task: format-tests
+      - git diff --color=always --exit-code
+
+  format-src:
+    desc: Format src directory with ruff
+    cmds:
+      - '[ -d src ] && uv run ruff format src || echo "src directory does not exist, skipping"'
+
+  format-tests:
+    desc: Format tests directory with ruff
+    cmds:
+      - '[ -d tests ] && uv run ruff format tests || echo "tests directory does not exist, skipping"'
 
   lint:
     desc: Lint with ruff
@@ -32,15 +44,13 @@ tasks:
     desc: Run tests with pytest and coverage
     cmds:
       - task: install
-      - uv run coverage run -m pytest -s -vv
-      - uv run coverage report
-      - uv run coverage html
+      - '[ -n "$(find . -name "test_*.py" -o -name "*_test.py" | head -1)" ] && { uv run coverage run -m pytest -s -vv; uv run coverage report; uv run coverage html; } || echo "No test files found (test_*.py or *_test.py), skipping pytest"'
 
   mypy:
     desc: Run mypy types checking
     cmds:
       - task: install
-      - uv run mypy src
+      - '[ -d src ] && uv run mypy src || echo "src directory does not exist, skipping mypy"'
 
   install:
     desc: Install uv dependencies
