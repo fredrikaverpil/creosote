@@ -425,7 +425,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
     """Visit `ast` nodes and extract module names from `INSTALLED_APPS` and `MIDDLEWARE`."""
 
     def __init__(self) -> None:
-        self.found_modules: List[str] = []
+        self.found_modules: list[str] = []
         self.variable_assignments: dict[str, list[str]] = {}
 
     def visit(self, node: ast.AST) -> None:
