@@ -78,6 +78,7 @@ exclude-deps =[
   "pyodbc",
   "pg8000",
 ]
+# Django settings file path (relative to pyproject.toml)
 django-settings = "myproject/settings.py"
 ```
 
