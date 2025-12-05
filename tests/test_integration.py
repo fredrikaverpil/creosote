@@ -790,3 +790,83 @@ def test_dependency_with_prerelease_version_found(
         "No unused dependencies found! ✨",
     ]
     assert exit_code == 0
+
+
+@pytest.mark.parametrize("use_django_settings_arg", [True, False])
+def test_django_feature_finds_no_unused_deps(
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+    use_django_settings_arg: bool,
+) -> None:
+    """Test that dependencies in INSTALLED_APPS are not marked as unused."""
+
+    # arrange
+    venv_path, site_packages_path = venv_manager.create_venv()
+
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            '"django-debug-toolbar",',
+            '"loguru",',
+            "]",
+        ],
+    )
+
+    settings_filepath = venv_manager.create_source_file(
+        relative_filepath="myproject/settings.py",
+        contents=[
+            "INSTALLED_APPS = [",
+            '    "debug_toolbar",',
+            "]",
+        ],
+    )
+
+    source_file = venv_manager.create_source_file(
+        relative_filepath="src/main.py",
+        contents=[
+            "import loguru",
+            # Note: no direct import of debug_toolbar
+        ],
+    )
+
+    # Simulate installed packages
+    venv_manager.create_top_level_txt(
+        site_packages_path=site_packages_path,
+        dependency_name="django-debug-toolbar",
+        contents=["debug_toolbar"],
+    )
+    venv_manager.create_top_level_txt(
+        site_packages_path=site_packages_path,
+        dependency_name="loguru",
+        contents=["loguru"],
+    )
+
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        "project.dependencies",
+        "--format",
+        "no-color",
+    ]
+
+    if use_django_settings_arg:
+        args.extend(["--django-settings", str(settings_filepath)])
+
+    # act
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+    if use_django_settings_arg:
+        assert "No unused dependencies found! ✨" in actual_output
+        assert exit_code == 0
+    else:
+        assert "Unused dependencies found: django-debug-toolbar" in actual_output
+        assert exit_code == 1

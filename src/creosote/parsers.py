@@ -4,7 +4,7 @@ import sys
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import Union, cast
+from typing import List, Union, cast
 
 import nbformat
 from typing_extensions import TypeGuard
@@ -419,3 +419,80 @@ def get_excluded_deps_which_are_not_installed(
 
 def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
+
+
+class DjangoSettingsVisitor(ast.NodeVisitor):
+    """Visit `ast` nodes and extract module names from `INSTALLED_APPS` and `MIDDLEWARE`."""
+
+    def __init__(self) -> None:
+        self.found_modules: list[str] = []
+        self.variable_assignments: dict[str, list[str]] = {}
+
+    def visit(self, node: ast.AST) -> None:
+        """Walk the tree to find all list assignments first."""
+        for sub_node in ast.walk(node):
+            if isinstance(sub_node, ast.Assign):
+                self.visit_Assign_for_list(sub_node)
+        super().visit(node)
+
+    def visit_Assign_for_list(self, node: ast.Assign) -> None:
+        """Find all list/tuple assignments and store their values."""
+        if isinstance(node.value, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.value.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.variable_assignments[target.id] = apps
+
+    def _resolve_value(self, node: ast.expr) -> list[str]:
+        """Recursively resolve the value of a node."""
+        if isinstance(node, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            return apps
+        elif isinstance(node, ast.Name) and node.id in self.variable_assignments:
+            return self.variable_assignments[node.id]
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            left = self._resolve_value(node.left)
+            right = self._resolve_value(node.right)
+            return left + right
+        return []
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Visit `ast.Assign` node."""
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id in [
+                "INSTALLED_APPS",
+                "MIDDLEWARE",
+            ]:
+                self.found_modules.extend(self._resolve_value(node.value))
+        self.generic_visit(node)
+
+
+def get_modules_from_django_settings(settings_file: Path) -> List[str]:
+    """Parse a Django settings file and extract modules from INSTALLED_APPS."""
+    if not settings_file.is_file():
+        logger.warning(f"Django settings file not found: {settings_file}")
+        return []
+
+    logger.debug(f"Parsing Django settings file: {settings_file}")
+    content = settings_file.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(settings_file))
+
+    visitor = DjangoSettingsVisitor()
+    visitor.visit(tree)
+
+    if not visitor.found_modules:
+        logger.warning(
+            f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}."
+        )
+    else:
+        logger.info(
+            f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}."
+        )
+
+    return visitor.found_modules
