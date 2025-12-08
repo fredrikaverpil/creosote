@@ -184,7 +184,7 @@ def test_get_modules_from_django_settings_no_apps_found_warning(
     get_modules_from_django_settings(settings_file)
 
     assert (
-        f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}"
+        f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_file}."
         in caplog.text
     )
 
@@ -201,6 +201,6 @@ def test_get_modules_from_django_settings_not_a_list_warning(
     get_modules_from_django_settings(settings_file)
 
     assert (
-        f"Could not find INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}"
+       f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_file}."
         in caplog.text
     )
