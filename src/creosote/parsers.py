@@ -428,24 +428,6 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         self.found_modules: list[str] = []
         self.variable_assignments: dict[str, list[str]] = {}
 
-    def visit(self, node: ast.AST) -> None:
-        """Walk the tree to find all list assignments first."""
-        for sub_node in ast.walk(node):
-            if isinstance(sub_node, ast.Assign):
-                self.visit_Assign_for_list(sub_node)
-        super().visit(node)
-
-    def visit_Assign_for_list(self, node: ast.Assign) -> None:
-        """Find all list/tuple assignments and store their values."""
-        if isinstance(node.value, (ast.List, ast.Tuple)):
-            apps = []
-            for element in node.value.elts:
-                if isinstance(element, ast.Constant) and isinstance(element.value, str):
-                    apps.append(element.value.split(".")[0])
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    self.variable_assignments[target.id] = apps
-
     def _resolve_value(self, node: ast.expr) -> list[str]:
         """Recursively resolve the value of a node."""
         if isinstance(node, (ast.List, ast.Tuple)):
@@ -463,13 +445,25 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         return []
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit `ast.Assign` node."""
+        """Visit ast.Assign nodes to find INSTALLED_APPS/MIDDLEWARE and track variables."""
+        # First, check if this is a list/tuple assignment to track
+        if isinstance(node.value, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.value.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.variable_assignments[target.id] = apps
+
+        # Then check if this is INSTALLED_APPS or MIDDLEWARE
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id in [
                 "INSTALLED_APPS",
                 "MIDDLEWARE",
             ]:
                 self.found_modules.extend(self._resolve_value(node.value))
+
         self.generic_visit(node)
 
 
