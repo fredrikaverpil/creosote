@@ -432,8 +432,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         """Recursively resolve an expression node to a list of module names.
 
         This method traverses an AST expression, resolving it into a list of
-        strings. It handles lists, tuples, and addition operations (`+` aka
-        `ast.BinOp` and `ast.Add`).
+        strings. It handles lists, tuples, and addition operations (`+`).
 
         The recursion is structural on the AST of binary operations, which is
         guaranteed to terminate as it only descends into the expression tree.
@@ -444,18 +443,23 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         variable references (e.g., `A = B; B = A`), as the variable's value
         is returned directly instead of re-triggering resolution.
         """
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return [node.value.split(".")[0]]
+
         if isinstance(node, (ast.List, ast.Tuple)):
             apps = []
             for element in node.elts:
-                if isinstance(element, ast.Constant) and isinstance(element.value, str):
-                    apps.append(element.value.split(".")[0])
+                apps.extend(self._resolve_value(element))
             return apps
-        elif isinstance(node, ast.Name) and node.id in self.variable_assignments:
+
+        if isinstance(node, ast.Name) and node.id in self.variable_assignments:
             return self.variable_assignments[node.id]
-        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             left = self._resolve_value(node.left)
             right = self._resolve_value(node.right)
             return left + right
+
         return []
 
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -487,12 +491,40 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         # If this is an assignment to INSTALLED_APPS or MIDDLEWARE, resolve
         # its value and add the found modules to our list.
         for target in node.targets:
-            if isinstance(target, ast.Name) and target.id in [
-                "INSTALLED_APPS",
-                "MIDDLEWARE",
-            ]:
+            if (
+                isinstance(target, ast.Name)
+                and target.id in ["INSTALLED_APPS", "MIDDLEWARE"]
+                and isinstance(node.value, (ast.List, ast.Tuple, ast.BinOp, ast.Name))
+            ):
+                # Guard against invalid assignments like `INSTALLED_APPS = "foo"`.
+                # While `_resolve_value` can handle a single string (for `.append()`
+                # support), a direct assignment to INSTALLED_APPS must be a
+                # list-like expression (List, Tuple, BinOp, or Name).
                 self.found_modules.extend(self._resolve_value(node.value))
 
+        self.generic_visit(node)
+
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        """Visit `ast.AugAssign` to handle `INSTALLED_APPS += [...]`."""
+        if isinstance(node.target, ast.Name) and node.target.id in [
+            "INSTALLED_APPS",
+            "MIDDLEWARE",
+        ]:
+            self.found_modules.extend(self._resolve_value(node.value))
+        self.generic_visit(node)
+
+    def visit_Expr(self, node: ast.Expr) -> None:
+        """Visit `ast.Expr` to handle `INSTALLED_APPS.append(...)` etc."""
+        if isinstance(node.value, ast.Call):
+            call = node.value
+            if (
+                isinstance(call.func, ast.Attribute)
+                and isinstance(call.func.value, ast.Name)
+                and call.func.value.id in ["INSTALLED_APPS", "MIDDLEWARE"]
+                and call.func.attr in ["append", "extend"]
+            ):
+                for arg in call.args:
+                    self.found_modules.extend(self._resolve_value(arg))
         self.generic_visit(node)
 
 

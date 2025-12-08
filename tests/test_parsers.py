@@ -92,21 +92,48 @@ from creosote.parsers import get_modules_from_django_settings
             id="installed_apps_and_middleware",
         ),
         pytest.param(
-            (
-                "A = B\n"
-                "B = A\n"
-                'INSTALLED_APPS = ["real_app"] + A'
-            ),
+            ('A = B\nB = A\nINSTALLED_APPS = ["real_app"] + A'),
             ["real_app"],
-            id="circular_reference",
+            id="circular_reference_with_concat",
+        ),
+        pytest.param(
+            ('A = ["real_app"] + A\nINSTALLED_APPS = A'),
+            [],
+            id="circular_self_reference",
+        ),
+        pytest.param(
+            "A = B\nB = A\nINSTALLED_APPS = A",
+            [],
+            id="circular_reference_no_deps",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS += ['b']",
+            ["a", "b"],
+            id="augmented_assignment",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS.append('b')",
+            ["a", "b"],
+            id="append_method",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS.extend(['b'])",
+            ["a", "b"],
+            id="extend_method",
+        ),
+        pytest.param(
+            ("A=['a']\nB=['b']\nC=['c']\nD=['d']\nINSTALLED_APPS=A+B+C+D"),
+            ["a", "b", "c", "d"],
+            id="deep_concatenation",
         ),
         pytest.param(
             (
-                'A = ["real_app"] + A\n'
-                "INSTALLED_APPS = A"
+                "PREREQ = ['prereq']\n"
+                "MORE_APPS = ['more']\n"
+                "INSTALLED_APPS = PREREQ + ['inline'] + MORE_APPS"
             ),
-            [],
-            id="circular_self_reference",
+            ["prereq", "inline", "more"],
+            id="mixed_concatenation",
         ),
     ],
 )
