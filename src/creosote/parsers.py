@@ -528,15 +528,16 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def get_modules_from_django_settings(settings_file: Path) -> List[str]:
+def get_modules_from_django_settings(settings_file: Union[str, Path]) -> List[str]:
     """Parse a Django settings file and extract modules from INSTALLED_APPS."""
-    if not settings_file.is_file():
-        logger.warning(f"Django settings file not found: {settings_file}")
+    settings_path = Path(settings_file)
+    if not settings_path.is_file():
+        logger.warning(f"Django settings file not found: {settings_path}")
         return []
 
-    logger.debug(f"Parsing Django settings file: {settings_file}")
-    content = settings_file.read_text(encoding="utf-8")
-    tree = ast.parse(content, filename=str(settings_file))
+    logger.debug(f"Parsing Django settings file: {settings_path}")
+    content = settings_path.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(settings_path))
 
     visitor = DjangoSettingsVisitor()
     visitor.visit(tree)
@@ -547,15 +548,15 @@ def get_modules_from_django_settings(settings_file: Path) -> List[str]:
             for var in ["INSTALLED_APPS", "MIDDLEWARE"]
         ):
             logger.info(
-                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_file} but they were empty."
+                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but they were empty."
             )
         else:
             logger.warning(
-                f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_file}."
+                f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_path}."
             )
     else:
         logger.info(
-            f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_file}."
+            f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_path}."
         )
 
     return visitor.found_modules

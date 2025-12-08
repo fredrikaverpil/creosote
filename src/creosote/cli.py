@@ -1,6 +1,5 @@
 import sys
 from collections.abc import Sequence
-from pathlib import Path
 from typing import Optional
 
 from loguru import logger
@@ -29,7 +28,7 @@ def main(args_: Optional[Sequence[str]] = None) -> int:
     # Get imports from Django settings file
     if args.django_settings:
         django_imports = parsers.get_modules_from_django_settings(
-            Path(args.django_settings)
+            args.django_settings
         )
         imports.extend(
             [
