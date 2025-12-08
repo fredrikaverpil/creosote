@@ -306,7 +306,7 @@ uv tool uninstall creosote
 # Creosote build from PR #123
 uv tool install --force git+https://github.com/fredrikaverpil/creosote.git@refs/pull/123/head
 creosote --venv .venv
-iv tool uninstall creosote
+uv tool uninstall creosote
 ```
 
 #### pipx
