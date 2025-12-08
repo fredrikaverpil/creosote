@@ -429,7 +429,21 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         self.variable_assignments: dict[str, list[str]] = {}
 
     def _resolve_value(self, node: ast.expr) -> list[str]:
-        """Recursively resolve the value of a node."""
+        """Recursively resolve an expression node to a list of module names.
+
+        This method traverses an AST expression, resolving it into a list of
+        strings. It handles lists, tuples, and addition operations (`+` aka
+        `ast.BinOp` and `ast.Add`).
+
+        The recursion is structural on the AST of binary operations, which is
+        guaranteed to terminate as it only descends into the expression tree.
+
+        Variable lookups are handled by checking a pre-populated dictionary
+        (`self.variable_assignments`), which acts as a base case for the
+        recursion. This prevents infinite loops in cases of circular
+        variable references (e.g., `A = B; B = A`), as the variable's value
+        is returned directly instead of re-triggering resolution.
+        """
         if isinstance(node, (ast.List, ast.Tuple)):
             apps = []
             for element in node.elts:
@@ -445,8 +459,22 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         return []
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit ast.Assign nodes to find INSTALLED_APPS/MIDDLEWARE and track variables."""
-        # First, check if this is a list/tuple assignment to track
+        """Visit `ast.Assign` nodes to track variables and find modules.
+
+        This method is called for each assignment in the settings file. It
+        has two main purposes:
+
+        1.  It identifies assignments of literal lists/tuples to variables
+            and stores the resolved module names in `self.variable_assignments`.
+            This tracking is order-dependent and only works for literal
+            assignments, not for variables assigned from other expressions.
+
+        2.  It checks if the assignment is to `INSTALLED_APPS` or `MIDDLEWARE`.
+            If so, it calls `_resolve_value` to resolve the expression into
+            a list of module names.
+        """
+        # Populate `variable_assignments` for any literal list/tuple so it
+        # can be resolved later if used in INSTALLED_APPS/MIDDLEWARE.
         if isinstance(node.value, (ast.List, ast.Tuple)):
             apps = []
             for element in node.value.elts:
@@ -456,7 +484,8 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
                 if isinstance(target, ast.Name):
                     self.variable_assignments[target.id] = apps
 
-        # Then check if this is INSTALLED_APPS or MIDDLEWARE
+        # If this is an assignment to INSTALLED_APPS or MIDDLEWARE, resolve
+        # its value and add the found modules to our list.
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id in [
                 "INSTALLED_APPS",

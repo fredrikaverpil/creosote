@@ -91,6 +91,23 @@ from creosote.parsers import get_modules_from_django_settings
             ["rest_framework", "django", "whitenoise"],
             id="installed_apps_and_middleware",
         ),
+        pytest.param(
+            (
+                "A = B\n"
+                "B = A\n"
+                'INSTALLED_APPS = ["real_app"] + A'
+            ),
+            ["real_app"],
+            id="circular_reference",
+        ),
+        pytest.param(
+            (
+                'A = ["real_app"] + A\n'
+                "INSTALLED_APPS = A"
+            ),
+            [],
+            id="circular_self_reference",
+        ),
     ],
 )
 def test_get_modules_from_django_settings(
