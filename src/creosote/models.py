@@ -8,6 +8,11 @@ class ImportInfo:
     name: list[str]
     alias: Optional[str] = None
 
+    @classmethod
+    def from_module_name(cls, module_name: str) -> "ImportInfo":
+        """Create ImportInfo from a simple module name (e.g., for Django apps)."""
+        return cls(module=[], name=[module_name], alias=None)
+
 
 @dataclasses.dataclass
 class DependencyInfo:

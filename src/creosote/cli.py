@@ -27,12 +27,10 @@ def main(args_: Optional[Sequence[str]] = None) -> int:
 
     # Get imports from Django settings file
     if args.django_settings:
-        django_imports = parsers.get_modules_from_django_settings(
-            args.django_settings
-        )
+        django_imports = parsers.get_modules_from_django_settings(args.django_settings)
         imports.extend(
             [
-                models.ImportInfo(module=[], name=[django_import], alias=None)
+                models.ImportInfo.from_module_name(django_import)
                 for django_import in django_imports
             ]
         )
