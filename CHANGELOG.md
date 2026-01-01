@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/fredrikaverpil/creosote/compare/v4.1.0...v4.2.0) (2026-01-01)
+
+
+### Features
+
+* support Django apps not explicitly imported ([#339](https://github.com/fredrikaverpil/creosote/issues/339)) ([1644679](https://github.com/fredrikaverpil/creosote/commit/1644679995870036f6b4057457c3b6cda0363e7b))
+
 ## [4.1.0](https://github.com/fredrikaverpil/creosote/compare/v4.0.3...v4.1.0) (2025-08-18)
 
 
