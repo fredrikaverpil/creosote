@@ -20,7 +20,7 @@ jobs:
         uses: fredrikaverpil/github/.github/actions/sync@main
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.SYNC_TOKEN }}
           branch: ci/sync-workflows
