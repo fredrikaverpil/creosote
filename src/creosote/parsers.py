@@ -468,6 +468,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.variable_assignments: dict[str, list[str]] = {}
         self.target_nodes: list[ast.expr] = []
+        self.variable_mutations: list[tuple[str, ast.expr]] = []
 
     def _is_target_setting(self, name: str) -> bool:
         """Check if a variable name is a Django setting we're tracking."""
@@ -496,29 +497,50 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
 
     @override
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
-        """Collect augmented assignments (+=) to INSTALLED_APPS/MIDDLEWARE."""
-        if isinstance(node.target, ast.Name) and self._is_target_setting(
-            node.target.id
-        ):
-            self.target_nodes.append(node.value)
+        """Collect augmented assignments (+=) to INSTALLED_APPS/MIDDLEWARE and variables."""
+        if isinstance(node.target, ast.Name):
+            if self._is_target_setting(node.target.id):
+                self.target_nodes.append(node.value)
+            else:
+                # Track mutations to regular variables for later resolution
+                self.variable_mutations.append((node.target.id, node.value))
         self.generic_visit(node)
 
     @override
     def visit_Expr(self, node: ast.Expr) -> None:
-        """Collect .append/.extend calls to INSTALLED_APPS/MIDDLEWARE."""
+        """Collect .append/.extend calls to INSTALLED_APPS/MIDDLEWARE and variables."""
         if isinstance(node.value, ast.Call):
             call = node.value
             if (
                 isinstance(call.func, ast.Attribute)
                 and isinstance(call.func.value, ast.Name)
-                and self._is_target_setting(call.func.value.id)
                 and call.func.attr in ("append", "extend")
             ):
-                self.target_nodes.extend(call.args)
+                if self._is_target_setting(call.func.value.id):
+                    self.target_nodes.extend(call.args)
+                else:
+                    # Track mutations to regular variables for later resolution
+                    for arg in call.args:
+                        self.variable_mutations.append((call.func.value.id, arg))
         self.generic_visit(node)
 
     def resolve_modules(self) -> set[str]:
-        """Resolve all collected INSTALLED_APPS/MIDDLEWARE references."""
+        """Resolve all collected INSTALLED_APPS/MIDDLEWARE references.
+
+        Applies mutations (augmented assignments and method calls) to variables
+        before resolving target nodes, enabling proper handling of patterns like:
+            APPS = ['a']
+            APPS += ['b']
+            INSTALLED_APPS = APPS
+        """
+        # Apply mutations to variable assignments
+        for var_name, mutation_node in self.variable_mutations:
+            if var_name in self.variable_assignments:
+                additional = _resolve_expression(
+                    mutation_node, self.variable_assignments
+                )
+                self.variable_assignments[var_name].extend(additional)
+
         return {
             module
             for node in self.target_nodes
