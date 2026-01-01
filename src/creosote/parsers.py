@@ -482,71 +482,54 @@ def _resolve_expression(node: ast.expr, variables: dict[str, list[str]]) -> list
 
 
 class DjangoSettingsVisitor(ast.NodeVisitor):
-    """Two-pass visitor to extract modules from INSTALLED_APPS and MIDDLEWARE.
+    """Single-pass visitor to collect assignments and resolve INSTALLED_APPS/MIDDLEWARE.
 
-    Pass 1 (collect_variables): Collects all literal list/tuple assignments.
-    Pass 2 (collect_modules): Resolves INSTALLED_APPS/MIDDLEWARE with full context.
-
-    This two-pass approach allows for resolving forward references (e.g. where
-    INSTALLED_APPS uses a variable defined later in the file).
+    Collects all assignments in one pass, then resolves INSTALLED_APPS/MIDDLEWARE
+    references after the traversal. This allows resolving forward references where
+    INSTALLED_APPS uses a variable defined later in the file.
     """
 
     def __init__(self) -> None:
-        self.found_modules: set[str] = set()
         self.variable_assignments: dict[str, list[str]] = {}
-        self._collecting_variables: bool = True
+        self.target_assignments: list[ast.AST] = []
+        self.target_augments: list[ast.AugAssign] = []
+        self.target_calls: list[ast.Call] = []
 
-    def _visit_assign_collect_variables(self, node: ast.Assign) -> None:
-        """Pass 1: Collect literal list/tuple variable assignments.
-
-        This tracking only works for literal assignments (lists or tuples of
-        strings), not for variables assigned from other expressions or function
-        calls.
-        """
+    @override
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Collect all assignments - both variables and INSTALLED_APPS/MIDDLEWARE."""
+        # Track literal list/tuple assignments to variables
         if isinstance(node.value, (ast.List, ast.Tuple)):
             modules = _extract_string_modules(node.value)
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.variable_assignments[target.id] = modules
 
-    def _visit_assign_collect_modules(self, node: ast.Assign) -> None:
-        """Pass 2: Resolve INSTALLED_APPS/MIDDLEWARE assignments."""
+        # Track INSTALLED_APPS/MIDDLEWARE assignments for later resolution
         for target in node.targets:
             if (
                 isinstance(target, ast.Name)
                 and target.id in ("INSTALLED_APPS", "MIDDLEWARE")
                 and isinstance(node.value, (ast.List, ast.Tuple, ast.BinOp, ast.Name))
             ):
-                self.found_modules.update(
-                    _resolve_expression(node.value, self.variable_assignments)
-                )
+                self.target_assignments.append(node)
 
-    @override
-    def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit assignment nodes - behavior depends on current pass."""
-        if self._collecting_variables:
-            self._visit_assign_collect_variables(node)
-        else:
-            self._visit_assign_collect_modules(node)
         self.generic_visit(node)
 
     @override
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
-        """Visit augmented assignment (+=) - only in pass 2."""
-        if (
-            not self._collecting_variables
-            and isinstance(node.target, ast.Name)
-            and node.target.id in ("INSTALLED_APPS", "MIDDLEWARE")
+        """Collect augmented assignments (+=) to INSTALLED_APPS/MIDDLEWARE."""
+        if isinstance(node.target, ast.Name) and node.target.id in (
+            "INSTALLED_APPS",
+            "MIDDLEWARE",
         ):
-            self.found_modules.update(
-                _resolve_expression(node.value, self.variable_assignments)
-            )
+            self.target_augments.append(node)
         self.generic_visit(node)
 
     @override
     def visit_Expr(self, node: ast.Expr) -> None:
-        """Visit expression statements (.append/.extend) - only in pass 2."""
-        if not self._collecting_variables and isinstance(node.value, ast.Call):
+        """Collect .append/.extend calls to INSTALLED_APPS/MIDDLEWARE."""
+        if isinstance(node.value, ast.Call):
             call = node.value
             if (
                 isinstance(call.func, ast.Attribute)
@@ -554,21 +537,38 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
                 and call.func.value.id in ("INSTALLED_APPS", "MIDDLEWARE")
                 and call.func.attr in ("append", "extend")
             ):
-                for arg in call.args:
-                    self.found_modules.update(
-                        _resolve_expression(arg, self.variable_assignments)
-                    )
+                self.target_calls.append(call)
         self.generic_visit(node)
 
-    def process(self, tree: ast.AST) -> None:
-        """Run both passes over the AST."""
-        # Pass 1: Collect all variable assignments
-        self._collecting_variables = True
-        self.visit(tree)
+    def resolve_modules(self) -> set[str]:
+        """Resolve all collected INSTALLED_APPS/MIDDLEWARE references."""
+        found_modules: set[str] = set()
 
-        # Pass 2: Resolve INSTALLED_APPS/MIDDLEWARE
-        self._collecting_variables = False
+        # Resolve assignments
+        for node in self.target_assignments:
+            found_modules.update(
+                _resolve_expression(node.value, self.variable_assignments)
+            )
+
+        # Resolve augmented assignments
+        for node in self.target_augments:
+            found_modules.update(
+                _resolve_expression(node.value, self.variable_assignments)
+            )
+
+        # Resolve method calls
+        for call in self.target_calls:
+            for arg in call.args:
+                found_modules.update(
+                    _resolve_expression(arg, self.variable_assignments)
+                )
+
+        return found_modules
+
+    def process(self, tree: ast.AST) -> set[str]:
+        """Collect all assignments, then resolve INSTALLED_APPS/MIDDLEWARE."""
         self.visit(tree)
+        return self.resolve_modules()
 
 
 def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
@@ -583,12 +583,12 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
     tree = ast.parse(content, filename=str(settings_path))
 
     visitor = DjangoSettingsVisitor()
-    visitor.process(tree)
+    found_modules = visitor.process(tree)
 
-    if not visitor.found_modules:
+    if not found_modules:
         if any(
             var in visitor.variable_assignments
-            for var in ["INSTALLED_APPS", "MIDDLEWARE"]
+            for var in ("INSTALLED_APPS", "MIDDLEWARE")
         ):
             logger.info(
                 f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but empty."
@@ -598,7 +598,7 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
                 f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_path}."
             )
     else:
-        module_count = len(visitor.found_modules)
+        module_count = len(found_modules)
         logger.info(f"Found {module_count} Django modules in {settings_path}.")
 
-    return list(visitor.found_modules)
+    return list(found_modules)
