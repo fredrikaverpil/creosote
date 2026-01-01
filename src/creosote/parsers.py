@@ -481,6 +481,9 @@ def _resolve_expression(node: ast.expr, variables: dict[str, list[str]]) -> list
     return []
 
 
+_DJANGO_TARGET_NAMES = ("INSTALLED_APPS", "MIDDLEWARE")
+
+
 class DjangoSettingsVisitor(ast.NodeVisitor):
     """Single-pass visitor to collect assignments and resolve INSTALLED_APPS/MIDDLEWARE.
 
@@ -491,9 +494,11 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.variable_assignments: dict[str, list[str]] = {}
-        self.target_assignments: list[ast.AST] = []
-        self.target_augments: list[ast.AugAssign] = []
-        self.target_calls: list[ast.Call] = []
+        self.target_nodes: list[ast.expr] = []
+
+    def _is_target_setting(self, name: str) -> bool:
+        """Check if a variable name is a Django setting we're tracking."""
+        return name in _DJANGO_TARGET_NAMES
 
     @override
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -509,21 +514,20 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         for target in node.targets:
             if (
                 isinstance(target, ast.Name)
-                and target.id in ("INSTALLED_APPS", "MIDDLEWARE")
+                and self._is_target_setting(target.id)
                 and isinstance(node.value, (ast.List, ast.Tuple, ast.BinOp, ast.Name))
             ):
-                self.target_assignments.append(node)
+                self.target_nodes.append(node.value)
 
         self.generic_visit(node)
 
     @override
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
         """Collect augmented assignments (+=) to INSTALLED_APPS/MIDDLEWARE."""
-        if isinstance(node.target, ast.Name) and node.target.id in (
-            "INSTALLED_APPS",
-            "MIDDLEWARE",
+        if isinstance(node.target, ast.Name) and self._is_target_setting(
+            node.target.id
         ):
-            self.target_augments.append(node)
+            self.target_nodes.append(node.value)
         self.generic_visit(node)
 
     @override
@@ -534,35 +538,17 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
             if (
                 isinstance(call.func, ast.Attribute)
                 and isinstance(call.func.value, ast.Name)
-                and call.func.value.id in ("INSTALLED_APPS", "MIDDLEWARE")
+                and self._is_target_setting(call.func.value.id)
                 and call.func.attr in ("append", "extend")
             ):
-                self.target_calls.append(call)
+                self.target_nodes.extend(call.args)
         self.generic_visit(node)
 
     def resolve_modules(self) -> set[str]:
         """Resolve all collected INSTALLED_APPS/MIDDLEWARE references."""
         found_modules: set[str] = set()
-
-        # Resolve assignments
-        for node in self.target_assignments:
-            found_modules.update(
-                _resolve_expression(node.value, self.variable_assignments)
-            )
-
-        # Resolve augmented assignments
-        for node in self.target_augments:
-            found_modules.update(
-                _resolve_expression(node.value, self.variable_assignments)
-            )
-
-        # Resolve method calls
-        for call in self.target_calls:
-            for arg in call.args:
-                found_modules.update(
-                    _resolve_expression(arg, self.variable_assignments)
-                )
-
+        for node in self.target_nodes:
+            found_modules.update(_resolve_expression(node, self.variable_assignments))
         return found_modules
 
     def process(self, tree: ast.AST) -> set[str]:
@@ -586,10 +572,7 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
     found_modules = visitor.process(tree)
 
     if not found_modules:
-        if any(
-            var in visitor.variable_assignments
-            for var in ("INSTALLED_APPS", "MIDDLEWARE")
-        ):
+        if any(var in visitor.variable_assignments for var in _DJANGO_TARGET_NAMES):
             logger.info(
                 f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but empty."
             )
