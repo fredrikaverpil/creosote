@@ -36,6 +36,7 @@ class Config:
         default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")]
     )
     features: list[str] = field(default_factory=list)
+    django_settings: Optional[str] = None
 
 
 class Features(Enum):
@@ -181,6 +182,13 @@ def parse_args(args: Optional[Sequence[str]]) -> Config:
         help=(
             "enable new/experimental functionality, that may be backward incompatible"
         ),
+    )
+    _ = parser.add_argument(
+        "--django-settings",
+        dest="django_settings",
+        metavar="PATH",
+        default=defaults.django_settings,
+        help="path to the Django settings file",
     )
 
     parsed_args = parser.parse_args(args)

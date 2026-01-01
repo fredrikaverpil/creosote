@@ -419,3 +419,144 @@ def get_excluded_deps_which_are_not_installed(
 
 def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
+
+
+class DjangoSettingsVisitor(ast.NodeVisitor):
+    """Visit `ast` nodes and extract module names from `INSTALLED_APPS` and `MIDDLEWARE`."""
+
+    def __init__(self) -> None:
+        self.found_modules: set[str] = set()
+        self.variable_assignments: dict[str, list[str]] = {}
+
+    def _resolve_value(self, node: ast.expr) -> list[str]:
+        """Recursively resolve an expression node to a list of module names.
+
+        This method traverses an AST expression, resolving it into a list of
+        strings. It handles lists, tuples, and addition operations (`+`).
+
+        The recursion is structural on the AST of binary operations, which is
+        guaranteed to terminate as it only descends into the expression tree.
+
+        Variable lookups are handled by checking a pre-populated dictionary
+        (`self.variable_assignments`), which acts as a base case for the
+        recursion. This prevents infinite loops in cases of circular
+        variable references (e.g., `A = B; B = A`), as the variable's value
+        is returned directly instead of re-triggering resolution.
+        """
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return [node.value.split(".")[0]]
+
+        if isinstance(node, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.elts:
+                apps.extend(self._resolve_value(element))
+            return apps
+
+        if isinstance(node, ast.Name) and node.id in self.variable_assignments:
+            return self.variable_assignments[node.id]
+
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            left = self._resolve_value(node.left)
+            right = self._resolve_value(node.right)
+            return left + right
+
+        return []
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Visit `ast.Assign` nodes to track variables and find modules.
+
+        This method is called for each assignment in the settings file. It
+        has two main purposes:
+
+        1.  It identifies assignments of literal lists/tuples to variables
+            and stores the resolved module names in `self.variable_assignments`.
+            This tracking is order-dependent and only works for literal
+            assignments, not for variables assigned from other expressions.
+
+        2.  It checks if the assignment is to `INSTALLED_APPS` or `MIDDLEWARE`.
+            If so, it calls `_resolve_value` to resolve the expression into
+            a list of module names.
+        """
+        # Populate `variable_assignments` for any literal list/tuple so it
+        # can be resolved later if used in INSTALLED_APPS/MIDDLEWARE.
+        if isinstance(node.value, (ast.List, ast.Tuple)):
+            apps = []
+            for element in node.value.elts:
+                if isinstance(element, ast.Constant) and isinstance(element.value, str):
+                    apps.append(element.value.split(".")[0])
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.variable_assignments[target.id] = apps
+
+        # If this is an assignment to INSTALLED_APPS or MIDDLEWARE, resolve
+        # its value and add the found modules to our list.
+        for target in node.targets:
+            if (
+                isinstance(target, ast.Name)
+                and target.id in ["INSTALLED_APPS", "MIDDLEWARE"]
+                and isinstance(node.value, (ast.List, ast.Tuple, ast.BinOp, ast.Name))
+            ):
+                # Guard against invalid assignments like `INSTALLED_APPS = "foo"`.
+                # While `_resolve_value` can handle a single string (for `.append()`
+                # support), a direct assignment to INSTALLED_APPS must be a
+                # list-like expression (List, Tuple, BinOp, or Name).
+                self.found_modules.update(self._resolve_value(node.value))
+
+        self.generic_visit(node)
+
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        """Visit `ast.AugAssign` to handle `INSTALLED_APPS += [...]`."""
+        if isinstance(node.target, ast.Name) and node.target.id in [
+            "INSTALLED_APPS",
+            "MIDDLEWARE",
+        ]:
+            self.found_modules.update(self._resolve_value(node.value))
+        self.generic_visit(node)
+
+    def visit_Expr(self, node: ast.Expr) -> None:
+        """Visit `ast.Expr` to handle `INSTALLED_APPS.append(...)` etc."""
+        if isinstance(node.value, ast.Call):
+            call = node.value
+            if (
+                isinstance(call.func, ast.Attribute)
+                and isinstance(call.func.value, ast.Name)
+                and call.func.value.id in ["INSTALLED_APPS", "MIDDLEWARE"]
+                and call.func.attr in ["append", "extend"]
+            ):
+                for arg in call.args:
+                    self.found_modules.update(self._resolve_value(arg))
+        self.generic_visit(node)
+
+
+def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[str]:
+    """Parse a Django settings file and extract modules from INSTALLED_APPS."""
+    settings_path = Path(settings_file)
+    if not settings_path.is_file():
+        logger.warning(f"Django settings file not found: {settings_path}")
+        return []
+
+    logger.debug(f"Parsing Django settings file: {settings_path}")
+    content = settings_path.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(settings_path))
+
+    visitor = DjangoSettingsVisitor()
+    visitor.visit(tree)
+
+    if not visitor.found_modules:
+        if any(
+            var in visitor.variable_assignments
+            for var in ["INSTALLED_APPS", "MIDDLEWARE"]
+        ):
+            logger.info(
+                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but they were empty."
+            )
+        else:
+            logger.warning(
+                f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_path}."
+            )
+    else:
+        logger.info(
+            f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_path}."
+        )
+
+    return list(visitor.found_modules)

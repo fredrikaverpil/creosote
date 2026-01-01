@@ -1,0 +1,239 @@
+import logging
+from pathlib import Path
+
+import pytest
+from loguru import logger
+
+from creosote.parsers import get_modules_from_django_settings
+
+
+@pytest.mark.parametrize(
+    ("content", "expected_modules"),
+    [
+        pytest.param(
+            'INSTALLED_APPS = ["django.contrib.admin", "debug_toolbar", "myapp"]',
+            ["django", "debug_toolbar", "myapp"],
+            id="simple_list",
+        ),
+        pytest.param(
+            'INSTALLED_APPS = ("django.contrib.admin", "debug_toolbar", "myapp",)',
+            ["django", "debug_toolbar", "myapp"],
+            id="simple_tuple",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = [\n"
+                "    'django.contrib.admin',\n"
+                "    'django.contrib.auth',\n"
+                "    'debug_toolbar.apps.DebugToolbarConfig',\n"
+                "]"
+            ),
+            ["django", "debug_toolbar"],
+            id="dotted_paths",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = []",
+            [],
+            id="empty_list",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = get_apps()",
+            [],
+            id="dynamic_apps_in_func_call",
+        ),
+        pytest.param(
+            "SECRET_KEY = '123'",
+            [],
+            id="no_installed_apps",
+        ),
+        pytest.param(
+            "",
+            [],
+            id="empty_file",
+        ),
+        pytest.param(
+            (
+                "if True:\n"
+                '    INSTALLED_APPS = ["a"]\n'
+                "else:\n"
+                '    INSTALLED_APPS = ["b"]\n'
+            ),
+            ["a", "b"],
+            id="multiple_definitions",
+        ),
+        pytest.param(
+            (
+                "PREREQ_APPS = ['django.contrib.auth', 'impersonate']\n"
+                "PROJECT_APPS = ['ebbs', 'events']\n"
+                "INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS"
+            ),
+            ["django", "impersonate", "ebbs", "events"],
+            id="concatenated_lists",
+        ),
+        pytest.param(
+            (
+                "MIDDLEWARE = [\n"
+                "    'django.middleware.security.SecurityMiddleware',\n"
+                "    'whitenoise.middleware.WhiteNoiseMiddleware',\n"
+                "]"
+            ),
+            ["django", "whitenoise"],
+            id="middleware_only",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['rest_framework']\n"
+                "MIDDLEWARE = [\n"
+                "    'django.middleware.security.SecurityMiddleware',\n"
+                "    'whitenoise.middleware.WhiteNoiseMiddleware',\n"
+                "]"
+            ),
+            ["rest_framework", "django", "whitenoise"],
+            id="installed_apps_and_middleware",
+        ),
+        pytest.param(
+            ('A = B\nB = A\nINSTALLED_APPS = ["real_app"] + A'),
+            ["real_app"],
+            id="circular_reference_with_concat",
+        ),
+        pytest.param(
+            ('A = ["real_app"] + A\nINSTALLED_APPS = A'),
+            [],
+            id="circular_self_reference",
+        ),
+        pytest.param(
+            "A = B\nB = A\nINSTALLED_APPS = A",
+            [],
+            id="circular_reference_no_deps",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS += ['b']",
+            ["a", "b"],
+            id="augmented_assignment",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS.append('b')",
+            ["a", "b"],
+            id="append_method",
+        ),
+        pytest.param(
+            "INSTALLED_APPS = ['a']\nINSTALLED_APPS.extend(['b'])",
+            ["a", "b"],
+            id="extend_method",
+        ),
+        pytest.param(
+            ("A=['a']\nB=['b']\nC=['c']\nD=['d']\nINSTALLED_APPS=A+B+C+D"),
+            ["a", "b", "c", "d"],
+            id="deep_concatenation",
+        ),
+        pytest.param(
+            (
+                "PREREQ = ['prereq']\n"
+                "MORE_APPS = ['more']\n"
+                "INSTALLED_APPS = PREREQ + ['inline'] + MORE_APPS"
+            ),
+            ["prereq", "inline", "more"],
+            id="mixed_concatenation",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['django']\n"
+                "INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']"
+            ),
+            ["django", "debug_toolbar"],
+            id="reassignment_no_duplicates",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['django', 'rest_framework']\n"
+                "INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']\n"
+                "INSTALLED_APPS += ['silk']"
+            ),
+            ["django", "rest_framework", "debug_toolbar", "silk"],
+            id="multiple_reassignments_no_duplicates",
+        ),
+        # Order-dependency tests: variables must be defined BEFORE use
+        pytest.param(
+            ("PREREQ_APPS = ['django']\nINSTALLED_APPS = PREREQ_APPS"),
+            ["django"],
+            id="variable_defined_before_use_works",
+        ),
+        pytest.param(
+            ("INSTALLED_APPS = PREREQ_APPS\nPREREQ_APPS = ['django']"),
+            [],  # BUG: returns empty because PREREQ_APPS not yet seen
+            id="variable_defined_after_use_fails",
+        ),
+        pytest.param(
+            ("INSTALLED_APPS = PREREQ_APPS + ['extra']\nPREREQ_APPS = ['django']"),
+            ["extra"],  # BUG: only gets 'extra', misses 'django' from forward ref
+            id="forward_reference_partial_resolution",
+        ),
+    ],
+)
+def test_get_modules_from_django_settings(
+    tmp_path: Path,
+    content: str,
+    expected_modules: list[str],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test parsing of a Django settings file for INSTALLED_APPS."""
+    # Add caplog handler to logger to fix "I/O operation on closed file"
+    # See: https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-caplog-fixture-from-pytest-for-testing-logs
+    logger.remove()
+    _ = logger.add(caplog.handler, format="{message}")
+    caplog.set_level(logging.INFO)
+
+    settings_file = tmp_path / "settings.py"
+    _ = settings_file.write_text(content, encoding="utf-8")
+
+    modules = get_modules_from_django_settings(settings_file)
+
+    assert sorted(modules) == sorted(expected_modules)
+
+
+def test_get_modules_from_django_settings_file_not_found(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test parsing a non-existent Django settings file."""
+    logger.remove()
+    _ = logger.add(caplog.handler, format="{message}")
+    non_existent_file = Path("non_existent_settings.py")
+
+    modules = get_modules_from_django_settings(non_existent_file)
+
+    assert modules == []
+    assert f"Django settings file not found: {non_existent_file}" in caplog.text
+
+
+def test_get_modules_from_django_settings_no_apps_found_warning(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that a warning is logged if INSTALLED_APPS is not found."""
+    logger.remove()
+    _ = logger.add(caplog.handler, format="{message}")
+    settings_file = tmp_path / "settings.py"
+    _ = settings_file.write_text("SECRET_KEY = '123'", encoding="utf-8")
+
+    _ = get_modules_from_django_settings(settings_file)
+
+    assert (
+        f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_file}."
+        in caplog.text
+    )
+
+
+def test_get_modules_from_django_settings_not_a_list_warning(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that a warning is logged if INSTALLED_APPS is not a list/tuple."""
+    logger.remove()
+    _ = logger.add(caplog.handler, format="{message}")
+    settings_file = tmp_path / "settings.py"
+    _ = settings_file.write_text("INSTALLED_APPS = 'not-a-list'", encoding="utf-8")
+
+    _ = get_modules_from_django_settings(settings_file)
+
+    assert (
+        f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_file}."
+        in caplog.text
+    )
