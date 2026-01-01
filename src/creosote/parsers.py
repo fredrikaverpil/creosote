@@ -425,7 +425,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
     """Visit `ast` nodes and extract module names from `INSTALLED_APPS` and `MIDDLEWARE`."""
 
     def __init__(self) -> None:
-        self.found_modules: list[str] = []
+        self.found_modules: set[str] = set()
         self.variable_assignments: dict[str, list[str]] = {}
 
     def _resolve_value(self, node: ast.expr) -> list[str]:
@@ -500,7 +500,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
                 # While `_resolve_value` can handle a single string (for `.append()`
                 # support), a direct assignment to INSTALLED_APPS must be a
                 # list-like expression (List, Tuple, BinOp, or Name).
-                self.found_modules.extend(self._resolve_value(node.value))
+                self.found_modules.update(self._resolve_value(node.value))
 
         self.generic_visit(node)
 
@@ -510,7 +510,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
             "INSTALLED_APPS",
             "MIDDLEWARE",
         ]:
-            self.found_modules.extend(self._resolve_value(node.value))
+            self.found_modules.update(self._resolve_value(node.value))
         self.generic_visit(node)
 
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -524,7 +524,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
                 and call.func.attr in ["append", "extend"]
             ):
                 for arg in call.args:
-                    self.found_modules.extend(self._resolve_value(arg))
+                    self.found_modules.update(self._resolve_value(arg))
         self.generic_visit(node)
 
 
@@ -559,4 +559,4 @@ def get_modules_from_django_settings(settings_file: Union[str, Path]) -> List[st
             f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_path}."
         )
 
-    return visitor.found_modules
+    return list(visitor.found_modules)

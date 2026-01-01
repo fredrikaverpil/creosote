@@ -28,7 +28,7 @@ from creosote.parsers import get_modules_from_django_settings
                 "    'debug_toolbar.apps.DebugToolbarConfig',\n"
                 "]"
             ),
-            ["django", "django", "debug_toolbar"],
+            ["django", "debug_toolbar"],
             id="dotted_paths",
         ),
         pytest.param(
@@ -134,6 +134,23 @@ from creosote.parsers import get_modules_from_django_settings
             ),
             ["prereq", "inline", "more"],
             id="mixed_concatenation",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['django']\n"
+                "INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']"
+            ),
+            ["django", "debug_toolbar"],
+            id="reassignment_no_duplicates",
+        ),
+        pytest.param(
+            (
+                "INSTALLED_APPS = ['django', 'rest_framework']\n"
+                "INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']\n"
+                "INSTALLED_APPS += ['silk']"
+            ),
+            ["django", "rest_framework", "debug_toolbar", "silk"],
+            id="multiple_reassignments_no_duplicates",
         ),
     ],
 )
