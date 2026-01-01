@@ -525,11 +525,6 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
             for module in _resolve_expression(node, self.variable_assignments)
         }
 
-    def process(self, tree: ast.AST) -> set[str]:
-        """Collect all assignments, then resolve INSTALLED_APPS/MIDDLEWARE."""
-        self.visit(tree)
-        return self.resolve_modules()
-
 
 def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[str]:
     """Parse a Django settings file and extract modules from INSTALLED_APPS."""
@@ -543,7 +538,8 @@ def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[st
     tree = ast.parse(content, filename=str(settings_path))
 
     visitor = DjangoSettingsVisitor()
-    found_modules = visitor.process(tree)
+    visitor.visit(tree)
+    found_modules = visitor.resolve_modules()
 
     if not found_modules:
         if any(var in visitor.variable_assignments for var in _DJANGO_TARGET_NAMES):
