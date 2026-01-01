@@ -544,7 +544,8 @@ def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[st
     if not found_modules:
         if visitor.target_nodes:
             logger.info(
-                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but they were empty."
+                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} "
+                + "but they were empty."
             )
         else:
             logger.warning(
@@ -553,7 +554,7 @@ def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[st
     else:
         logger.info(
             f"Found {len(found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules "
-            f"in {settings_path}."
+            + f"in {settings_path}."
         )
 
     return list(found_modules)
