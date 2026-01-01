@@ -168,6 +168,23 @@ from creosote.parsers import get_modules_from_django_settings
             ["django", "extra"],  # Two-pass resolution handles forward references
             id="forward_reference_with_concatenation",
         ),
+        # Test augmented assignment with variable reference
+        pytest.param(
+            ("APPS = ['a']\nAPPS += ['b']\nINSTALLED_APPS = APPS"),
+            ["a", "b"],
+            id="augmented_assignment_then_reference",
+        ),
+        # Test method calls with variable reference
+        pytest.param(
+            ("APPS = ['a']\nAPPS.append('b')\nINSTALLED_APPS = APPS"),
+            ["a", "b"],
+            id="append_method_then_reference",
+        ),
+        pytest.param(
+            ("APPS = ['a']\nAPPS.extend(['b'])\nINSTALLED_APPS = APPS"),
+            ["a", "b"],
+            id="extend_method_then_reference",
+        ),
     ],
 )
 def test_get_modules_from_django_settings(
