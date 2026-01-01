@@ -4,7 +4,7 @@ import sys
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import List, Union, cast
+from typing import Union, cast
 
 import nbformat
 from typing_extensions import TypeGuard
@@ -528,7 +528,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def get_modules_from_django_settings(settings_file: Union[str, Path]) -> List[str]:
+def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[str]:
     """Parse a Django settings file and extract modules from INSTALLED_APPS."""
     settings_path = Path(settings_file)
     if not settings_path.is_file():
