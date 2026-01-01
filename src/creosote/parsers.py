@@ -558,7 +558,7 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
     found_modules = visitor.resolve_modules()
 
     if not found_modules:
-        if any(var in visitor.variable_assignments for var in _DJANGO_TARGET_NAMES):
+        if visitor.target_nodes:
             logger.info(
                 f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but empty."
             )
