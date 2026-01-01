@@ -152,6 +152,22 @@ from creosote.parsers import get_modules_from_django_settings
             ["django", "rest_framework", "debug_toolbar", "silk"],
             id="multiple_reassignments_no_duplicates",
         ),
+        # Order-dependency tests: variables must be defined BEFORE use
+        pytest.param(
+            ("PREREQ_APPS = ['django']\nINSTALLED_APPS = PREREQ_APPS"),
+            ["django"],
+            id="variable_defined_before_use_works",
+        ),
+        pytest.param(
+            ("INSTALLED_APPS = PREREQ_APPS\nPREREQ_APPS = ['django']"),
+            [],  # BUG: returns empty because PREREQ_APPS not yet seen
+            id="variable_defined_after_use_fails",
+        ),
+        pytest.param(
+            ("INSTALLED_APPS = PREREQ_APPS + ['extra']\nPREREQ_APPS = ['django']"),
+            ["extra"],  # BUG: only gets 'extra', misses 'django' from forward ref
+            id="forward_reference_partial_resolution",
+        ),
     ],
 )
 def test_get_modules_from_django_settings(
