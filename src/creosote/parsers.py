@@ -421,17 +421,6 @@ def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
 
 
-def _extract_string_modules(node: ast.expr) -> list[str]:
-    """Extract module names from string constants in a list/tuple node."""
-    if not isinstance(node, (ast.List, ast.Tuple)):
-        return []
-    return [
-        el.value.split(".")[0]
-        for el in node.elts
-        if isinstance(el, ast.Constant) and isinstance(el.value, str)
-    ]
-
-
 def _resolve_expression(node: ast.expr, variables: dict[str, list[str]]) -> list[str]:
     """Resolve an AST expression to a list of module names.
 
@@ -489,7 +478,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         """Collect all assignments - both variables and INSTALLED_APPS/MIDDLEWARE."""
         # Track literal list/tuple assignments to variables
         if isinstance(node.value, (ast.List, ast.Tuple)):
-            modules = _extract_string_modules(node.value)
+            modules = _resolve_expression(node.value, {})
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.variable_assignments[target.id] = modules
@@ -530,10 +519,11 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
 
     def resolve_modules(self) -> set[str]:
         """Resolve all collected INSTALLED_APPS/MIDDLEWARE references."""
-        found_modules: set[str] = set()
-        for node in self.target_nodes:
-            found_modules.update(_resolve_expression(node, self.variable_assignments))
-        return found_modules
+        return {
+            module
+            for node in self.target_nodes
+            for module in _resolve_expression(node, self.variable_assignments)
+        }
 
     def process(self, tree: ast.AST) -> set[str]:
         """Collect all assignments, then resolve INSTALLED_APPS/MIDDLEWARE."""
