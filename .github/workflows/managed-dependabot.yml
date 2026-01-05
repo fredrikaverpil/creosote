@@ -1,0 +1,30 @@
+# MANAGED BY fredrikaverpil/github - DO NOT EDIT
+# This file is automatically updated during sync operations
+# Source: https://github.com/fredrikaverpil/github
+
+name: dependabot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  ci:
+    uses: fredrikaverpil/github/.github/workflows/dependabot.yml@main
+    with:
+      update-interval: "monthly"
+    # NOTE: optionally customize configuration
+    # with:
+    #   update-interval: "monthly"
+    #   skip-dependabot: false
+    secrets:
+      SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}

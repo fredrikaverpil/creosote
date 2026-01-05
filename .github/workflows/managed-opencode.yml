@@ -15,6 +15,9 @@ permissions:
 jobs:
   ci:
     uses: fredrikaverpil/github/.github/workflows/opencode.yml@main
-    secrets:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
+    # NOTE: optionally supply model and key
+    # with:
+    #   model: github/claude-sonnet-4
+    #   model: anthropic/claude-sonnet-4-20250514
+    # secrets:
+    #   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -7,20 +7,20 @@ name: sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * 1" # Monday at 8am
+    - cron: "0 8 * * 1"  # Monday at 8am
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: run sync action
         uses: fredrikaverpil/github/.github/actions/sync@main
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.SYNC_TOKEN }}
           branch: ci/sync-workflows
