@@ -10,7 +10,7 @@ import (
 var Config = pocket.Config{
 	AutoRun: pocket.Serial(
 		// Python workflow
-		pocket.Paths(python.Workflow()).DetectBy(python.Detect()).SkipTask(python.Test),
+		pocket.Paths(python.Tasks()).DetectBy(python.Detect()).SkipTask(python.Test),
 	),
 	ManualRun: []pocket.Runnable{
 		github.Workflows,
