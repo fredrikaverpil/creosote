@@ -37,7 +37,7 @@ var autoRun = pocket.Serial(
 	pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
 
 	// Generate GitHub workflow files
-	github.Workflows,
+	pocket.WithOpts(github.Workflows, github.WorkflowsOptions{SkipPocket: true, SkipPocketMatrix: false}),
 )
 
 // matrixConfig excludes py-test (handled separately via TestMatrix with version-specific names).
