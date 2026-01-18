@@ -18,7 +18,7 @@ func TestMatrix(versions []string) pocket.Runnable {
 	for i, v := range versions {
 		tasks[i] = pocket.Clone(python.Test,
 			pocket.Named("py-test:"+v),
-			pocket.Opts(python.TestOptions{PythonVersion: v}),
+			pocket.Opts(python.TestOptions{PythonVersion: v, SkipCoverage: true}), // skip coverage in matrix tests
 		)
 	}
 	return pocket.Parallel(tasks...)
