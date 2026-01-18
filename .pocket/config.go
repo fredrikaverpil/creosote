@@ -12,6 +12,17 @@ var pythonVersions = []string{"3.9", "3.10", "3.11", "3.12", "3.13"}
 // minPythonVersion is used for linting/typechecking (target minimum supported version).
 const minPythonVersion = "3.9"
 
+// LintTasks returns lint/format/typecheck tasks with minPythonVersion baked in.
+// This ensures CI matrix jobs use the correct Python version when run individually.
+func LintTasks() pocket.Runnable {
+	return pocket.Serial(
+		pocket.WithOpts(python.Sync, python.SyncOptions{PythonVersion: minPythonVersion}),
+		pocket.WithOpts(python.Format, python.FormatOptions{PythonVersion: minPythonVersion}),
+		pocket.WithOpts(python.Lint, python.LintOptions{PythonVersion: minPythonVersion}),
+		pocket.WithOpts(python.Typecheck, python.TypecheckOptions{PythonVersion: minPythonVersion}),
+	)
+}
+
 // TestMatrix creates parallel test runs across multiple Python versions.
 func TestMatrix(versions []string) pocket.Runnable {
 	tasks := make([]any, len(versions))
@@ -26,12 +37,8 @@ func TestMatrix(versions []string) pocket.Runnable {
 
 // autoRun defines the execution tree for ./pok (also used for matrix generation).
 var autoRun = pocket.Serial(
-	// Run all python tasks except Test (skipped everywhere), targeting minimum Python version
-	pocket.RunIn(
-		python.Tasks(python.WithPythonVersion(minPythonVersion)),
-		pocket.Detect(python.Detect()),
-		pocket.Skip(python.Test),
-	),
+	// Run lint/format/typecheck targeting minimum Python version
+	pocket.RunIn(LintTasks(), pocket.Detect(python.Detect())),
 
 	// Run tests across all supported Python versions in parallel
 	pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
