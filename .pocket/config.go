@@ -24,28 +24,35 @@ func TestMatrix(versions []string) pocket.Runnable {
 	return pocket.Parallel(tasks...)
 }
 
-// LintWorkflow runs sync, format, lint, typecheck (no tests) against minimum Python version.
-func LintWorkflow() pocket.Runnable {
-	return pocket.Serial(
-		pocket.WithOpts(python.Sync, python.SyncOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Format, python.FormatOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Lint, python.LintOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Typecheck, python.TypecheckOptions{PythonVersion: minPythonVersion}),
-	)
+// autoRun defines the execution tree for ./pok (also used for matrix generation).
+var autoRun = pocket.Serial(
+	// Run all python tasks except Test (skipped everywhere), targeting minimum Python version
+	pocket.RunIn(
+		python.Tasks(python.WithPythonVersion(minPythonVersion)),
+		pocket.Detect(python.Detect()),
+		pocket.Skip(python.Test),
+	),
+
+	// Run tests across all supported Python versions in parallel
+	pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
+
+	// Generate GitHub workflow files
+	github.Workflows,
+)
+
+// matrixConfig excludes py-test (handled separately via TestMatrix with version-specific names).
+var matrixConfig = github.MatrixConfig{
+	DefaultPlatforms: []string{"ubuntu-latest"},
+	ExcludeTasks:     []string{"py-test"}, // Skip generic py-test; we use py-test:3.X instead
 }
 
 // Config is the pocket configuration for this project.
 var Config = pocket.Config{
-	AutoRun: pocket.Serial(
-		// Format, lint, typecheck against minimum supported version (no tests)
-		pocket.RunIn(LintWorkflow(), pocket.Detect(python.Detect())),
-
-		// Run tests across all supported Python versions in parallel
-		pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
-
-		// Generate GitHub workflow files
-		github.Workflows,
-	),
+	AutoRun: autoRun,
+	ManualRun: []pocket.Runnable{
+		// GitHub Actions matrix generation (used by CI)
+		github.MatrixTask(autoRun, matrixConfig),
+	},
 	Shim: &pocket.ShimConfig{
 		Posix:      true,
 		Windows:    true,
