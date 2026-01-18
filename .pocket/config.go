@@ -40,14 +40,10 @@ var autoRun = pocket.Serial(
 	pocket.WithOpts(github.Workflows, github.WorkflowsOptions{SkipPocket: true, IncludePocketMatrix: true}),
 )
 
-// matrixConfig excludes py-test (handled separately via TestMatrix with version-specific names).
-// Format/lint/typecheck run only on ubuntu; versioned test tasks run on all platforms.
 var matrixConfig = github.MatrixConfig{
-	DefaultPlatforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"},
+	DefaultPlatforms: []string{"ubuntu-latest"},
 	TaskOverrides: map[string]github.TaskOverride{
-		"py-format":    {Platforms: []string{"ubuntu-latest"}},
-		"py-lint":      {Platforms: []string{"ubuntu-latest"}},
-		"py-typecheck": {Platforms: []string{"ubuntu-latest"}},
+		"py-test:.*": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
 	},
 	ExcludeTasks: []string{"py-test"}, // py-test is replaced by py-test:3.X
 }
