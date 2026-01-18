@@ -36,8 +36,8 @@ var autoRun = pocket.Serial(
 	// Run tests across all supported Python versions in parallel
 	pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
 
-	// Generate GitHub workflow files
-	pocket.WithOpts(github.Workflows, github.WorkflowsOptions{SkipPocket: true, SkipPocketMatrix: false}),
+	// Generate GitHub workflow files (use matrix workflow for multi-version testing)
+	pocket.WithOpts(github.Workflows, github.WorkflowsOptions{SkipPocket: true, IncludePocketMatrix: true}),
 )
 
 // matrixConfig excludes py-test (handled separately via TestMatrix with version-specific names).
@@ -49,7 +49,7 @@ var matrixConfig = github.MatrixConfig{
 		"py-lint":      {Platforms: []string{"ubuntu-latest"}},
 		"py-typecheck": {Platforms: []string{"ubuntu-latest"}},
 	},
-	ExcludeTasks: []string{"py-test"}, // Skip generic py-test; we use py-test:3.X instead
+	ExcludeTasks: []string{"py-test"}, // py-test is replaced by py-test:3.X
 }
 
 // Config is the pocket configuration for this project.
