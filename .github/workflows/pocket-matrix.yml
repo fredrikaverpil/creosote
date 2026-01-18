@@ -45,8 +45,15 @@ jobs:
         with:
           go-version-file: .pocket/go.mod
           cache-dependency-path: "**/go.sum"
-      - name: ${{ matrix.task }}
+      - name: ${{ matrix.task }} (unix)
+        if: ${{ !contains(matrix.os, 'windows') }}
+        shell: bash
+        run: ${{ matrix.shim }} ${{ matrix.task }} -v
+      - name: ${{ matrix.task }} (windows)
+        if: ${{ contains(matrix.os, 'windows') }}
+        shell: pwsh
         run: ${{ matrix.shim }} ${{ matrix.task }} -v
       - name: Check for uncommitted changes
         if: ${{ matrix.gitDiff }}
+        shell: bash
         run: git diff --exit-code
