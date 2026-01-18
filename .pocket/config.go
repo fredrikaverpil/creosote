@@ -12,17 +12,6 @@ var pythonVersions = []string{"3.9", "3.10", "3.11", "3.12", "3.13"}
 // minPythonVersion is used for linting/typechecking (target minimum supported version).
 const minPythonVersion = "3.9"
 
-// LintTasks returns lint/format/typecheck tasks with minPythonVersion baked in.
-// This ensures CI matrix jobs use the correct Python version when run individually.
-func LintTasks() pocket.Runnable {
-	return pocket.Serial(
-		pocket.WithOpts(python.Sync, python.SyncOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Format, python.FormatOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Lint, python.LintOptions{PythonVersion: minPythonVersion}),
-		pocket.WithOpts(python.Typecheck, python.TypecheckOptions{PythonVersion: minPythonVersion}),
-	)
-}
-
 // TestMatrix creates parallel test runs across multiple Python versions.
 func TestMatrix(versions []string) pocket.Runnable {
 	tasks := make([]any, len(versions))
@@ -37,8 +26,12 @@ func TestMatrix(versions []string) pocket.Runnable {
 
 // autoRun defines the execution tree for ./pok (also used for matrix generation).
 var autoRun = pocket.Serial(
-	// Run lint/format/typecheck targeting minimum Python version
-	pocket.RunIn(LintTasks(), pocket.Detect(python.Detect())),
+	// Run all python tasks except Test, targeting minimum Python version
+	pocket.RunIn(
+		python.Tasks(python.WithPythonVersion(minPythonVersion)),
+		pocket.Detect(python.Detect()),
+		pocket.Skip(python.Test),
+	),
 
 	// Run tests across all supported Python versions in parallel
 	pocket.RunIn(TestMatrix(pythonVersions), pocket.Detect(python.Detect())),
@@ -49,7 +42,7 @@ var autoRun = pocket.Serial(
 
 // matrixConfig excludes py-test (handled separately via TestMatrix with version-specific names).
 var matrixConfig = github.MatrixConfig{
-	DefaultPlatforms: []string{"ubuntu-latest"},
+	DefaultPlatforms: []string{"ubuntu-latest", "macos-latest", "linux-latest"},
 	ExcludeTasks:     []string{"py-test"}, // Skip generic py-test; we use py-test:3.X instead
 }
 
