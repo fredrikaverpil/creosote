@@ -728,7 +728,7 @@ def test_dependency_with_prerelease_version_found(
     venv_manager: VenvManager,
     capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
 ) -> None:
-    """Tests that a dependency with a pre-release version (PEP 440) is correctly parsed and found."""
+    """Tests that a dependency with a pre-release version is correctly found."""
 
     # arrange
     dependency_name = "google-cloud-storage"
@@ -751,7 +751,7 @@ def test_dependency_with_prerelease_version_found(
         ],
     )
 
-    # Create the dist-info with the specific pre-release version using the updated fixture
+    # Create the dist-info with the specific pre-release version
     _ = venv_manager.create_top_level_txt(
         site_packages_path=site_packages_path,
         dependency_name=dependency_name,

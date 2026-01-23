@@ -422,7 +422,7 @@ def canonicalize_module_name(module_name: str) -> str:
 
 
 class DjangoSettingsVisitor(ast.NodeVisitor):
-    """Visit `ast` nodes and extract module names from `INSTALLED_APPS` and `MIDDLEWARE`."""
+    """Visit `ast` nodes and extract module names from Django settings."""
 
     def __init__(self) -> None:
         self.found_modules: set[str] = set()
@@ -548,15 +548,14 @@ def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[st
             for var in ["INSTALLED_APPS", "MIDDLEWARE"]
         ):
             logger.info(
-                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but they were empty."
+                f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but empty."
             )
         else:
             logger.warning(
                 f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_path}."
             )
     else:
-        logger.info(
-            f"Found {len(visitor.found_modules)} INSTALLED_APPS and/or MIDDLEWARE modules in {settings_path}."
-        )
+        module_count = len(visitor.found_modules)
+        logger.info(f"Found {module_count} Django modules in {settings_path}.")
 
     return list(visitor.found_modules)
