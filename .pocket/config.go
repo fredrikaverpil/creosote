@@ -37,24 +37,23 @@ var Config = &pk.Config{
 			pk.WithDetect(python.Detect()),
 		),
 
-		// Just run Creosote.
-		Creosote,
+		pk.Parallel(
+			// Just run Creosote.
+			Creosote,
 
-		// Check so .pre-commit-config.yaml was bumped
-		PreCommitCheck,
+			// Check so .pre-commit-config.yaml was bumped
+			PreCommitCheck,
 
-		// GitHub workflows, including matrix-based task execution
-		pk.WithOptions(
-			github.Tasks(),
-			pk.WithFlag(github.Workflows, "skip-pocket", true),
-			pk.WithFlag(github.Workflows, "include-pocket-matrix", true),
+			// GitHub workflows, including matrix-based task execution
+			pk.WithOptions(
+				github.Tasks(),
+				github.WithSkipPocket(), // skip the simple workflow variant
+				github.WithMatrixWorkflow(github.MatrixConfig{
+					DefaultPlatforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"},
+				}),
+			),
 		),
 	),
-
-	// Manual tasks - only run when explicitly invoked.
-	Manual: []pk.Runnable{
-		github.Matrix(matrixConfig), // ./pok gha-matrix
-	},
 
 	// Plan configuration.
 	Plan: &pk.PlanConfig{
@@ -109,8 +108,3 @@ var PreCommitCheck = pk.NewTask(
 		return nil
 	}),
 )
-
-// matrixConfig configures GitHub Actions matrix generation.
-var matrixConfig = github.MatrixConfig{
-	ExcludeTasks: []string{"github-workflows"},
-}
