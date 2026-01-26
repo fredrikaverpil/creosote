@@ -35,7 +35,7 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.RELEASE_PLEASE }}
           config-file: ${{ steps.release-please-config.outputs.config-file }}
           release-type: ${{ steps.release-please-config.outputs.release-type }}
           manifest-file: ${{ steps.release-please-config.outputs.manifest-file }}
