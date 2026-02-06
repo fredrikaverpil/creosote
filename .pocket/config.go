@@ -74,24 +74,22 @@ var Config = &pk.Config{
 }
 
 // Creosote runs creosote on itself to verify no unused dependencies.
-var Creosote = pk.NewTask(
-	"creosote",
-	"run creosote self-check",
-	nil,
-	pk.Serial(
+var Creosote = &pk.Task{
+	Name:  "creosote",
+	Usage: "run creosote self-check",
+	Body: pk.Serial(
 		uv.Install,
 		pk.Do(func(ctx context.Context) error {
 			return pk.Exec(ctx, "uv", "run", "creosote", "--venv", ".venv", "--exclude-dep", "tomli")
 		}),
 	),
-)
+}
 
 // PreCommitCheck validates that .pre-commit-config.yaml uses "rev: v" format.
-var PreCommitCheck = pk.NewTask(
-	"pre-commit-check",
-	"check pre-commit rev format has v prefix",
-	nil,
-	pk.Do(func(ctx context.Context) error {
+var PreCommitCheck = &pk.Task{
+	Name:  "pre-commit-check",
+	Usage: "check pre-commit rev format has v prefix",
+	Do: func(ctx context.Context) error {
 		// Tasks run from .pocket/, so go up to project root
 		configPath := filepath.Join("..", ".pre-commit-config.yaml")
 		file, err := os.Open(configPath)
@@ -118,5 +116,5 @@ var PreCommitCheck = pk.NewTask(
 		}
 		pk.Println(ctx, "All rev: entries have 'v' prefix ✓")
 		return nil
-	}),
-)
+	},
+}
