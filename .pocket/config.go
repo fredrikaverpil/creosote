@@ -21,18 +21,22 @@ var Config = &pk.Config{
 		// Format, lint, typecheck, and test with Python 3.9 (minimum supported version)
 		pk.WithOptions(
 			python.Tasks(),
-			python.WithVersion("3.9"),
-			python.WithTestCoverage(),
+			pk.WithNameSuffix("3.9"),
+			pk.WithFlag(python.Format, "python", "3.9"),
+			pk.WithFlag(python.Lint, "python", "3.9"),
+			pk.WithFlag(python.Typecheck, "python", "3.9"),
+			pk.WithFlag(python.Test, "python", "3.9"),
+			pk.WithFlag(python.Test, "coverage", true),
 			pk.WithDetect(python.Detect()),
 		),
 
 		// Test against remaining supported Python versions
 		pk.WithOptions(
 			pk.Parallel(
-				pk.WithOptions(python.Test, python.WithVersion("3.10")),
-				pk.WithOptions(python.Test, python.WithVersion("3.11")),
-				pk.WithOptions(python.Test, python.WithVersion("3.12")),
-				pk.WithOptions(python.Test, python.WithVersion("3.13")),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.10"), pk.WithFlag(python.Test, "python", "3.10")),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.11"), pk.WithFlag(python.Test, "python", "3.11")),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.12"), pk.WithFlag(python.Test, "python", "3.12")),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.13"), pk.WithFlag(python.Test, "python", "3.13")),
 			),
 			pk.WithDetect(python.Detect()),
 		),
@@ -47,9 +51,17 @@ var Config = &pk.Config{
 			// GitHub workflows, including matrix-based task execution
 			pk.WithOptions(
 				github.Tasks(),
-				github.WithSkipPocket(), // skip the simple workflow variant
-				github.WithMatrixWorkflow(github.MatrixConfig{
-					DefaultPlatforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"},
+				pk.WithFlag(github.Workflows, "skip-pocket", true),
+				pk.WithFlag(github.Workflows, "include-pocket-matrix", true),
+				pk.WithContextValue(github.MatrixConfigKey{}, github.MatrixConfig{
+					DefaultPlatforms: []string{"ubuntu-latest"},
+					TaskOverrides: map[string]github.TaskOverride{
+						"py-test:3.9":  {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+						"py-test:3.10": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+						"py-test:3.11": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+						"py-test:3.12": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+						"py-test:3.13": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+					},
 				}),
 			),
 		),
@@ -62,24 +74,22 @@ var Config = &pk.Config{
 }
 
 // Creosote runs creosote on itself to verify no unused dependencies.
-var Creosote = pk.NewTask(
-	"creosote",
-	"run creosote self-check",
-	nil,
-	pk.Serial(
+var Creosote = &pk.Task{
+	Name:  "creosote",
+	Usage: "run creosote self-check",
+	Body: pk.Serial(
 		uv.Install,
 		pk.Do(func(ctx context.Context) error {
 			return pk.Exec(ctx, "uv", "run", "creosote", "--venv", ".venv", "--exclude-dep", "tomli")
 		}),
 	),
-)
+}
 
 // PreCommitCheck validates that .pre-commit-config.yaml uses "rev: v" format.
-var PreCommitCheck = pk.NewTask(
-	"pre-commit-check",
-	"check pre-commit rev format has v prefix",
-	nil,
-	pk.Do(func(ctx context.Context) error {
+var PreCommitCheck = &pk.Task{
+	Name:  "pre-commit-check",
+	Usage: "check pre-commit rev format has v prefix",
+	Do: func(ctx context.Context) error {
 		// Tasks run from .pocket/, so go up to project root
 		configPath := filepath.Join("..", ".pre-commit-config.yaml")
 		file, err := os.Open(configPath)
@@ -106,5 +116,5 @@ var PreCommitCheck = pk.NewTask(
 		}
 		pk.Println(ctx, "All rev: entries have 'v' prefix ✓")
 		return nil
-	}),
-)
+	},
+}
