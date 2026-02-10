@@ -60,11 +60,11 @@ You can configure creosote using commandline arguments or in your
 
 #### Optional arguments
 
-| Argument             | Default value | Description                                                               |
-| -------------------  | ------------- | ------------------------------------------------------------------------- |
-| `--exclude-dep`      |               | Dependencies you wish to not scan for.                                    |
-| `--django-settings`  |               | The path to your Django settings file.                                    |
-| `--format`           | `default`     | The output format, valid values are `default`, `no-color` or `porcelain`. |
+| Argument            | Default value | Description                                                               |
+| ------------------- | ------------- | ------------------------------------------------------------------------- |
+| `--exclude-dep`     |               | Dependencies you wish to not scan for.                                    |
+| `--django-settings` |               | The path to your Django settings file.                                    |
+| `--format`          | `default`     | The output format, valid values are `default`, `no-color` or `porcelain`. |
 
 ### Using `pyproject.toml`
 
@@ -91,7 +91,7 @@ the virtual environment for resolving and the ability to read the dependency's
 `RECORD` or `top_level.txt` file). If a dependency does not have any imports
 associated, it is considered unused.
 
-Creosote also scans the Django settings `INSTALLED_APPS` and `MIDDLEWARE` lists 
+Creosote also scans the Django settings `INSTALLED_APPS` and `MIDDLEWARE` lists
 when the option `--django-settings` argument is used.
 
 See the `main` function in
@@ -147,14 +147,14 @@ depending on your objectives.
 #### Why are my Django dependencies reported as unused?
 
 Django dependencies are often added to the `INSTALLED_APPS` and `MIDDLEWARE`
-lists in `settings.py` file as strings, without being directly imported in your 
-source code. Because Creosote's default import scanner looks for explicit `import`
-statements, it may incorrectly flag these dependencies as unused.
+lists in `settings.py` file as strings, without being directly imported in your
+source code. Because Creosote's default import scanner looks for explicit
+`import` statements, it may incorrectly flag these dependencies as unused.
 
 To resolve this, you can use the `--django-settings` command-line argument or
 the `django-settings` key in your `pyproject.toml` to point Creosote to your
-Django settings file. Creosote will then parse the `INSTALLED_APPS` and `MIDDLEWARE`
-lists to correctly identify those dependencies as used.
+Django settings file. Creosote will then parse the `INSTALLED_APPS` and
+`MIDDLEWARE` lists to correctly identify those dependencies as used.
 
 #### 📔 Notes on [PEP-508](https://peps.python.org/pep-0508) (`requirements.txt`)
 
@@ -290,6 +290,23 @@ This new creosote 3.x behavior applies to the following 3.x CLI arguments:
 </details>
 
 ## 👩‍🔬 Development/debugging info
+
+### Contributions
+
+You are welcome to open a PR to improve or enhance Creosote. This project uses
+[Pocket](https://github.com/fredrikaverpil/pocket) to run linting, formatting,
+testing.
+
+```sh
+# Help
+./pok -h
+
+# Run task
+./pok <task>
+
+# Run all tasks
+./pok
+```
 
 ### Install in-development builds
 
