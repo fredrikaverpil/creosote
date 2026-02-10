@@ -51,16 +51,16 @@ var Config = &pk.Config{
 			// GitHub workflows, including matrix-based task execution
 			pk.WithOptions(
 				github.Tasks(),
-				pk.WithFlag(github.Workflows, "skip-pocket", true),
-				pk.WithFlag(github.Workflows, "include-pocket-matrix", true),
-				pk.WithContextValue(github.MatrixConfigKey{}, github.MatrixConfig{
-					DefaultPlatforms: []string{"ubuntu-latest"},
+				pk.WithFlag(github.Workflows, github.FlagSkipPocket, true),
+				pk.WithFlag(github.Workflows, github.FlagIncludePocketPerjob, true),
+				pk.WithContextValue(github.PerJobConfigKey{}, github.PerJobConfig{
+					DefaultPlatforms: []string{github.PlatformUbuntu},
 					TaskOverrides: map[string]github.TaskOverride{
-						"py-test:3.9":  {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
-						"py-test:3.10": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
-						"py-test:3.11": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
-						"py-test:3.12": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
-						"py-test:3.13": {Platforms: []string{"ubuntu-latest", "macos-latest", "windows-latest"}},
+						"py-test:3.9":  {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
+						"py-test:3.10": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
+						"py-test:3.11": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
+						"py-test:3.12": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
+						"py-test:3.13": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
 					},
 				}),
 			),
