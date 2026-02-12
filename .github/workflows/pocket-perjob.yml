@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  py-format-3-9-ubuntu:
-    name: py-format:3.9 (ubuntu-latest)
+  py-format-3-10-ubuntu:
+    name: py-format:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -36,14 +36,14 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-format-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-format-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-pocket-py-format-3-9-ubuntu-
-      - name: Run py-format:3.9
+            ${{ runner.os }}-pocket-py-format-3-10-ubuntu-
+      - name: Run py-format:3.10
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-format:3.9
+        run: ./pok -v -g py-format:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -54,10 +54,10 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-format-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-format-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
 
-  py-lint-3-9-ubuntu:
-    name: py-lint:3.9 (ubuntu-latest)
+  py-lint-3-10-ubuntu:
+    name: py-lint:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -75,14 +75,14 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-lint-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-lint-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-pocket-py-lint-3-9-ubuntu-
-      - name: Run py-lint:3.9
+            ${{ runner.os }}-pocket-py-lint-3-10-ubuntu-
+      - name: Run py-lint:3.10
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-lint:3.9
+        run: ./pok -v -g py-lint:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -93,10 +93,10 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-lint-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-lint-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
 
-  py-typecheck-3-9-ubuntu:
-    name: py-typecheck:3.9 (ubuntu-latest)
+  py-typecheck-3-10-ubuntu:
+    name: py-typecheck:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -114,14 +114,14 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-typecheck-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-typecheck-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-pocket-py-typecheck-3-9-ubuntu-
-      - name: Run py-typecheck:3.9
+            ${{ runner.os }}-pocket-py-typecheck-3-10-ubuntu-
+      - name: Run py-typecheck:3.10
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-typecheck:3.9
+        run: ./pok -v -g py-typecheck:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -132,124 +132,7 @@ jobs:
             .pocket/bin
             .pocket/tools
             .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-typecheck-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
-
-  py-test-3-9-ubuntu:
-    name: py-test:3.9 (ubuntu-latest)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: .pocket/go.mod
-          cache: false
-      - name: Restore cache
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-pocket-py-test-3-9-ubuntu-
-      - name: Run py-test:3.9
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.9
-      - name: Save cache
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-ubuntu-${{ hashFiles('**/go.sum') }}
-
-  py-test-3-9-macos:
-    name: py-test:3.9 (macos-latest)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: .pocket/go.mod
-          cache: false
-      - name: Restore cache
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-macos-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-pocket-py-test-3-9-macos-
-      - name: Run py-test:3.9
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.9
-      - name: Save cache
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-macos-${{ hashFiles('**/go.sum') }}
-
-  py-test-3-9-windows:
-    name: py-test:3.9 (windows-latest)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: .pocket/go.mod
-          cache: false
-      - name: Restore cache
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-windows-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-pocket-py-test-3-9-windows-
-      - name: Run py-test:3.9
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.9
-      - name: Save cache
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            .pocket/bin
-            .pocket/tools
-            .pocket/venvs
-          key: ${{ runner.os }}-pocket-py-test-3-9-windows-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-pocket-py-typecheck-3-10-ubuntu-${{ hashFiles('**/go.sum') }}
 
   py-test-3-10-ubuntu:
     name: py-test:3.10 (ubuntu-latest)

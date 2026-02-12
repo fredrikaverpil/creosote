@@ -18,14 +18,14 @@ import (
 var Config = &pk.Config{
 	Auto: pk.Serial(
 
-		// Format, lint, typecheck, and test with Python 3.9 (minimum supported version)
+		// Format, lint, typecheck, and test with Python 3.10 (minimum supported version)
 		pk.WithOptions(
 			python.Tasks(),
-			pk.WithNameSuffix("3.9"),
-			pk.WithFlag(python.Format, "python", "3.9"),
-			pk.WithFlag(python.Lint, "python", "3.9"),
-			pk.WithFlag(python.Typecheck, "python", "3.9"),
-			pk.WithFlag(python.Test, "python", "3.9"),
+			pk.WithNameSuffix("3.10"),
+			pk.WithFlag(python.Format, "python", "3.10"),
+			pk.WithFlag(python.Lint, "python", "3.10"),
+			pk.WithFlag(python.Typecheck, "python", "3.10"),
+			pk.WithFlag(python.Test, "python", "3.10"),
 			pk.WithFlag(python.Test, "coverage", true),
 			pk.WithDetect(python.Detect()),
 		),
@@ -33,7 +33,6 @@ var Config = &pk.Config{
 		// Test against remaining supported Python versions
 		pk.WithOptions(
 			pk.Parallel(
-				pk.WithOptions(python.Test, pk.WithNameSuffix("3.10"), pk.WithFlag(python.Test, "python", "3.10")),
 				pk.WithOptions(python.Test, pk.WithNameSuffix("3.11"), pk.WithFlag(python.Test, "python", "3.11")),
 				pk.WithOptions(python.Test, pk.WithNameSuffix("3.12"), pk.WithFlag(python.Test, "python", "3.12")),
 				pk.WithOptions(python.Test, pk.WithNameSuffix("3.13"), pk.WithFlag(python.Test, "python", "3.13")),
@@ -56,7 +55,6 @@ var Config = &pk.Config{
 				pk.WithContextValue(github.PerJobConfigKey{}, github.PerJobConfig{
 					DefaultPlatforms: []string{github.PlatformUbuntu},
 					TaskOverrides: map[string]github.TaskOverride{
-						"py-test:3.9":  {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
 						"py-test:3.10": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
 						"py-test:3.11": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
 						"py-test:3.12": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},

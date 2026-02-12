@@ -3,14 +3,13 @@ name = "creosote"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
 version = "4.2.1"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = []
 authors = [{ name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" }]
 classifiers = [
   # https://pypi.org/classifiers/
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -25,7 +24,6 @@ dependencies = [
   "nbformat>=5.10.4,<6.0",
   "pip-requirements-parser>=32.0.1,<33.1",
   "tomli>=2.1.0,<3.0.0 ; python_version < '3.11'",
-  "typing-extensions>=4.12.2",
 ]
 
 [project.urls]
@@ -47,6 +45,7 @@ package = true
 
 [tool.ruff]
 src = ["src", "tests"]
+target-version = "py310"
 line-length = 88       # black default
 
 [tool.ruff.lint]
@@ -55,7 +54,7 @@ select = [
   "W", # pycodestyle warnings
   # "D",  # pydocstyle
   "F", # pyflakes
-  # "UP", # pyupgrade
+  "UP", # pyupgrade
   "S", # flake8-bandit
   "B", # flake8-bugbear
   "I", # isort
@@ -93,11 +92,11 @@ ignore = []
 ]
 
 [tool.basedpyright]
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 venvPath = ".venv"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 
 [[tool.mypy.overrides]]

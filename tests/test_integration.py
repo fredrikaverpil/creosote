@@ -71,8 +71,7 @@ def test_creosote_project_success(
 
     assert actual_output == [
         "Found dependencies in pyproject.toml: "
-        + "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser, "
-        + "typing-extensions",
+        + "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser",
         "No unused dependencies found! ✨",
     ]
     assert exit_code == 0
