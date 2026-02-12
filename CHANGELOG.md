@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.1](https://github.com/fredrikaverpil/creosote/compare/v4.2.0...v4.2.1) (2026-02-12)
+
+
+### Documentation
+
+* **contrib:** mention python versions ([#360](https://github.com/fredrikaverpil/creosote/issues/360)) ([96a1553](https://github.com/fredrikaverpil/creosote/commit/96a1553f9aa8e2e07fb28c5f09c34ad11b5311c8))
+* **readme:** mention contributions ([#358](https://github.com/fredrikaverpil/creosote/issues/358)) ([e5272d3](https://github.com/fredrikaverpil/creosote/commit/e5272d3c11e7da0a77f97fd96b304e9e6864ed07))
+
 ## [4.2.0](https://github.com/fredrikaverpil/creosote/compare/v4.1.0...v4.2.0) (2026-01-01)
 
 
