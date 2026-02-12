@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/fredrikaverpil/creosote/compare/v4.2.1...v5.0.0) (2026-02-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* Python 3.9 is no longer supported as it has reached end-of-life. The minimum required version is now Python 3.10.
+
+### Features
+
+* drop Python 3.9, require 3.10+ and add 3.14 support ([#362](https://github.com/fredrikaverpil/creosote/issues/362)) ([3b16b4b](https://github.com/fredrikaverpil/creosote/commit/3b16b4b850bceedf454b8acb62ad8ee26a37622f))
+
 ## [4.2.1](https://github.com/fredrikaverpil/creosote/compare/v4.2.0...v4.2.1) (2026-02-12)
 
 
