@@ -17,7 +17,7 @@ from loguru import logger
 from creosote.__about__ import __version__
 
 
-@dataclass
+@dataclass(slots=True)
 class Config:
     """Structured configuration data.
 

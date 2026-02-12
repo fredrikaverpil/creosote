@@ -1,7 +1,7 @@
 import dataclasses
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class ImportInfo:
     module: list[str]
     name: list[str]
@@ -13,7 +13,7 @@ class ImportInfo:
         return cls(module=[], name=[module_name], alias=None)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class DependencyInfo:
     name: str  # as defined in the dependencies specification file
     top_level_import_names: list[str] | None = None
