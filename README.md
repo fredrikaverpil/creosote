@@ -308,6 +308,12 @@ testing.
 ./pok
 ```
 
+Creosote is written and primarily tested against the
+[oldest supported Python version](https://devguide.python.org/versions/).
+However, since Creosote is meant to also work on all supported Python versions,
+tests will run for all these versions too. See the
+[Pocket CI configuration](.pocket/config.go) for details.
+
 ### Install in-development builds
 
 You can run in-development versions of Creosote.
