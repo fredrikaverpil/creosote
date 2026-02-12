@@ -602,6 +602,123 @@ jobs:
             .pocket/venvs
           key: ${{ runner.os }}-pocket-py-test-3-13-windows-${{ hashFiles('**/go.sum') }}
 
+  py-test-3-14-ubuntu:
+    name: py-test:3.14 (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: .pocket/go.mod
+          cache: false
+      - name: Restore cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-ubuntu-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-pocket-py-test-3-14-ubuntu-
+      - name: Run py-test:3.14
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./pok -v -g py-test:3.14
+      - name: Save cache
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-ubuntu-${{ hashFiles('**/go.sum') }}
+
+  py-test-3-14-macos:
+    name: py-test:3.14 (macos-latest)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: .pocket/go.mod
+          cache: false
+      - name: Restore cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-macos-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-pocket-py-test-3-14-macos-
+      - name: Run py-test:3.14
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./pok -v -g py-test:3.14
+      - name: Save cache
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-macos-${{ hashFiles('**/go.sum') }}
+
+  py-test-3-14-windows:
+    name: py-test:3.14 (windows-latest)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: .pocket/go.mod
+          cache: false
+      - name: Restore cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-windows-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-pocket-py-test-3-14-windows-
+      - name: Run py-test:3.14
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: .\pok.ps1 -v -g py-test:3.14
+      - name: Save cache
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            .pocket/bin
+            .pocket/tools
+            .pocket/venvs
+          key: ${{ runner.os }}-pocket-py-test-3-14-windows-${{ hashFiles('**/go.sum') }}
+
   creosote-ubuntu:
     name: creosote (ubuntu-latest)
     runs-on: ubuntu-latest
