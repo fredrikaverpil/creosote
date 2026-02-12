@@ -1,6 +1,5 @@
 import sys
 from collections.abc import Sequence
-from typing import Optional
 
 from loguru import logger
 
@@ -9,7 +8,7 @@ from creosote.__about__ import __version__
 from creosote.config import Features, fail_fast, parse_args
 
 
-def main(args_: Optional[Sequence[str]] = None) -> int:
+def main(args_: Sequence[str] | None = None) -> int:
     args = parse_args(args_)
     if fail_fast(args):
         return 1

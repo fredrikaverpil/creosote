@@ -4,10 +4,9 @@ import sys
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import Union, cast
+from typing import TypeGuard, cast
 
 import nbformat
-from typing_extensions import TypeGuard
 
 if sys.version_info >= (3, 11):
     import tomllib  # pyright: ignore[reportUnreachable]
@@ -27,32 +26,32 @@ GroupName = str
 PackageName = str
 PEP621Type1 = list[PackageName]
 PEP621Type2 = dict[GroupName, list[PackageName]]
-PEP621Types = Union[PEP621Type1, PEP621Type2]
+PEP621Types = PEP621Type1 | PEP621Type2
 PEP735Type1 = dict[GroupName, list[PackageName]]
-PEP735Type2 = dict[GroupName, list[Union[dict[str, PackageName], str]]]
-PEP735Types = Union[PEP735Type1, PEP735Type2]
+PEP735Type2 = dict[GroupName, list[dict[str, PackageName] | str]]
+PEP735Types = PEP735Type1 | PEP735Type2
 PoetryType1 = dict[PackageName, str]
 PoetryType2 = dict[PackageName, dict[str, str]]
-PoetryType3 = dict[PackageName, Union[str, dict[str, str]]]
+PoetryType3 = dict[PackageName, str | dict[str, str]]
 PoetryType4 = dict[PackageName, list[dict[str, str]]]
-PoetryTypes = Union[PoetryType1, PoetryType2, PoetryType3, PoetryType4]
+PoetryTypes = PoetryType1 | PoetryType2 | PoetryType3 | PoetryType4
 PipfileType1 = dict[PackageName, str]
 PipfileType2 = dict[PackageName, dict[str, str]]
-PipfileType3 = dict[PackageName, Union[str, dict[str, str]]]
-PipfileTypes = Union[PipfileType1, PipfileType2, PipfileType3]
-AllSupportedTypes = Union[
-    PEP621Type1,
-    PEP621Type2,
-    PEP735Type1,
-    PEP735Type2,
-    PoetryType1,
-    PoetryType2,
-    PoetryType3,
-    PoetryType4,
-    PipfileType1,
-    PipfileType2,
-    PipfileType3,
-]
+PipfileType3 = dict[PackageName, str | dict[str, str]]
+PipfileTypes = PipfileType1 | PipfileType2 | PipfileType3
+AllSupportedTypes = (
+    PEP621Type1
+    | PEP621Type2
+    | PEP735Type1
+    | PEP735Type2
+    | PoetryType1
+    | PoetryType2
+    | PoetryType3
+    | PoetryType4
+    | PipfileType1
+    | PipfileType2
+    | PipfileType3
+)
 
 
 def is_list_type(var: AllSupportedTypes) -> TypeGuard[PEP621Type1]:
@@ -61,13 +60,13 @@ def is_list_type(var: AllSupportedTypes) -> TypeGuard[PEP621Type1]:
 
 def is_dict_of_strings(
     var: AllSupportedTypes,
-) -> TypeGuard[Union[PoetryType1, PipfileType1]]:
+) -> TypeGuard[PoetryType1 | PipfileType1]:
     return isinstance(var, dict) and all(isinstance(v, str) for v in var.values())
 
 
 def is_dict_of_lists(
     var: AllSupportedTypes,
-) -> TypeGuard[Union[PEP621Type2, PEP735Type1, PEP735Type2, PoetryType4]]:
+) -> TypeGuard[PEP621Type2 | PEP735Type1 | PEP735Type2 | PoetryType4]:
     return isinstance(var, dict) and all(isinstance(v, list) for v in var.values())
 
 
@@ -84,13 +83,13 @@ def is_pep621_dict_of_lists(
 
 def is_dict_of_dicts(
     var: AllSupportedTypes,
-) -> TypeGuard[Union[PoetryType2, PipfileType2]]:
+) -> TypeGuard[PoetryType2 | PipfileType2]:
     return isinstance(var, dict) and all(isinstance(v, dict) for v in var.values())
 
 
 def is_dict_of_union(
     var: AllSupportedTypes,
-) -> TypeGuard[Union[PoetryType3, PipfileType3]]:
+) -> TypeGuard[PoetryType3 | PipfileType3]:
     if not isinstance(var, dict):
         return False
     return all(isinstance(v, (str, dict)) for v in var.values())
@@ -205,7 +204,7 @@ class DependencyReader:
 
     def get_deps_from_toml_section_keys(
         self,
-        section_contents: Union[PoetryTypes, PipfileTypes],
+        section_contents: PoetryTypes | PipfileTypes,
     ) -> list[PackageName]:
         """Get dependency names from toml section's dict keys."""
         self.assert_is_dict(section_contents)
@@ -270,7 +269,7 @@ class DependencyReader:
         return sorted([dep.name for dep in dep_from_req if dep.name is not None])
 
     @staticmethod
-    def parse_dep_string(dep: str) -> Union[str, None]:
+    def parse_dep_string(dep: str) -> str | None:
         if "@" in dep:
             return DependencyReader.dependency_without_direct_reference(dep)
         else:
@@ -279,7 +278,7 @@ class DependencyReader:
     @staticmethod
     def dependency_without_version_constraint(
         dependency_string: str,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """Return dependency name without version constraint.
 
         See PEP-404 for variations.
@@ -293,7 +292,7 @@ class DependencyReader:
     @staticmethod
     def dependency_without_direct_reference(
         dependency_string: str,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """Return dependency name without direct reference.
 
         See PEP-508 for variations.
@@ -528,7 +527,7 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def get_modules_from_django_settings(settings_file: Union[str, Path]) -> list[str]:
+def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
     """Parse a Django settings file and extract modules from INSTALLED_APPS."""
     settings_path = Path(settings_file)
     if not settings_path.is_file():

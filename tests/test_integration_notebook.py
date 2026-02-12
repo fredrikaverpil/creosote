@@ -41,7 +41,7 @@ def test_jupyter_ok(
         contents=deps_file_contents,
     )
 
-    with open("tests/notebook.ipynb", "r") as notebook:
+    with open("tests/notebook.ipynb") as notebook:
         contents = notebook.readlines()
 
     source_file = venv_manager.create_source_file(

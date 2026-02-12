@@ -108,7 +108,7 @@ class DepsResolver:
                     == self.canonicalize_module_name(dep_info.name).lower()
                 ):
                     with open(
-                        top_level_filepath, "r", encoding="utf-8", errors="replace"
+                        top_level_filepath, encoding="utf-8", errors="replace"
                     ) as infile:
                         lines = infile.readlines()
                     dep_info.top_level_import_names = [line.strip() for line in lines]
@@ -131,7 +131,7 @@ class DepsResolver:
                     == self.canonicalize_module_name(dep_info.name).lower()
                 ):
                     with open(
-                        record_filepath, "r", encoding="utf-8", errors="replace"
+                        record_filepath, encoding="utf-8", errors="replace"
                     ) as infile:
                         lines = infile.readlines()
 

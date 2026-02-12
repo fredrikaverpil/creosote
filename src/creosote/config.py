@@ -1,12 +1,11 @@
 import argparse
 import os
 import sys
-import typing
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal, get_args
 
 if sys.version_info >= (3, 11):
     import tomllib  # pyright: ignore[reportUnreachable]
@@ -18,7 +17,7 @@ from loguru import logger
 from creosote.__about__ import __version__
 
 
-@dataclass
+@dataclass(slots=True)
 class Config:
     """Structured configuration data.
 
@@ -36,7 +35,7 @@ class Config:
         default_factory=lambda: [os.environ.get("VIRTUAL_ENV", ".venv")]
     )
     features: list[str] = field(default_factory=list)
-    django_settings: Optional[str] = None
+    django_settings: str | None = None
 
 
 class Features(Enum):
@@ -60,7 +59,7 @@ class CustomAppendAction(argparse.Action):
         self,
         option_strings: list[str],
         dest: str,
-        nargs: Optional[list[str]] = None,
+        nargs: list[str] | None = None,
         **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ):
         """Initialize the action."""
@@ -94,7 +93,7 @@ def show_migration_message() -> None:
             sys.exit(1)
 
 
-def parse_args(args: Optional[Sequence[str]]) -> Config:
+def parse_args(args: Sequence[str] | None) -> Config:
     show_migration_message()
 
     defaults = load_defaults()
@@ -117,7 +116,7 @@ def parse_args(args: Optional[Sequence[str]]) -> Config:
         "-f",
         "--format",
         dest="format",
-        choices=typing.get_args(Config.__annotations__["format"]),
+        choices=get_args(Config.__annotations__["format"]),
         default=defaults.format,
         help="output format",
     )
@@ -195,7 +194,7 @@ def parse_args(args: Optional[Sequence[str]]) -> Config:
     return Config(**vars(parsed_args))  # pyright: ignore[reportAny]
 
 
-def load_defaults(src: Union[str, Path] = "pyproject.toml") -> Config:
+def load_defaults(src: str | Path = "pyproject.toml") -> Config:
     """Load pyproject.toml defaults from user config.
 
     Expects user configuration at ``[tool.creosote]``.

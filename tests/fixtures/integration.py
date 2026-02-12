@@ -12,7 +12,7 @@ class VenvManager:
     def create_venv(self) -> tuple[Path, Path]:
         """Create a simulated virtual environment."""
         venv_path = self.temporary_path / "venv"
-        site_packages_path = venv_path / "lib" / "python3.9" / "site-packages"
+        site_packages_path = venv_path / "lib" / "python3.10" / "site-packages"
         site_packages_path.mkdir(parents=True)
         return venv_path, site_packages_path
 
