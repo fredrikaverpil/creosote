@@ -52,6 +52,14 @@ def test_read_toml_pep621(
                 "useful-types",
             ],
         ),
+        (
+            ["dependency-groups.test"],
+            ["coverage", "pytest"],
+        ),
+        (
+            ["dependency-groups.typing-test"],
+            ["useful-types"],
+        ),
     ],
 )
 def test_read_toml_pep735(
