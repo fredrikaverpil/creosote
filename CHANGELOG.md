@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/fredrikaverpil/creosote/compare/v5.0.0...v5.0.1) (2026-03-05)
+
+
+### Bug Fixes
+
+* handle single PEP 735 dependency group in section path ([#368](https://github.com/fredrikaverpil/creosote/issues/368)) ([d2c7cf4](https://github.com/fredrikaverpil/creosote/commit/d2c7cf4b13a3c83768770637aea4fa3c8c4aeaae))
+
 ## [5.0.0](https://github.com/fredrikaverpil/creosote/compare/v4.2.1...v5.0.0) (2026-02-12)
 
 
