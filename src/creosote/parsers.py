@@ -29,7 +29,8 @@ PEP621Type2 = dict[GroupName, list[PackageName]]
 PEP621Types = PEP621Type1 | PEP621Type2
 PEP735Type1 = dict[GroupName, list[PackageName]]
 PEP735Type2 = dict[GroupName, list[dict[str, PackageName] | str]]
-PEP735Types = PEP735Type1 | PEP735Type2
+PEP735Type3 = list[dict[str, PackageName] | str]
+PEP735Types = PEP735Type1 | PEP735Type2 | PEP735Type3
 PoetryType1 = dict[PackageName, str]
 PoetryType2 = dict[PackageName, dict[str, str]]
 PoetryType3 = dict[PackageName, str | dict[str, str]]
@@ -44,6 +45,7 @@ AllSupportedTypes = (
     | PEP621Type2
     | PEP735Type1
     | PEP735Type2
+    | PEP735Type3
     | PoetryType1
     | PoetryType2
     | PoetryType3
@@ -178,7 +180,13 @@ class DependencyReader:
         """
 
         dep_strings: list[str] = []
-        if is_dict_of_lists(section_contents):
+        if is_list_type(section_contents):
+            for item in section_contents:
+                if type(item) is not str:
+                    logger.debug(f"Skipping non-string entry: {item}")
+                    continue
+                dep_strings.append(item)
+        elif is_dict_of_lists(section_contents):
             for _, dep_string_list in section_contents.items():
                 for dep_string in dep_string_list:
                     if type(dep_string) is not str:
