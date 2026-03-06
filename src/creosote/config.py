@@ -36,6 +36,7 @@ class Config:
     )
     features: list[str] = field(default_factory=list)
     django_settings: str | None = None
+    include_deferred: bool = False
 
 
 class Features(Enum):
@@ -188,6 +189,13 @@ def parse_args(args: Sequence[str] | None) -> Config:
         metavar="PATH",
         default=defaults.django_settings,
         help="path to the Django settings file",
+    )
+    _ = parser.add_argument(
+        "--include-deferred",
+        dest="include_deferred",
+        action="store_true",
+        default=defaults.include_deferred,
+        help="detect deferred imports inside functions and methods",
     )
 
     parsed_args = parser.parse_args(args)
