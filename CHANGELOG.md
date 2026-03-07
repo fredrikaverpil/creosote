@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/fredrikaverpil/creosote/compare/v5.0.1...v5.1.0) (2026-03-07)
+
+
+### Features
+
+* add --include-deferred flag to detect imports inside functions ([#373](https://github.com/fredrikaverpil/creosote/issues/373)) ([570ca77](https://github.com/fredrikaverpil/creosote/commit/570ca77dbff30de9970f357088c1daba42935870)), closes [#372](https://github.com/fredrikaverpil/creosote/issues/372)
+
 ## [5.0.1](https://github.com/fredrikaverpil/creosote/compare/v5.0.0...v5.0.1) (2026-03-05)
 
 
