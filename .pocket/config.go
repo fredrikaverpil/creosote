@@ -80,7 +80,7 @@ var Creosote = &pk.Task{
 	Body: pk.Serial(
 		uv.Install,
 		pk.Do(func(ctx context.Context) error {
-			return pk.Exec(ctx, "uv", "run", "--frozen", "creosote", "--venv", ".venv", "--exclude-dep", "tomli")
+			return pk.Exec(ctx, "uv", "run", "--frozen", "creosote", "--venv", ".venv", "--include-deferred")
 		}),
 	),
 }
