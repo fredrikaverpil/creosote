@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.1](https://github.com/fredrikaverpil/creosote/compare/v5.1.0...v5.1.1) (2026-03-07)
+
+
+### Documentation
+
+* add --include-deferred to README ([#377](https://github.com/fredrikaverpil/creosote/issues/377)) ([3e86a70](https://github.com/fredrikaverpil/creosote/commit/3e86a7099356e5b66a43e279622a78ed08a5f33d))
+
 ## [5.1.0](https://github.com/fredrikaverpil/creosote/compare/v5.0.1...v5.1.0) (2026-03-07)
 
 
