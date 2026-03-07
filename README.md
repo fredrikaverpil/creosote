@@ -60,11 +60,12 @@ You can configure creosote using commandline arguments or in your
 
 #### Optional arguments
 
-| Argument            | Default value | Description                                                               |
-| ------------------- | ------------- | ------------------------------------------------------------------------- |
-| `--exclude-dep`     |               | Dependencies you wish to not scan for.                                    |
-| `--django-settings` |               | The path to your Django settings file.                                    |
-| `--format`          | `default`     | The output format, valid values are `default`, `no-color` or `porcelain`. |
+| Argument             | Default value | Description                                                               |
+| -------------------- | ------------- | ------------------------------------------------------------------------- |
+| `--exclude-dep`      |               | Dependencies you wish to not scan for.                                    |
+| `--include-deferred` | `false`       | Also scan for imports inside functions, methods, and conditional blocks.   |
+| `--django-settings`  |               | The path to your Django settings file.                                    |
+| `--format`           | `default`     | The output format, valid values are `default`, `no-color` or `porcelain`. |
 
 ### Using `pyproject.toml`
 
@@ -78,6 +79,8 @@ exclude-deps =[
   "pyodbc",
   "pg8000",
 ]
+# Also scan for imports inside functions, methods, and conditional blocks
+include-deferred = true
 # Django settings file path (relative to pyproject.toml)
 django-settings = "myproject/settings.py"
 ```
