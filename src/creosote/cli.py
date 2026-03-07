@@ -22,7 +22,9 @@ def main(args_: Sequence[str] | None = None) -> int:
         logger.info(f"Feature(s) enabled: {', '.join(args.features)}")
 
     # Get imports from source code
-    imports = parsers.get_module_names_from_code(args.paths)
+    imports = parsers.get_module_names_from_code(
+        args.paths, include_deferred=args.include_deferred
+    )
 
     # Get imports from Django settings file
     if args.django_settings:

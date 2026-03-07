@@ -312,7 +312,9 @@ class DependencyReader:
         return None
 
 
-def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, None]:
+def get_module_info_from_python_file(
+    path: str, *, include_deferred: bool = False
+) -> Generator[ImportInfo, None, None]:
     """Get imports, based on given filepath.
 
     Credit:
@@ -344,7 +346,9 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
             logger.warning(f"Syntax error, cannot AST-parse {path}: {e}")
 
     if root:
-        for node in ast.iter_child_nodes(root):  # or potentially ast.walk ?
+        # TODO(v6): always use ast.walk and make --include-deferred flag a no-op
+        iter_nodes = ast.walk if include_deferred else ast.iter_child_nodes
+        for node in iter_nodes(root):
             if isinstance(node, ast.Import):
                 module = []
             elif isinstance(node, ast.ImportFrom):
@@ -363,7 +367,9 @@ def get_module_info_from_python_file(path: str) -> Generator[ImportInfo, None, N
         Path(path).unlink()
 
 
-def get_module_names_from_code(paths: list[str]) -> list[ImportInfo]:
+def get_module_names_from_code(
+    paths: list[str], *, include_deferred: bool = False
+) -> list[ImportInfo]:
     resolved_paths: list[Path] = []
     imports: list[ImportInfo] = []
 
@@ -376,7 +382,9 @@ def get_module_names_from_code(paths: list[str]) -> list[ImportInfo]:
 
     for resolved_path in resolved_paths:
         logger.debug(f"Parsing {resolved_path}")
-        for import_info in get_module_info_from_python_file(path=str(resolved_path)):
+        for import_info in get_module_info_from_python_file(
+            path=str(resolved_path), include_deferred=include_deferred
+        ):
             imports.append(import_info)
 
     imports_with_dupes_removed: list[ImportInfo] = []
