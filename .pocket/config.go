@@ -22,21 +22,20 @@ var Config = &pk.Config{
 		pk.WithOptions(
 			python.Tasks(),
 			pk.WithNameSuffix("3.10"),
-			pk.WithFlag(python.Format, "python", "3.10"),
-			pk.WithFlag(python.Lint, "python", "3.10"),
-			pk.WithFlag(python.Typecheck, "python", "3.10"),
-			pk.WithFlag(python.Test, "python", "3.10"),
-			pk.WithFlag(python.Test, "coverage", true),
+			pk.WithFlags(python.FormatFlags{Python: "3.10"}),
+			pk.WithFlags(python.LintFlags{Python: "3.10"}),
+			pk.WithFlags(python.TypecheckFlags{Python: "3.10"}),
+			pk.WithFlags(python.TestFlags{Python: "3.10", Coverage: true}),
 			pk.WithDetect(python.Detect()),
 		),
 
 		// Test against remaining supported Python versions
 		pk.WithOptions(
 			pk.Parallel(
-				pk.WithOptions(python.Test, pk.WithNameSuffix("3.11"), pk.WithFlag(python.Test, "python", "3.11")),
-				pk.WithOptions(python.Test, pk.WithNameSuffix("3.12"), pk.WithFlag(python.Test, "python", "3.12")),
-				pk.WithOptions(python.Test, pk.WithNameSuffix("3.13"), pk.WithFlag(python.Test, "python", "3.13")),
-				pk.WithOptions(python.Test, pk.WithNameSuffix("3.14"), pk.WithFlag(python.Test, "python", "3.14")),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.11"), pk.WithFlags(python.TestFlags{Python: "3.11"})),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.12"), pk.WithFlags(python.TestFlags{Python: "3.12"})),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.13"), pk.WithFlags(python.TestFlags{Python: "3.13"})),
+				pk.WithOptions(python.Test, pk.WithNameSuffix("3.14"), pk.WithFlags(python.TestFlags{Python: "3.14"})),
 			),
 			pk.WithDetect(python.Detect()),
 		),
@@ -51,16 +50,11 @@ var Config = &pk.Config{
 			// GitHub workflows, including matrix-based task execution
 			pk.WithOptions(
 				github.Tasks(),
-				pk.WithFlag(github.Workflows, github.FlagSkipPocket, true),
-				pk.WithFlag(github.Workflows, github.FlagIncludePocketPerjob, true),
-				pk.WithContextValue(github.PerJobConfigKey{}, github.PerJobConfig{
-					DefaultPlatforms: []string{github.PlatformUbuntu},
-					TaskOverrides: map[string]github.TaskOverride{
-						"py-test:3.10": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
-						"py-test:3.11": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
-						"py-test:3.12": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
-						"py-test:3.13": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
-						"py-test:3.14": {Platforms: []string{github.PlatformUbuntu, github.PlatformMacOS, github.PlatformWindows}},
+				pk.WithFlags(github.WorkflowFlags{
+					PerPocketTaskJob: new(true),
+					Platforms:        []github.Platform{github.Ubuntu},
+					PerPocketTaskJobOptions: map[string]github.PerPocketTaskJobOption{
+						"py-test:.*": {Platforms: github.AllPlatforms()},
 					},
 				}),
 			),
