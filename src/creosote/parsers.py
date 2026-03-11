@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TypeGuard, cast
 
 import nbformat
+from typing_extensions import override
 
 if sys.version_info >= (3, 11):
     import tomllib  # pyright: ignore[reportUnreachable]
@@ -436,111 +437,131 @@ def canonicalize_module_name(module_name: str) -> str:
     return module_name.replace("-", "_").replace(".", "_").strip()
 
 
+def _resolve_expression(node: ast.expr, variables: dict[str, list[str]]) -> list[str]:
+    """Resolve an AST expression to a list of module names.
+
+    Handles string constants, lists, tuples, variable references, and
+    binary addition operations.
+
+    The recursion is structural on the AST of binary operations, which is
+    guaranteed to terminate as it only descends into the expression tree.
+
+    Variable lookups use the pre-populated `variables` dict, which prevents
+    infinite loops for circular references (e.g., `A = B; B = A`), as the
+    variable's value is returned directly instead of re-triggering resolution.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return [node.value.split(".")[0]]
+
+    if isinstance(node, (ast.List, ast.Tuple)):
+        result: list[str] = []
+        for element in node.elts:
+            result.extend(_resolve_expression(element, variables))
+        return result
+
+    if isinstance(node, ast.Name) and node.id in variables:
+        return variables[node.id]
+
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        left = _resolve_expression(node.left, variables)
+        right = _resolve_expression(node.right, variables)
+        return left + right
+
+    return []
+
+
+_DJANGO_TARGET_NAMES = ("INSTALLED_APPS", "MIDDLEWARE")
+
+
 class DjangoSettingsVisitor(ast.NodeVisitor):
-    """Visit `ast` nodes and extract module names from Django settings."""
+    """Single-pass visitor to collect assignments and resolve INSTALLED_APPS/MIDDLEWARE.
+
+    Collects all assignments in one pass, then resolves INSTALLED_APPS/MIDDLEWARE
+    references after the traversal. This allows resolving forward references where
+    INSTALLED_APPS uses a variable defined later in the file.
+    """
 
     def __init__(self) -> None:
-        self.found_modules: set[str] = set()
         self.variable_assignments: dict[str, list[str]] = {}
+        self.target_nodes: list[ast.expr] = []
+        self.variable_mutations: list[tuple[str, ast.expr]] = []
 
-    def _resolve_value(self, node: ast.expr) -> list[str]:
-        """Recursively resolve an expression node to a list of module names.
+    def _is_target_setting(self, name: str) -> bool:
+        """Check if a variable name is a Django setting we're tracking."""
+        return name in _DJANGO_TARGET_NAMES
 
-        This method traverses an AST expression, resolving it into a list of
-        strings. It handles lists, tuples, and addition operations (`+`).
-
-        The recursion is structural on the AST of binary operations, which is
-        guaranteed to terminate as it only descends into the expression tree.
-
-        Variable lookups are handled by checking a pre-populated dictionary
-        (`self.variable_assignments`), which acts as a base case for the
-        recursion. This prevents infinite loops in cases of circular
-        variable references (e.g., `A = B; B = A`), as the variable's value
-        is returned directly instead of re-triggering resolution.
-        """
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            return [node.value.split(".")[0]]
-
-        if isinstance(node, (ast.List, ast.Tuple)):
-            apps = []
-            for element in node.elts:
-                apps.extend(self._resolve_value(element))
-            return apps
-
-        if isinstance(node, ast.Name) and node.id in self.variable_assignments:
-            return self.variable_assignments[node.id]
-
-        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            left = self._resolve_value(node.left)
-            right = self._resolve_value(node.right)
-            return left + right
-
-        return []
-
+    @override
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit `ast.Assign` nodes to track variables and find modules.
-
-        This method is called for each assignment in the settings file. It
-        has two main purposes:
-
-        1.  It identifies assignments of literal lists/tuples to variables
-            and stores the resolved module names in `self.variable_assignments`.
-            This tracking is order-dependent and only works for literal
-            assignments, not for variables assigned from other expressions.
-
-        2.  It checks if the assignment is to `INSTALLED_APPS` or `MIDDLEWARE`.
-            If so, it calls `_resolve_value` to resolve the expression into
-            a list of module names.
-        """
-        # Populate `variable_assignments` for any literal list/tuple so it
-        # can be resolved later if used in INSTALLED_APPS/MIDDLEWARE.
+        """Collect all assignments - both variables and INSTALLED_APPS/MIDDLEWARE."""
+        # Track literal list/tuple assignments to variables
         if isinstance(node.value, (ast.List, ast.Tuple)):
-            apps = []
-            for element in node.value.elts:
-                if isinstance(element, ast.Constant) and isinstance(element.value, str):
-                    apps.append(element.value.split(".")[0])
+            modules = _resolve_expression(node.value, {})
             for target in node.targets:
                 if isinstance(target, ast.Name):
-                    self.variable_assignments[target.id] = apps
+                    self.variable_assignments[target.id] = modules
 
-        # If this is an assignment to INSTALLED_APPS or MIDDLEWARE, resolve
-        # its value and add the found modules to our list.
+        # Track INSTALLED_APPS/MIDDLEWARE assignments for later resolution
         for target in node.targets:
             if (
                 isinstance(target, ast.Name)
-                and target.id in ["INSTALLED_APPS", "MIDDLEWARE"]
+                and self._is_target_setting(target.id)
                 and isinstance(node.value, (ast.List, ast.Tuple, ast.BinOp, ast.Name))
             ):
-                # Guard against invalid assignments like `INSTALLED_APPS = "foo"`.
-                # While `_resolve_value` can handle a single string (for `.append()`
-                # support), a direct assignment to INSTALLED_APPS must be a
-                # list-like expression (List, Tuple, BinOp, or Name).
-                self.found_modules.update(self._resolve_value(node.value))
+                self.target_nodes.append(node.value)
 
         self.generic_visit(node)
 
+    @override
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
-        """Visit `ast.AugAssign` to handle `INSTALLED_APPS += [...]`."""
-        if isinstance(node.target, ast.Name) and node.target.id in [
-            "INSTALLED_APPS",
-            "MIDDLEWARE",
-        ]:
-            self.found_modules.update(self._resolve_value(node.value))
+        """Collect augmented assignments (+=) to target settings and variables."""
+        if isinstance(node.target, ast.Name):
+            if self._is_target_setting(node.target.id):
+                self.target_nodes.append(node.value)
+            else:
+                # Track mutations to regular variables for later resolution
+                self.variable_mutations.append((node.target.id, node.value))
         self.generic_visit(node)
 
+    @override
     def visit_Expr(self, node: ast.Expr) -> None:
-        """Visit `ast.Expr` to handle `INSTALLED_APPS.append(...)` etc."""
+        """Collect .append/.extend calls to INSTALLED_APPS/MIDDLEWARE and variables."""
         if isinstance(node.value, ast.Call):
             call = node.value
             if (
                 isinstance(call.func, ast.Attribute)
                 and isinstance(call.func.value, ast.Name)
-                and call.func.value.id in ["INSTALLED_APPS", "MIDDLEWARE"]
-                and call.func.attr in ["append", "extend"]
+                and call.func.attr in ("append", "extend")
             ):
-                for arg in call.args:
-                    self.found_modules.update(self._resolve_value(arg))
+                if self._is_target_setting(call.func.value.id):
+                    self.target_nodes.extend(call.args)
+                else:
+                    # Track mutations to regular variables for later resolution
+                    for arg in call.args:
+                        self.variable_mutations.append((call.func.value.id, arg))
         self.generic_visit(node)
+
+    def resolve_modules(self) -> set[str]:
+        """Resolve all collected INSTALLED_APPS/MIDDLEWARE references.
+
+        Applies mutations (augmented assignments and method calls) to variables
+        before resolving target nodes, enabling proper handling of patterns like:
+            APPS = ['a']
+            APPS += ['b']
+            INSTALLED_APPS = APPS
+        """
+        # Apply mutations to variable assignments
+        for var_name, mutation_node in self.variable_mutations:
+            if var_name in self.variable_assignments:
+                additional = _resolve_expression(
+                    mutation_node, self.variable_assignments
+                )
+                self.variable_assignments[var_name].extend(additional)
+
+        return {
+            module
+            for node in self.target_nodes
+            for module in _resolve_expression(node, self.variable_assignments)
+        }
 
 
 def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
@@ -556,12 +577,10 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
 
     visitor = DjangoSettingsVisitor()
     visitor.visit(tree)
+    found_modules = visitor.resolve_modules()
 
-    if not visitor.found_modules:
-        if any(
-            var in visitor.variable_assignments
-            for var in ["INSTALLED_APPS", "MIDDLEWARE"]
-        ):
+    if not found_modules:
+        if visitor.target_nodes:
             logger.info(
                 f"Found INSTALLED_APPS/MIDDLEWARE in {settings_path} but empty."
             )
@@ -570,7 +589,7 @@ def get_modules_from_django_settings(settings_file: str | Path) -> list[str]:
                 f"Could not find INSTALLED_APPS or MIDDLEWARE in {settings_path}."
             )
     else:
-        module_count = len(visitor.found_modules)
+        module_count = len(found_modules)
         logger.info(f"Found {module_count} Django modules in {settings_path}.")
 
-    return list(visitor.found_modules)
+    return list(found_modules)
