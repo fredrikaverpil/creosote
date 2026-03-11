@@ -509,8 +509,6 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
             ):
                 self.target_nodes.append(node.value)
 
-        self.generic_visit(node)
-
     @override
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
         """Collect augmented assignments (+=) to target settings and variables."""
@@ -520,7 +518,6 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
             else:
                 # Track mutations to regular variables for later resolution
                 self.variable_mutations.append((node.target.id, node.value))
-        self.generic_visit(node)
 
     @override
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -538,7 +535,6 @@ class DjangoSettingsVisitor(ast.NodeVisitor):
                     # Track mutations to regular variables for later resolution
                     for arg in call.args:
                         self.variable_mutations.append((call.func.value.id, arg))
-        self.generic_visit(node)
 
     def resolve_modules(self) -> set[str]:
         """Resolve all collected INSTALLED_APPS/MIDDLEWARE references.
