@@ -43,7 +43,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-format:3.10
+        run: ./pok -v -g -c py-format:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -82,7 +82,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-lint:3.10
+        run: ./pok -v -g -c py-lint:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -121,7 +121,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-typecheck:3.10
+        run: ./pok -v -g -c py-typecheck:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -160,7 +160,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.10
+        run: ./pok -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -199,7 +199,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.10
+        run: ./pok -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -238,7 +238,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.10
+        run: .\pok.ps1 -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -277,7 +277,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.11
+        run: ./pok -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -316,7 +316,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.11
+        run: ./pok -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -355,7 +355,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.11
+        run: .\pok.ps1 -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -394,7 +394,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.12
+        run: ./pok -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -433,7 +433,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.12
+        run: ./pok -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -472,7 +472,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.12
+        run: .\pok.ps1 -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -511,7 +511,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.13
+        run: ./pok -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -550,7 +550,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.13
+        run: ./pok -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -589,7 +589,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.13
+        run: .\pok.ps1 -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -628,7 +628,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.14
+        run: ./pok -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -667,7 +667,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g py-test:3.14
+        run: ./pok -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -706,7 +706,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\pok.ps1 -v -g py-test:3.14
+        run: .\pok.ps1 -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -745,7 +745,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g creosote
+        run: ./pok -v -g -c creosote
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -784,7 +784,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g pre-commit-check
+        run: ./pok -v -g -c pre-commit-check
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5
@@ -823,7 +823,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./pok -v -g github-workflows
+        run: ./pok -v -g -c github-workflows
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/cache/save@v5

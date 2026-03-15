@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  workflows: write
 
 jobs:
   self-update:
@@ -28,7 +29,7 @@ jobs:
         run: ./pok self-update -force
       - name: Run pocket
         shell: bash
-        run: ./pok
+        run: ./pok -v
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -37,6 +38,6 @@ jobs:
           body: |
             Automated [Pocket](https://github.com/fredrikaverpil/pocket) self-update.
 
-            Run `./pok self-update -force && ./pok` locally to reproduce.
+            Run `./pok self-update -force && ./pok -v` locally to reproduce.
           branch: chore/pocket-self-update
           delete-branch: true
