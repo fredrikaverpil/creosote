@@ -1,5 +1,5 @@
-github.com/fredrikaverpil/pocket v0.0.0-20260315115246-3e71d540c07b h1:+O6F7I+5miQwvJgNFvMLayFk+Gw+cQeuH055HSwfcyk=
-github.com/fredrikaverpil/pocket v0.0.0-20260315115246-3e71d540c07b/go.mod h1:/Yrpyu8n8psheBv/3pVgIoz+KVsWwSy0ueU7xzOKf4w=
+github.com/fredrikaverpil/pocket v0.1.0 h1:HKn9qC9OsHy2Y/gJzMJTKil3VeBMoRehW28tOs6s7OY=
+github.com/fredrikaverpil/pocket v0.1.0/go.mod h1:/Yrpyu8n8psheBv/3pVgIoz+KVsWwSy0ueU7xzOKf4w=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 golang.org/x/sync v0.19.0 h1:vV+1eWNmZ5geRlYjzm2adRgW2/mcpevXNg50YZtPCE4=
