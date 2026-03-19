@@ -69,11 +69,15 @@ def test_creosote_project_success(
 
     # assert
 
-    assert actual_output == [
+    # On Python 3.11+, tomli is a conditional dep that resolves out of the spec,
+    # so it will be flagged as an unnecessary exclude (correct behavior).
+    # The feature flag is not enabled here, so exit code is still 0.
+    expected_found_line = (
         "Found dependencies in pyproject.toml: "
-        + "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser",
-        "No unused dependencies found! ✨",
-    ]
+        + "dotty-dict, loguru, nbconvert, nbformat, pip-requirements-parser"
+    )
+    assert expected_found_line in actual_output
+    assert "No unused dependencies found! ✨" in actual_output
     assert exit_code == 0
 
 
@@ -869,3 +873,122 @@ def test_django_feature_finds_no_unused_deps(
     else:
         assert "Unused dependencies found: django-debug-toolbar" in actual_output
         assert exit_code == 1
+
+
+@pytest.mark.parametrize(
+    argnames=["scenario", "dep_in_spec", "has_import"],
+    argvalues=[
+        pytest.param(
+            "import_detected",
+            True,
+            True,
+            id="excluded dep has import detected — would have been found as used",
+        ),
+        pytest.param(
+            "transitive_dep",
+            False,
+            False,
+            id="excluded dep is not in the dep spec — transitive dependency",
+        ),
+    ],
+)
+@pytest.mark.parametrize(["use_feature"], [[True], [False]])
+def test_fail_unnecessary_excludes(  # noqa: PLR0913
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+    scenario: str,
+    dep_in_spec: bool,
+    has_import: bool,
+    use_feature: bool,
+) -> None:
+    """Test the fail-unnecessary-excludes feature.
+
+    Covers two cases of an unnecessary exclusion:
+      - "import_detected": the excluded dep has an import in source, so it
+        would have been found as used regardless.
+      - "transitive_dep": the excluded dep is not in the dependency spec at
+        all (e.g. a transitive dep), so excluding it is pointless.
+
+    In both cases a warning is always emitted.  Exit code is 1 only when the
+    feature flag is enabled.
+    """
+
+    # arrange
+
+    venv_path, site_packages_path = venv_manager.create_venv()
+
+    spec_deps = ['"loguru>=0.6.0,<0.8"']
+    if dep_in_spec:
+        spec_deps.append('"yolo>=1.0"')
+
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            *[f"  {d}," for d in spec_deps],
+            "]",
+        ],
+    )
+
+    installed_dependencies = ["loguru", "yolo"]
+    for dependency_name in installed_dependencies:
+        _ = venv_manager.create_record(
+            site_packages_path=site_packages_path,
+            dependency_name=dependency_name,
+            contents=[
+                f"{dependency_name}/__init__.py,sha256=4skFj_sdo33SWqTefV1JBAvZiT4MY_pB5yaRL5DMNVs,240"
+            ],
+        )
+
+    source_contents = ["import loguru"]
+    if has_import:
+        source_contents.append("import yolo")
+
+    source_file = venv_manager.create_source_file(
+        relative_filepath="src/foo.py",
+        contents=source_contents,
+    )
+
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        "project.dependencies",
+        "--exclude-dep",
+        "yolo",
+        "--format",
+        "no-color",
+    ]
+
+    if use_feature:
+        args.extend(["--use-feature", "fail-unnecessary-excludes"])
+
+    # act
+
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+
+    if scenario == "import_detected":
+        assert (
+            "Unnecessary exclusion 'yolo': import detected in source code"
+            in actual_output
+        )
+    elif scenario == "transitive_dep":
+        assert any(
+            "Unnecessary exclusion 'yolo': not found in" in line
+            and "transitive dependency or typo" in line
+            for line in actual_output
+        )
+    assert "No unused dependencies found! ✨" in actual_output
+
+    if use_feature:
+        assert exit_code == 1
+    else:
+        assert exit_code == 0

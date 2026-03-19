@@ -111,6 +111,7 @@ Enable using `--use-feature <FEATURE>`. Use at your own risk!
 | Feature                           | Description                                                                                                                                                                                 | Target version |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | `fail-excluded-and-not-installed` | When excluding a dependency from the scan (using `--exclude-dep`) and if the dependency is removed from the dependency specification file (e.g. `pyproject.toml`), return with exit code 1. | N/A            |
+| `fail-unnecessary-excludes` | When excluding a dependency from the scan (using `--exclude-dep`) and if the exclusion is unnecessary — either because an import was detected (the dep would have been found as used anyway) or because the dep is a transitive dependency (not in the dependency spec at all) — return with exit code 1. | experimental |
 
 ### 😤 Known limitations
 

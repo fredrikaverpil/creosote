@@ -8,6 +8,39 @@ from creosote.__about__ import __version__
 from creosote.config import Features, fail_fast, parse_args
 
 
+def get_unnecessary_excludes(
+    deps_reader: parsers.DependencyReader,
+    imports: list[models.ImportInfo],
+    exclude_deps: list[str],
+    venvs: list[str],
+    deps_file: str,
+) -> list[str]:
+    """Return excluded deps that don't need to be excluded, with a warning per entry."""
+    unnecessary: list[str] = []
+    all_dep_names = deps_reader.read_unfiltered()
+    excluded_direct_deps = [d for d in exclude_deps if d in all_dep_names]
+    excluded_unused = set(
+        resolvers.DepsResolver(
+            imports=imports,
+            dependency_names=excluded_direct_deps,
+            venvs=venvs,
+        ).resolve_unused_dependency_names()
+    )
+    for d in exclude_deps:
+        if d not in all_dep_names:
+            unnecessary.append(d)
+            logger.warning(
+                f"Unnecessary exclusion '{d}': not found in {deps_file} "
+                "(transitive dependency or typo)"
+            )
+        elif d not in excluded_unused:
+            unnecessary.append(d)
+            logger.warning(
+                f"Unnecessary exclusion '{d}': import detected in source code"
+            )
+    return unnecessary
+
+
 def main(args_: Sequence[str] | None = None) -> int:
     args = parse_args(args_)
     if fail_fast(args):
@@ -58,6 +91,19 @@ def main(args_: Sequence[str] | None = None) -> int:
     )
     unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
+    # Check for unnecessary excludes (experimental feature)
+    unnecessary_excludes = (
+        get_unnecessary_excludes(
+            deps_reader=deps_reader,
+            imports=imports,
+            exclude_deps=args.exclude_deps,
+            venvs=args.venvs,
+            deps_file=args.deps_file,
+        )
+        if args.exclude_deps
+        else []
+    )
+
     # Print final results
     formatters.print_results(
         unused_dependency_names=unused_dependency_names, format_=args.format
@@ -66,8 +112,11 @@ def main(args_: Sequence[str] | None = None) -> int:
     # Return with exit code
     if unused_dependency_names:
         return 1
-    elif excluded_deps_and_not_installed:  # noqa: SIM102
+    elif excluded_deps_and_not_installed:
         if Features.FAIL_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
+            return 1
+    elif unnecessary_excludes:  # noqa: SIM102
+        if Features.FAIL_UNNECESSARY_EXCLUDES.value in args.features:
             return 1
     return 0
 

@@ -143,6 +143,17 @@ class DependencyReader:
 
         return dep_names
 
+    def read_unfiltered(self) -> list[str]:
+        """Read all dependency names from the spec file, ignoring exclusions."""
+        if self.deps_file.endswith(".toml") or self.deps_file.endswith("Pipfile"):
+            return self.read_toml(self.deps_file, self.sections)
+        elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
+            return self.read_requirements(self.deps_file)
+        else:
+            raise NotImplementedError(
+                f"Dependency specs file {self.deps_file} is not supported."
+            )
+
     def get_deps_from_pep621_toml(
         self, section_contents: PEP621Types
     ) -> list[PackageName]:
