@@ -21,7 +21,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           requireScope: false
-          subjectPattern: ^(?![A-Z]).+$
+          subjectPattern: ^(?![A-Z]).{1,64}$
+          subjectPatternError: |
+            The subject must not start with an uppercase letter and must be at most 64 characters.
+            (Total limit is 72 characters including the type and scope prefix.)
           scopes: |
             .+
           types: |
@@ -31,12 +34,10 @@ jobs:
             docs
             feat
             fix
-            merge
             perf
             refactor
             revert
             style
             test
-            wip
           ignoreLabels: |
             autorelease: pending
