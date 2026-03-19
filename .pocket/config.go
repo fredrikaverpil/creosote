@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/fredrikaverpil/pocket/pk"
+	"github.com/fredrikaverpil/pocket/pk/run"
 	"github.com/fredrikaverpil/pocket/tasks/github"
 	"github.com/fredrikaverpil/pocket/tasks/python"
 	"github.com/fredrikaverpil/pocket/tools/uv"
@@ -74,7 +75,7 @@ var Creosote = &pk.Task{
 	Body: pk.Serial(
 		uv.Install,
 		pk.Do(func(ctx context.Context) error {
-			return pk.Exec(ctx, "uv", "run", "--frozen", "creosote", "--venv", ".venv", "--include-deferred")
+			return run.Exec(ctx, "uv", "run", "--frozen", "creosote", "--venv", ".venv", "--include-deferred")
 		}),
 	),
 }
@@ -108,7 +109,7 @@ var PreCommitCheck = &pk.Task{
 		if len(badLines) > 0 {
 			return fmt.Errorf("found rev: entries without 'v' prefix:\n%s", strings.Join(badLines, "\n"))
 		}
-		pk.Println(ctx, "All rev: entries have 'v' prefix ✓")
+		run.Println(ctx, "All rev: entries have 'v' prefix ✓")
 		return nil
 	},
 }
