@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/fredrikaverpil/creosote/compare/v5.1.1...v5.2.0) (2026-03-28)
+
+
+### Features
+
+* detect redundant excludes ([#389](https://github.com/fredrikaverpil/creosote/issues/389)) ([642f440](https://github.com/fredrikaverpil/creosote/commit/642f44062f8d3ebd8035254f48733f3530132b88))
+
 ## [5.1.1](https://github.com/fredrikaverpil/creosote/compare/v5.1.0...v5.1.1) (2026-03-11)
 
 
