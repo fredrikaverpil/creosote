@@ -35,9 +35,7 @@ def get_redundant_excludes(
             )
         elif d not in excluded_unused:
             redundant.append(d)
-            logger.warning(
-                f"Redundant exclusion '{d}': import detected in source code"
-            )
+            logger.warning(f"Redundant exclusion '{d}': import detected in source code")
     return redundant
 
 
