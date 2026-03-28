@@ -43,6 +43,7 @@ class Features(Enum):
     """Features that can be enabled via the --use-feature flag."""
 
     FAIL_EXCLUDED_AND_NOT_INSTALLED = "fail-excluded-and-not-installed"
+    FAIL_REDUNDANT_EXCLUDES = "fail-redundant-excludes"
 
 
 class CustomAppendAction(argparse.Action):
