@@ -114,6 +114,7 @@ class DependencyReader:
         self.exclude_deps: list[str] = exclude_deps + always_excluded_deps
 
     def read(self) -> list[str]:
+        """Read dependency names from the spec file, with exclusions applied."""
         logger.debug(f"Parsing {self.deps_file} for dependencies...")
 
         if not Path(self.deps_file).exists():
@@ -143,8 +144,8 @@ class DependencyReader:
 
         return dep_names
 
-        """Read all dependency names from the spec file, ignoring exclusions."""
     def read_all(self) -> list[str]:
+        """Read dependency names from the spec file, without exclusions applied."""
         if self.deps_file.endswith(".toml") or self.deps_file.endswith("Pipfile"):
             return self.read_toml(self.deps_file, self.sections)
         elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
