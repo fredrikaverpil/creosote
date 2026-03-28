@@ -8,15 +8,15 @@ from creosote.__about__ import __version__
 from creosote.config import Features, fail_fast, parse_args
 
 
-def get_unnecessary_excludes(
+def get_redundant_excludes(
     deps_reader: parsers.DependencyReader,
     imports: list[models.ImportInfo],
     exclude_deps: list[str],
     venvs: list[str],
     deps_file: str,
 ) -> list[str]:
-    """Return excluded deps that don't need to be excluded, with a warning per entry."""
-    unnecessary: list[str] = []
+    """Return excluded deps that are redundant, with a warning per entry."""
+    redundant: list[str] = []
     all_dep_names = deps_reader.read_all()
     excluded_direct_deps = [d for d in exclude_deps if d in all_dep_names]
     excluded_unused = set(
@@ -28,17 +28,17 @@ def get_unnecessary_excludes(
     )
     for d in exclude_deps:
         if d not in all_dep_names:
-            unnecessary.append(d)
+            redundant.append(d)
             logger.warning(
-                f"Unnecessary exclusion '{d}': not found in {deps_file} "
+                f"Redundant exclusion '{d}': not found in {deps_file} "
                 "(transitive dependency or typo)"
             )
         elif d not in excluded_unused:
-            unnecessary.append(d)
+            redundant.append(d)
             logger.warning(
-                f"Unnecessary exclusion '{d}': import detected in source code"
+                f"Redundant exclusion '{d}': import detected in source code"
             )
-    return unnecessary
+    return redundant
 
 
 def main(args_: Sequence[str] | None = None) -> int:
@@ -91,9 +91,9 @@ def main(args_: Sequence[str] | None = None) -> int:
     )
     unused_dependency_names = deps_resolver.resolve_unused_dependency_names()
 
-    # Check for unnecessary excludes (experimental feature)
-    unnecessary_excludes = (
-        get_unnecessary_excludes(
+    # Check for redundant excludes (experimental feature)
+    redundant_excludes = (
+        get_redundant_excludes(
             deps_reader=deps_reader,
             imports=imports,
             exclude_deps=args.exclude_deps,
@@ -115,8 +115,8 @@ def main(args_: Sequence[str] | None = None) -> int:
     elif excluded_deps_and_not_installed:
         if Features.FAIL_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
             return 1
-    elif unnecessary_excludes:  # noqa: SIM102
-        if Features.FAIL_UNNECESSARY_EXCLUDES.value in args.features:
+    elif redundant_excludes:  # noqa: SIM102
+        if Features.FAIL_REDUNDANT_EXCLUDES.value in args.features:
             return 1
     return 0
 

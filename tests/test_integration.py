@@ -70,7 +70,7 @@ def test_creosote_project_success(
     # assert
 
     # On Python 3.11+, tomli is a conditional dep that resolves out of the spec,
-    # so it will be flagged as an unnecessary exclude (correct behavior).
+    # so it will be flagged as a redundant exclude (correct behavior).
     # The feature flag is not enabled here, so exit code is still 0.
     expected_found_line = (
         "Found dependencies in pyproject.toml: "
@@ -893,7 +893,7 @@ def test_django_feature_finds_no_unused_deps(
     ],
 )
 @pytest.mark.parametrize(["use_feature"], [[True], [False]])
-def test_fail_unnecessary_excludes(  # noqa: PLR0913
+def test_fail_redundant_excludes(  # noqa: PLR0913
     venv_manager: VenvManager,
     capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
     scenario: str,
@@ -901,9 +901,9 @@ def test_fail_unnecessary_excludes(  # noqa: PLR0913
     has_import: bool,
     use_feature: bool,
 ) -> None:
-    """Test the fail-unnecessary-excludes feature.
+    """Test the fail-redundant-excludes feature.
 
-    Covers two cases of an unnecessary exclusion:
+    Covers two cases of a redundant exclusion:
       - "import_detected": the excluded dep has an import in source, so it
         would have been found as used regardless.
       - "transitive_dep": the excluded dep is not in the dependency spec at
@@ -966,7 +966,7 @@ def test_fail_unnecessary_excludes(  # noqa: PLR0913
     ]
 
     if use_feature:
-        args.extend(["--use-feature", "fail-unnecessary-excludes"])
+        args.extend(["--use-feature", "fail-redundant-excludes"])
 
     # act
 
@@ -977,12 +977,12 @@ def test_fail_unnecessary_excludes(  # noqa: PLR0913
 
     if scenario == "import_detected":
         assert (
-            "Unnecessary exclusion 'yolo': import detected in source code"
+            "Redundant exclusion 'yolo': import detected in source code"
             in actual_output
         )
     elif scenario == "transitive_dep":
         assert any(
-            "Unnecessary exclusion 'yolo': not found in" in line
+            "Redundant exclusion 'yolo': not found in" in line
             and "transitive dependency or typo" in line
             for line in actual_output
         )
