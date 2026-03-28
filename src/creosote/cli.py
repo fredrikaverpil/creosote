@@ -17,7 +17,7 @@ def get_unnecessary_excludes(
 ) -> list[str]:
     """Return excluded deps that don't need to be excluded, with a warning per entry."""
     unnecessary: list[str] = []
-    all_dep_names = deps_reader.read_unfiltered()
+    all_dep_names = deps_reader.read_all()
     excluded_direct_deps = [d for d in exclude_deps if d in all_dep_names]
     excluded_unused = set(
         resolvers.DepsResolver(
