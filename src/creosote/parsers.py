@@ -120,24 +120,7 @@ class DependencyReader:
         if not Path(self.deps_file).exists():
             raise Exception(f"File {self.deps_file} does not exist")
 
-        dep_names: list[str] = []
-        always_excluded_deps: list[str] = ["python"]  # occurs in Poetry setup
-        deps_to_exclude: list[str] = always_excluded_deps + self.exclude_deps
-
-        if self.deps_file.endswith(".toml") or self.deps_file.endswith(
-            "Pipfile"
-        ):  # pyproject.toml or Pipfile expected
-            for dep_name in self.read_toml(self.deps_file, self.sections):
-                if dep_name not in deps_to_exclude:
-                    dep_names.append(dep_name)
-        elif self.deps_file.endswith(".txt") or self.deps_file.endswith(".in"):
-            for dep_name in self.read_requirements(self.deps_file):
-                if dep_name not in deps_to_exclude:
-                    dep_names.append(dep_name)
-        else:
-            raise NotImplementedError(
-                f"Dependency specs file {self.deps_file} is not supported."
-            )
+        dep_names = [d for d in self.read_all() if d not in self.exclude_deps]
 
         found = ", ".join(dep_names)
         logger.info(f"Found dependencies in {self.deps_file}: {found}")
