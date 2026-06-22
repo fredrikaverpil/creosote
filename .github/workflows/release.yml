@@ -18,7 +18,7 @@ jobs:
   please:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: release-please config
         id: release-please-config
         run: |
@@ -32,7 +32,7 @@ jobs:
             echo "release-type=simple" >> $GITHUB_OUTPUT
           fi
           exit 0
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE || github.token }}
