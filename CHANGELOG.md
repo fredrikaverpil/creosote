@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.1](https://github.com/fredrikaverpil/creosote/compare/v5.2.0...v5.2.1) (2026-07-12)
+
+
+### Documentation
+
+* list uv as supported package manager ([#414](https://github.com/fredrikaverpil/creosote/issues/414)) ([7963948](https://github.com/fredrikaverpil/creosote/commit/7963948ff5d87d6b1dce53f196daf5aeb3eb8bd3))
+
 ## [5.2.0](https://github.com/fredrikaverpil/creosote/compare/v5.1.1...v5.2.0) (2026-03-28)
 
 
