@@ -21,14 +21,14 @@ jobs:
     name: py-format:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -46,7 +46,7 @@ jobs:
         run: ./pok -v -g -c py-format:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -60,14 +60,14 @@ jobs:
     name: py-lint:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -85,7 +85,7 @@ jobs:
         run: ./pok -v -g -c py-lint:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -99,14 +99,14 @@ jobs:
     name: py-typecheck:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -124,7 +124,7 @@ jobs:
         run: ./pok -v -g -c py-typecheck:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -138,14 +138,14 @@ jobs:
     name: py-test:3.10 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -163,7 +163,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -177,14 +177,14 @@ jobs:
     name: py-test:3.10 (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -202,7 +202,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -216,14 +216,14 @@ jobs:
     name: py-test:3.10 (windows-latest)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -241,7 +241,7 @@ jobs:
         run: .\pok.ps1 -v -g -c py-test:3.10
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -255,14 +255,14 @@ jobs:
     name: py-test:3.11 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -280,7 +280,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -294,14 +294,14 @@ jobs:
     name: py-test:3.11 (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -319,7 +319,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -333,14 +333,14 @@ jobs:
     name: py-test:3.11 (windows-latest)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -358,7 +358,7 @@ jobs:
         run: .\pok.ps1 -v -g -c py-test:3.11
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -372,14 +372,14 @@ jobs:
     name: py-test:3.12 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -397,7 +397,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -411,14 +411,14 @@ jobs:
     name: py-test:3.12 (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -436,7 +436,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -450,14 +450,14 @@ jobs:
     name: py-test:3.12 (windows-latest)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -475,7 +475,7 @@ jobs:
         run: .\pok.ps1 -v -g -c py-test:3.12
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -489,14 +489,14 @@ jobs:
     name: py-test:3.13 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -514,7 +514,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -528,14 +528,14 @@ jobs:
     name: py-test:3.13 (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -553,7 +553,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -567,14 +567,14 @@ jobs:
     name: py-test:3.13 (windows-latest)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -592,7 +592,7 @@ jobs:
         run: .\pok.ps1 -v -g -c py-test:3.13
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -606,14 +606,14 @@ jobs:
     name: py-test:3.14 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -631,7 +631,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -645,14 +645,14 @@ jobs:
     name: py-test:3.14 (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -670,7 +670,7 @@ jobs:
         run: ./pok -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -684,14 +684,14 @@ jobs:
     name: py-test:3.14 (windows-latest)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -709,7 +709,7 @@ jobs:
         run: .\pok.ps1 -v -g -c py-test:3.14
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -723,14 +723,14 @@ jobs:
     name: creosote (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -748,7 +748,7 @@ jobs:
         run: ./pok -v -g -c creosote
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -762,14 +762,14 @@ jobs:
     name: pre-commit-check (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -787,7 +787,7 @@ jobs:
         run: ./pok -v -g -c pre-commit-check
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
@@ -801,14 +801,14 @@ jobs:
     name: github-workflows (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: .pocket/go.mod
           cache: false
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.cache/go-build
@@ -826,7 +826,7 @@ jobs:
         run: ./pok -v -g -c github-workflows
       - name: Save cache
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.cache/go-build
