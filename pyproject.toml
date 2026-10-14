@@ -42,6 +42,7 @@ lsp = ["basedpyright>=1.23.1"]
 dap = ["debugpy>=1.8.11"]
 
 [tool.uv]
+exclude-newer = "3 days"
 package = true
 
 [tool.ruff]
