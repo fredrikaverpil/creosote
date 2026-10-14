@@ -6,6 +6,9 @@ minimum_release_age = "3d"
 rumdl = "0.2.52"
 uv = "0.13.1"
 
+[hooks]
+enter = { task = "py:sync" }
+
 # Python
 
 [tasks."py:sync"]
