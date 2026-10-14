@@ -186,7 +186,7 @@ Yes, you can specify a list of sections after the `--section` argument. It all
 depends on what your setup looks like and what you set out to achieve.
 
 ```bash
-$ creosote --section project.dependencies --section project.optional-dependencies.lint --section project.optional-dependencies.test
+creosote --section project.dependencies --section project.optional-dependencies.lint --section project.optional-dependencies.test
 ```
 
 ### Can I exclude dependencies from the scan?
@@ -200,7 +200,7 @@ dependency are database drivers, which are commonly only defined in connection
 strings and will signal to the ORM which driver to use.
 
 ```bash
-$ creosote --exclude-dep pyodbc --exclude-dep pg8000
+creosote --exclude-dep pyodbc --exclude-dep pg8000
 ```
 
 ### Can I run Creosote on Jupyter notebook (\*.ipynb) files?
