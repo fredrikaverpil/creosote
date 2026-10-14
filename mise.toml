@@ -1,0 +1,65 @@
+[settings]
+lockfile = true
+minimum_release_age = "3d"
+
+[tools]
+rumdl = "0.2.52"
+uv = "0.13.1"
+
+# Python
+
+[tasks."py:sync"]
+description = "Sync Python dependencies"
+run = "uv sync --all-groups --frozen"
+
+[tasks."py:format"]
+description = "Format Python files"
+run = "uv run --frozen --group lint ruff format ."
+
+[tasks."py:lint"]
+description = "Lint Python files, with fixes"
+run = "uv run --frozen --group lint ruff check --fix ."
+
+[tasks."py:typecheck"]
+description = "Type-check Python files"
+run = "uv run --frozen --group types --group test mypy ."
+
+[tasks."py:test"]
+description = "Run tests with coverage"
+run = [
+  "uv run --frozen --group test coverage run -m pytest",
+  "uv run --frozen --group test coverage report",
+]
+
+[tasks."py:build"]
+description = "Build the wheel"
+run = "uv build --wheel"
+
+[tasks."py:deps"]
+description = "Run creosote on itself"
+run = "uv run --frozen creosote --venv .venv --include-deferred"
+
+[tasks."pre-commit:lint"]
+description = "Check that .pre-commit-config.yaml revs have a v prefix"
+run = """
+if grep -n 'rev:' .pre-commit-config.yaml | grep -v 'rev: v'; then
+  echo "found rev: entries without 'v' prefix" >&2
+  exit 1
+fi
+"""
+
+# Markdown
+
+[tasks."md:lint"]
+description = "Lint Markdown files, with fixes"
+run = "rumdl check --fix ."
+
+# Tasks that write files run one at a time; read-only checks in parallel.
+[tasks.default]
+description = "Run all checks"
+run = [
+  { task = "py:format" },
+  { task = "md:lint" },
+  { task = "py:lint" },
+  { tasks = ["py:typecheck", "py:test", "py:deps", "pre-commit:lint"] },
+]

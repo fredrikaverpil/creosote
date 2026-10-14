@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ matrix.task }}${{ matrix.python && format(' {0}', matrix.python) || '' }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [py:test]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - { task: py:format, os: ubuntu-latest }
+          - { task: py:lint, os: ubuntu-latest }
+          - { task: py:typecheck, os: ubuntu-latest }
+          - { task: py:deps, os: ubuntu-latest }
+          - { task: pre-commit:lint, os: ubuntu-latest }
+          - { task: md:lint, os: ubuntu-latest }
+    env:
+      UV_PYTHON: ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
+      - run: mise run ${{ matrix.task }}
+      - run: git diff --exit-code
