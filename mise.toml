@@ -1,0 +1,69 @@
+[tools]
+uv = "0.13"
+
+[hooks]
+enter = { task = "sync" }
+
+[tasks.sync]
+description = "Sync"
+run = "uv sync --all-groups --frozen"
+
+[tasks.format]
+description = "Format Python files"
+run = "uv run --frozen --group lint ruff format --target-version py310 ."
+
+[tasks.lint]
+description = "Lint Python files, with fixes"
+run = "uv run --frozen --group lint ruff check --fix --target-version py310 ."
+
+[tasks.typecheck]
+description = "Type-check Python files"
+run = "uv run --frozen --group types --group test mypy --python-version 3.10 ."
+
+[tasks.test]
+description = "Run tests with coverage"
+run = [
+  "uv run --frozen --group test coverage run -m pytest",
+  "uv run --frozen --group test coverage report",
+  "uv run --frozen --group test coverage html",
+]
+
+[tasks.test-py]
+description = "Run tests against a given Python version"
+usage = 'arg "<python>"'
+run = "uv run --frozen --isolated --all-groups --python {{usage.python}} pytest"
+
+[tasks.test-all]
+description = "Run tests against each supported Python version"
+run = """
+for py in 3.10 3.11 3.12 3.13 3.14; do
+  echo "--- Python $py"
+  mise run test-py "$py"
+done
+"""
+
+[tasks.creosote]
+description = "Run creosote on itself"
+run = "uv run --frozen creosote --venv .venv --include-deferred"
+
+[tasks.pre-commit-check]
+description = "Check that .pre-commit-config.yaml revs have a v prefix"
+run = """
+if grep -n 'rev:' .pre-commit-config.yaml | grep -v 'rev: v'; then
+  echo "found rev: entries without 'v' prefix" >&2
+  exit 1
+fi
+"""
+
+[tasks.all]
+description = "Run all checks"
+run = [
+  { task = "format" },
+  { task = "lint" },
+  { tasks = [
+    "typecheck",
+    "test",
+    "creosote",
+    "pre-commit-check",
+  ] },
+]
