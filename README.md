@@ -299,25 +299,24 @@ This new creosote 3.x behavior applies to the following 3.x CLI arguments:
 ### Contributions
 
 You are welcome to open a PR to improve or enhance Creosote. This project uses
-[Pocket](https://github.com/fredrikaverpil/pocket) to run linting, formatting,
-testing.
+[mise](https://mise.jdx.dev) to run linting, formatting, testing.
 
 ```sh
-# Help
-./pok -h
+# List tasks
+mise tasks
 
 # Run task
-./pok <task>
+mise run <task>
 
-# Run all tasks
-./pok
+# Run all checks
+mise run all
 ```
 
 Creosote is written and primarily tested against the
 [oldest supported Python version](https://devguide.python.org/versions/).
 However, since Creosote is meant to also work on all supported Python versions,
 tests will run for all these versions too. See the
-[Pocket CI configuration](.pocket/config.go) for details.
+[CI workflow](.github/workflows/ci.yml) for details.
 
 ### Install in-development builds
 
