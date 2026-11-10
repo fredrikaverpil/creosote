@@ -992,3 +992,83 @@ def test_fail_redundant_excludes(  # noqa: PLR0913
         assert exit_code == 1
     else:
         assert exit_code == 0
+
+
+def test_fail_redundant_excludes_with_excluded_dep_not_installed(
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+) -> None:
+    """Test fail-redundant-excludes still fails when another excluded dep
+    is not installed (without enabling fail-excluded-and-not-installed).
+
+    Regression test: the exit-code checks must be independent. An
+    excluded-but-not-installed dep without its feature flag must not
+    swallow a redundant-excludes failure into exit code 0.
+    """
+
+    # arrange
+
+    venv_path, site_packages_path = venv_manager.create_venv()
+
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            '  "loguru>=0.6.0,<0.8",',
+            '  "yolo>=1.0",',
+            "]",
+        ],
+    )
+
+    for dependency_name in ["loguru", "yolo"]:
+        _ = venv_manager.create_record(
+            site_packages_path=site_packages_path,
+            dependency_name=dependency_name,
+            contents=[
+                f"{dependency_name}/__init__.py,sha256=4skFj_sdo33SWqTefV1JBAvZiT4MY_pB5yaRL5DMNVs,240"
+            ],
+        )
+
+    source_file = venv_manager.create_source_file(
+        relative_filepath="src/foo.py",
+        contents=["import loguru", "import yolo"],
+    )
+
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        "project.dependencies",
+        "--exclude-dep",
+        "yolo",
+        "--exclude-dep",
+        "ghost",
+        "--format",
+        "no-color",
+        "--use-feature",
+        "fail-redundant-excludes",
+    ]
+
+    # act
+
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+
+    assert (
+        "Redundant exclusion 'yolo': import detected in source code"
+        in actual_output
+    )
+    assert any(
+        "Redundant exclusion 'ghost': not found in" in line
+        and "transitive dependency or typo" in line
+        for line in actual_output
+    )
+    assert "No unused dependencies found! ✨" in actual_output
+    assert exit_code == 1

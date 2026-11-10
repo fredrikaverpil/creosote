@@ -110,10 +110,10 @@ def main(args_: Sequence[str] | None = None) -> int:
     # Return with exit code
     if unused_dependency_names:
         return 1
-    elif excluded_deps_and_not_installed:
+    if excluded_deps_and_not_installed:
         if Features.FAIL_EXCLUDED_AND_NOT_INSTALLED.value in args.features:
             return 1
-    elif redundant_excludes:  # noqa: SIM102
+    if redundant_excludes:
         if Features.FAIL_REDUNDANT_EXCLUDES.value in args.features:
             return 1
     return 0
