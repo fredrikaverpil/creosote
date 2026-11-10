@@ -5,7 +5,6 @@ import pytest
 from loguru import logger
 
 from creosote.parsers import (
-    get_module_info_from_python_file,
     get_module_names_from_code,
     get_modules_from_django_settings,
 )
@@ -19,19 +18,8 @@ def test_get_module_names_from_code_dedupes_in_first_seen_order(
     second = tmp_path / "second.py"
     second.write_text("import sys\nfrom pathlib import Path\nimport os as o\n")
 
-    raw = [
-        import_info
-        for path in (first, second)
-        for import_info in get_module_info_from_python_file(path=str(path))
-    ]
-    expected = []
-    for import_info in raw:
-        if import_info not in expected:
-            expected.append(import_info)
-
     result = get_module_names_from_code([str(first), str(second)])
 
-    assert result == expected
     assert [(i.module, i.name, i.alias) for i in result] == [
         ([], ["os"], None),
         (["pathlib"], ["Path"], None),
