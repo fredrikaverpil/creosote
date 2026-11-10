@@ -4,7 +4,28 @@ from pathlib import Path
 import pytest
 from loguru import logger
 
-from creosote.parsers import get_modules_from_django_settings
+from creosote.parsers import (
+    get_module_names_from_code,
+    get_modules_from_django_settings,
+)
+
+
+def test_get_module_names_from_code_dedupes_in_first_seen_order(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first.py"
+    first.write_text("import os\nfrom pathlib import Path\nimport os as o\nimport os\n")
+    second = tmp_path / "second.py"
+    second.write_text("import sys\nfrom pathlib import Path\nimport os as o\n")
+
+    result = get_module_names_from_code([str(first), str(second)])
+
+    assert [(i.module, i.name, i.alias) for i in result] == [
+        ([], ["os"], None),
+        (["pathlib"], ["Path"], None),
+        ([], ["os"], "o"),
+        ([], ["sys"], None),
+    ]
 
 
 @pytest.mark.parametrize(
