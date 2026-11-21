@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.2.1](https://github.com/fredrikaverpil/creosote/compare/v5.2.0...v5.2.1) (2026-11-21)
+
+
+### Performance Improvements
+
+* dedupe imports with a set instead of a list scan ([#419](https://github.com/fredrikaverpil/creosote/issues/419)) ([20f2258](https://github.com/fredrikaverpil/creosote/commit/20f22581f6ca8dd5defb9a5fdba7a059efdf0023))
+
+
+### Documentation
+
+* list uv as supported package manager ([#414](https://github.com/fredrikaverpil/creosote/issues/414)) ([7963948](https://github.com/fredrikaverpil/creosote/commit/7963948ff5d87d6b1dce53f196daf5aeb3eb8bd3))
+
+
+### Code Refactoring
+
+* make ImportInfo frozen and hashable ([#421](https://github.com/fredrikaverpil/creosote/issues/421)) ([2b21c33](https://github.com/fredrikaverpil/creosote/commit/2b21c33a5be3c37f9991dab656cdfc1b903b2188))
+
 ## [5.2.0](https://github.com/fredrikaverpil/creosote/compare/v5.1.1...v5.2.0) (2026-03-28)
 
 
