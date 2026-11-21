@@ -96,6 +96,17 @@ from creosote.resolvers import DepsResolver
             [],
             id="top-level modules and non-package paths",
         ),
+        pytest.param(
+            [
+                "google/cloud/.hidden.py,sha256=x,1",
+                "google/cloud/my-script.py,sha256=x,1",
+                "google/cloud/foo.bak.py,sha256=x,1",
+                "google/libs/libfoo-1.2.so,sha256=x,1",
+                "google/cloud/storage/__init__.py,sha256=x,1",
+            ],
+            ["google.cloud.storage"],
+            id="non-identifier and multi-dot py stems ignored",
+        ),
     ],
 )
 def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> None:
@@ -116,46 +127,10 @@ def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> No
             id="import module",
         ),
         pytest.param(
-            ImportInfo(module=(), name=("requests", "api")),
-            "requests",
-            True,
-            id="import submodule",
-        ),
-        pytest.param(
-            ImportInfo(module=("requests",), name=("Session",)),
-            "requests",
-            True,
-            id="from module import symbol",
-        ),
-        pytest.param(
-            ImportInfo(module=("requests", "auth"), name=("HTTPBasicAuth",)),
-            "requests",
-            True,
-            id="from submodule import symbol",
-        ),
-        pytest.param(
-            ImportInfo(module=("requests",), name=("*",)),
-            "requests",
-            True,
-            id="star import",
-        ),
-        pytest.param(
             ImportInfo(module=(), name=("utils",)),
             "utils",
             True,
             id="relative import",
-        ),
-        pytest.param(
-            ImportInfo(module=("requests",), name=("Session",)),
-            "Session",
-            False,
-            id="imported symbol does not match",
-        ),
-        pytest.param(
-            ImportInfo(module=(), name=("os", "path")),
-            "path",
-            False,
-            id="trailing segment of import does not match",
         ),
         pytest.param(
             ImportInfo(module=("requests", "auth"), name=("HTTPBasicAuth",)),
@@ -165,13 +140,82 @@ def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> No
         ),
         pytest.param(
             ImportInfo(module=("google", "cloud"), name=("storage",)),
+            "google.cloud.storage",
+            True,
+            id="from namespace import package",
+        ),
+        pytest.param(
+            ImportInfo(module=("google", "cloud"), name=("storage",)),
+            "google.cloud.bigquery",
+            False,
+            id="from namespace import other package",
+        ),
+        pytest.param(
+            ImportInfo(module=(), name=("google", "cloud", "storage")),
+            "google.cloud.storage",
+            True,
+            id="import dotted package",
+        ),
+        pytest.param(
+            ImportInfo(module=("google", "cloud", "storage"), name=("Client",)),
+            "google.cloud.storage",
+            True,
+            id="from package import symbol",
+        ),
+        pytest.param(
+            ImportInfo(module=(), name=("google", "cloud")),
+            "google.cloud.storage",
+            True,
+            id="ambiguous bare namespace import",
+        ),
+        pytest.param(
+            ImportInfo(module=("google",), name=("cloud",)),
+            "google.cloud.storage",
+            True,
+            id="ambiguous from root import namespace",
+        ),
+        pytest.param(
+            ImportInfo(module=("google", "cloud"), name=("storage",)),
             "cloud",
             False,
-            id="middle segment does not match",
+            id="single-segment name does not match middle segment",
+        ),
+        pytest.param(
+            ImportInfo(module=(), name=("google", "cloud", "storage")),
+            "storage",
+            False,
+            id="single-segment name does not match trailing segment",
+        ),
+        pytest.param(
+            ImportInfo(module=(), name=("requests", "api")),
+            "requests",
+            True,
+            id="single-segment name matches leading segment",
+        ),
+        pytest.param(
+            ImportInfo(module=("requests", "auth"), name=("HTTPBasicAuth",)),
+            "requests",
+            True,
+            id="single-segment name matches from-import root",
+        ),
+        pytest.param(
+            ImportInfo(
+                module=("opentelemetry", "propagators", "textmap"),
+                name=("TextMapPropagator",),
+            ),
+            "opentelemetry.propagators.textmap",
+            True,
+            id="module directly inside namespace package",
+        ),
+        pytest.param(
+            ImportInfo(module=("opentelemetry", "sdk"), name=("trace",)),
+            "opentelemetry.trace",
+            False,
+            id="other portion of namespace package",
         ),
         pytest.param(
             ImportInfo(module=(), name=()),
-            "requests",
+            "google.cloud.storage",
             False,
             id="empty import info does not match",
         ),
@@ -189,3 +233,115 @@ def test_associate_dep_with_import(
 
     # assert
     assert dep_info.associated_imports == ([imp] if want_match else [])
+
+
+def test_resolve_skips_namespace_parent_in_canonicalized_dep_name() -> None:
+    # arrange: distribution name equals the PEP 420 namespace root
+    resolver = DepsResolver(
+        imports=[ImportInfo(module=("acme",), name=("auth",))],
+        dependency_names=[],
+        venvs=[],
+    )
+    acme = DependencyInfo(
+        name="acme",
+        top_level_import_names=["acme"],
+        record_import_names=["acme.core"],
+        canonicalized_dep_name="acme",
+    )
+    acme_auth = DependencyInfo(
+        name="acme-auth",
+        top_level_import_names=["acme"],
+        record_import_names=["acme.auth"],
+        canonicalized_dep_name="acme_auth",
+    )
+    resolver.dependencies = [acme, acme_auth]
+
+    # act
+    resolver.resolve()
+    resolver.get_unused_dependencies()
+
+    # assert
+    assert [d.name for d in resolver.unused_deps] == ["acme"]
+
+
+def test_resolve_keeps_non_namespace_top_level_and_dedupes_candidates() -> None:
+    # arrange
+    standalone_imp = ImportInfo(module=(), name=("standalone",))
+    requests_imp = ImportInfo(module=(), name=("requests",))
+    resolver = DepsResolver(
+        imports=[standalone_imp, requests_imp],
+        dependency_names=[],
+        venvs=[],
+    )
+    mixed = DependencyInfo(
+        name="mixed-pkg",
+        top_level_import_names=["ns", "standalone"],
+        record_import_names=["ns.sub"],
+        canonicalized_dep_name="mixed_pkg",
+    )
+    requests = DependencyInfo(
+        name="requests",
+        top_level_import_names=["requests"],
+        record_import_names=["requests"],
+        canonicalized_dep_name="requests",
+    )
+    resolver.dependencies = [mixed, requests]
+
+    # act
+    resolver.resolve()
+    resolver.get_unused_dependencies()
+
+    # assert
+    assert resolver.unused_deps == []
+    assert mixed.associated_imports == [standalone_imp]
+    assert requests.associated_imports == [requests_imp]
+
+
+@pytest.mark.parametrize(
+    ["imports", "want_unused"],
+    [
+        pytest.param(
+            [
+                ImportInfo(
+                    module=("opentelemetry", "propagators", "textmap"),
+                    name=("TextMapPropagator",),
+                )
+            ],
+            [],
+            id="module in namespace package",
+        ),
+        pytest.param(
+            [ImportInfo(module=("opentelemetry", "trace"), name=("Span",))],
+            [],
+            id="regular package in namespace package",
+        ),
+        pytest.param(
+            [ImportInfo(module=("opentelemetry", "sdk"), name=("trace",))],
+            ["opentelemetry-api"],
+            id="other portion of namespace package",
+        ),
+    ],
+)
+def test_resolve_modules_in_namespace_package(
+    imports: list[ImportInfo], want_unused: list[str]
+) -> None:
+    # arrange
+    resolver = DepsResolver(imports=imports, dependency_names=[], venvs=[])
+    resolver.dependencies = [
+        DependencyInfo(
+            name="opentelemetry-api",
+            top_level_import_names=["opentelemetry"],
+            record_import_names=[
+                "opentelemetry.trace",
+                "opentelemetry.propagators.textmap",
+            ],
+            canonicalized_dep_name="opentelemetry_api",
+        )
+    ]
+
+    # act
+    resolver.resolve()
+    resolver.get_unused_dependencies()
+
+    # assert
+    assert [d.name for d in resolver.unused_deps] == want_unused
