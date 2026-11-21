@@ -4,12 +4,11 @@
       "release-branch": "main",
       "release-type": "python",
       "include-v-in-tag": true,
-      "pull-request-header": " ## :warning: Manual changes required\n\n * `.pre-commit-config.yaml`: The Release will be prefixed by `v` (as in `v1.2.3`) but release-please does not edit the file with the `v` prefix.\n * Manual review of the `publish` workflow must be approved to publish to pypi.\n\n",
+      "pull-request-header": " ## :warning: Manual changes required\n\n * Manual review of the `publish` workflow must be approved to publish to pypi.\n\n",
       "extra-files": [
         {
-          "type": "yaml",
-          "path": ".pre-commit-config.yaml",
-          "jsonpath": "$.repos[?(@.repo == 'https://github.com/fredrikaverpil/creosote')].rev"
+          "type": "generic",
+          "path": ".pre-commit-config.yaml"
         }
       ]
     }
