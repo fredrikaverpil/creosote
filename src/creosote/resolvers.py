@@ -194,12 +194,9 @@ class DepsResolver:
         self, dep_info: DependencyInfo, import_name: str
     ) -> None:
         for imp in self.imports.copy():
-            if not imp.module and import_name in imp.name:
-                # import <imp.name>
-                dep_info.associated_imports.append(imp)
-
-            elif imp.name and import_name in imp.module:
-                # from <imp.name> import ...
+            # import <name>, or from <module> import ...
+            root = imp.module or imp.name
+            if root and root[0] == import_name:
                 dep_info.associated_imports.append(imp)
 
     def resolve(self) -> None:
