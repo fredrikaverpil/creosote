@@ -26,6 +26,14 @@ class DepsResolver:
         venvs: list[str],
     ):
         self.imports: list[ImportInfo] = imports
+        # full import path -> imports with exactly that path / starting with it
+        self.imports_by_path: dict[tuple[str, ...], list[ImportInfo]] = {}
+        self.imports_by_prefix: dict[tuple[str, ...], list[ImportInfo]] = {}
+        for imp in imports:
+            full = imp.module + imp.name
+            self.imports_by_path.setdefault(full, []).append(imp)
+            for i in range(1, len(full) + 1):
+                self.imports_by_prefix.setdefault(full[:i], []).append(imp)
         self.dependencies: list[DependencyInfo] = [
             DependencyInfo(name=dep) for dep in dependency_names
         ]
@@ -220,11 +228,11 @@ class DepsResolver:
         self, dep_info: DependencyInfo, import_name: str
     ) -> None:
         parts = tuple(import_name.split("."))
-        for imp in self.imports:
-            full = imp.module + imp.name
-            n = min(len(parts), len(full))
-            if n and full[:n] == parts[:n]:
-                dep_info.associated_imports.append(imp)
+        # imports at or below import_name, e.g. google.cloud.storage.Client
+        dep_info.associated_imports.extend(self.imports_by_prefix.get(parts, []))
+        # imports of a parent namespace, e.g. google.cloud
+        for i in range(1, len(parts)):
+            dep_info.associated_imports.extend(self.imports_by_path.get(parts[:i], []))
 
     def resolve(self) -> None:
         """Associate dependency name with import (module) name.
