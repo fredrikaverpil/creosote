@@ -226,15 +226,6 @@ class DepsResolver:
             if n and full[:n] == parts[:n]:
                 dep_info.associated_imports.append(imp)
 
-    @staticmethod
-    def is_namespace_of_record_name(dep_info: DependencyInfo, import_name: str) -> bool:
-        """Return True if import_name is a namespace package parent of a
-        package found via RECORD, e.g. "google" for "google.cloud.storage"."""
-        return any(
-            record_name.startswith(f"{import_name}.")
-            for record_name in dep_info.record_import_names or []
-        )
-
     def resolve(self) -> None:
         """Associate dependency name with import (module) name.
 
@@ -244,20 +235,23 @@ class DepsResolver:
         the RECORD and a best-guess.
         """
         for dep_info in self.dependencies:
-            if dep_info.top_level_import_names:
-                for top_level_import_name in dep_info.top_level_import_names:
-                    if self.is_namespace_of_record_name(
-                        dep_info, top_level_import_name
-                    ):
-                        continue
-                    self.associate_dep_with_import(dep_info, top_level_import_name)
-            if dep_info.record_import_names:
-                for record_import_name in dep_info.record_import_names:
-                    self.associate_dep_with_import(dep_info, record_import_name)
+            record_names = dep_info.record_import_names or []
+            fallback_names = list(dep_info.top_level_import_names or [])
             if dep_info.canonicalized_dep_name:
-                self.associate_dep_with_import(
-                    dep_info, dep_info.canonicalized_dep_name
-                )
+                fallback_names.append(dep_info.canonicalized_dep_name)
+
+            import_names = dict.fromkeys(
+                [
+                    *record_names,
+                    *(
+                        name
+                        for name in fallback_names
+                        if not any(r.startswith(f"{name}.") for r in record_names)
+                    ),
+                ]
+            )
+            for import_name in import_names:
+                self.associate_dep_with_import(dep_info, import_name)
 
     def get_unused_dependencies(self) -> None:
         self.unused_deps = [
