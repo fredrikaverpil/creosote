@@ -226,6 +226,30 @@ def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> No
             id="other portion of namespace package",
         ),
         pytest.param(
+            ImportInfo(module=("google", "cloud"), name=("*",)),
+            "google.cloud.storage",
+            True,
+            id="ambiguous star import from namespace",
+        ),
+        pytest.param(
+            ImportInfo(module=("google", "cloud", "storage"), name=("*",)),
+            "google.cloud.storage",
+            True,
+            id="star import from package",
+        ),
+        pytest.param(
+            ImportInfo(module=("requests",), name=("*",)),
+            "requests",
+            True,
+            id="single-segment star import",
+        ),
+        pytest.param(
+            ImportInfo(module=(), name=("*",)),
+            "google.cloud.storage",
+            False,
+            id="relative star import does not match",
+        ),
+        pytest.param(
             ImportInfo(module=(), name=()),
             "google.cloud.storage",
             False,

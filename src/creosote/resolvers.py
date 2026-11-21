@@ -34,7 +34,8 @@ class DepsResolver:
             defaultdict(list)
         )
         for imp in imports:
-            full = imp.module + imp.name
+            # from x import * imports x
+            full = imp.module if imp.name == ("*",) else imp.module + imp.name
             self.imports_by_path[full].append(imp)
             for i in range(1, len(full) + 1):
                 self.imports_by_prefix[full[:i]].append(imp)
