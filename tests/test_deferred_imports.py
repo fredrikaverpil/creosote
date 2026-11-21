@@ -54,8 +54,8 @@ def test_deferred_from_import(tmp_path: Path) -> None:
     # With flag: import detected
     imports = list(get_module_info_from_python_file(str(path), include_deferred=True))
     assert len(imports) == 1
-    assert imports[0].module == ["os", "path"]
-    assert imports[0].name == ["join"]
+    assert imports[0].module == ("os", "path")
+    assert imports[0].name == ("join",)
 
 
 def test_nested_function_import(tmp_path: Path) -> None:
@@ -66,4 +66,4 @@ def test_nested_function_import(tmp_path: Path) -> None:
 
     imports = list(get_module_info_from_python_file(str(path), include_deferred=True))
     assert len(imports) == 1
-    assert imports[0].name == ["deeply_nested"]
+    assert imports[0].name == ("deeply_nested",)

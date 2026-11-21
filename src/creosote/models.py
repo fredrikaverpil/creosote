@@ -1,16 +1,16 @@
 import dataclasses
 
 
-@dataclasses.dataclass(slots=True)
+@dataclasses.dataclass(frozen=True, slots=True)
 class ImportInfo:
-    module: list[str]
-    name: list[str]
+    module: tuple[str, ...]
+    name: tuple[str, ...]
     alias: str | None = None
 
     @classmethod
     def from_module_name(cls, module_name: str) -> "ImportInfo":
         """Create ImportInfo from a simple module name (e.g., for Django apps)."""
-        return cls(module=[], name=[module_name], alias=None)
+        return cls(module=(), name=(module_name,), alias=None)
 
 
 @dataclasses.dataclass(slots=True)

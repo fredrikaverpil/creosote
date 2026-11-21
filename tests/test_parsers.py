@@ -21,10 +21,10 @@ def test_get_module_names_from_code_dedupes_in_first_seen_order(
     result = get_module_names_from_code([str(first), str(second)])
 
     assert [(i.module, i.name, i.alias) for i in result] == [
-        ([], ["os"], None),
-        (["pathlib"], ["Path"], None),
-        ([], ["os"], "o"),
-        ([], ["sys"], None),
+        ((), ("os",), None),
+        (("pathlib",), ("Path",), None),
+        ((), ("os",), "o"),
+        ((), ("sys",), None),
     ]
 
 
