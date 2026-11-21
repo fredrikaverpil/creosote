@@ -5,6 +5,108 @@ from creosote.resolvers import DepsResolver
 
 
 @pytest.mark.parametrize(
+    ["lines", "want"],
+    [
+        pytest.param(
+            [
+                "requests/__init__.py,sha256=x,1",
+                "requests/api.py,sha256=x,1",
+                "requests-2.32.3.dist-info/RECORD,,",
+            ],
+            ["requests"],
+            id="regular package",
+        ),
+        pytest.param(
+            [
+                "google/cloud/storage/__init__.py,sha256=x,1",
+                "google/cloud/storage/_media/__init__.py,sha256=x,1",
+                "google/cloud/storage/blob.py,sha256=x,1",
+            ],
+            ["google.cloud.storage"],
+            id="pep 420 namespace package",
+        ),
+        pytest.param(
+            [
+                "google_cloud_storage-1.44.0-py3.10-nspkg.pth,sha256=x,1",
+                "google/cloud/storage/__init__.py,sha256=x,1",
+                "google/cloud/storage/blob.py,sha256=x,1",
+                "google_cloud_storage-1.44.0.dist-info/namespace_packages.txt,sha256=x,1",
+                "google_cloud_storage-1.44.0.dist-info/top_level.txt,sha256=x,1",
+            ],
+            ["google.cloud.storage"],
+            id="setuptools namespace_packages wheel",
+        ),
+        pytest.param(
+            [
+                "ruamel\\yaml\\__init__.py,sha256=x,1",
+                "ruamel\\yaml\\anchor.py,sha256=x,1",
+            ],
+            ["ruamel.yaml"],
+            id="windows path separators",
+        ),
+        pytest.param(
+            [
+                "setuptools/__init__.py,sha256=x,1",
+                "pkg_resources/__init__.py,sha256=x,1",
+            ],
+            ["setuptools", "pkg_resources"],
+            id="multiple top-level packages",
+        ),
+        pytest.param(
+            [
+                "opentelemetry/trace/__init__.py,sha256=x,1",
+                "opentelemetry/trace/span.py,sha256=x,1",
+                "opentelemetry/propagators/composite.py,sha256=x,1",
+                "opentelemetry/propagators/textmap.py,sha256=x,1",
+                "opentelemetry/propagators/py.typed,sha256=x,0",
+            ],
+            [
+                "opentelemetry.trace",
+                "opentelemetry.propagators.composite",
+                "opentelemetry.propagators.textmap",
+            ],
+            id="modules in pep 420 namespace package",
+        ),
+        pytest.param(
+            [
+                "google/protobuf/__init__.py,sha256=x,1",
+                "google/_upb/_message.abi3.so,sha256=x,1",
+            ],
+            ["google.protobuf", "google._upb._message"],
+            id="extension module in pep 420 namespace package",
+        ),
+        pytest.param(
+            [
+                "foo/__init__.cpython-312-x86_64-linux-gnu.so,sha256=x,1",
+                "foo/core.cpython-312-x86_64-linux-gnu.so,sha256=x,1",
+            ],
+            ["foo"],
+            id="compiled regular package",
+        ),
+        pytest.param(
+            [
+                "six.py,sha256=x,1",
+                "__init__.py,sha256=x,1",
+                "../../bin/tool.py,sha256=x,1",
+                "/usr/local/bin/tool.py,sha256=x,1",
+                "six-1.17.0.dist-info/hook.py,sha256=x,1",
+                "six-1.17.0.data/scripts/tool.py,sha256=x,1",
+                "six-1.17.0.dist-info/RECORD,,",
+            ],
+            [],
+            id="top-level modules and non-package paths",
+        ),
+    ],
+)
+def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> None:
+    # act
+    got = DepsResolver.import_names_from_record_lines(lines)
+
+    # assert
+    assert got == want
+
+
+@pytest.mark.parametrize(
     ["imp", "import_name", "want_match"],
     [
         pytest.param(

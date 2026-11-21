@@ -1,4 +1,3 @@
-import os
 import pathlib
 import re
 from pathlib import Path
@@ -135,25 +134,52 @@ class DepsResolver:
                     ) as infile:
                         lines = infile.readlines()
 
-                    import_names_found: list[str] = []
-                    for line in lines:
-                        candidate, _hash, _size = line.split(",")
-                        if candidate.endswith(".py") and "__init__" in candidate:
-                            import_name = candidate.split(os.sep)[0]
-                            if import_name not in import_names_found:
-                                import_names_found.append(import_name)
+                    import_names_found = self.import_names_from_record_lines(lines)
+                    if import_names_found:
+                        dep_info.record_import_names = import_names_found
 
-                            dep_info.record_import_names = import_names_found
-
-                            import_names = ",".join(dep_info.record_import_names)
-                            logger.debug(
-                                f"[{dep_info.name}] found import name "
-                                + f"via RECORD: {import_names} ⭐️"
-                            )
-                            return True
+                        import_names = ",".join(dep_info.record_import_names)
+                        logger.debug(
+                            f"[{dep_info.name}] found import name "
+                            + f"via RECORD: {import_names} ⭐️"
+                        )
+                        return True
 
         logger.debug(f"[{dep_info.name}] did not find dep in a RECORD file")
         return False
+
+    @staticmethod
+    def import_names_from_record_lines(lines: list[str]) -> list[str]:
+        """Return the topmost regular packages listed in a RECORD file.
+
+        Directories without an __init__ module are treated as PEP 420
+        namespace packages, so e.g. google/cloud/storage/__init__.py
+        yields "google.cloud.storage" rather than "google". Modules
+        directly inside a namespace package yield their own path, e.g.
+        opentelemetry/propagators/textmap.py yields
+        "opentelemetry.propagators.textmap".
+        """
+        modules: list[tuple[tuple[str, ...], str]] = []
+        for line in lines:
+            *path_dirs, filename = line.split(",")[0].replace("\\", "/").split("/")
+            if (
+                path_dirs
+                and all(d.isidentifier() for d in path_dirs)
+                and filename.endswith((".py", ".so", ".pyd"))
+            ):
+                modules.append((tuple(path_dirs), filename.split(".")[0]))
+        init_dirs = {dirs for dirs, stem in modules if stem == "__init__"}
+        import_names_found: list[str] = []
+        for dirs, stem in modules:
+            parts = dirs if stem == "__init__" else (*dirs, stem)
+            topmost = next(
+                (parts[:i] for i in range(1, len(parts)) if parts[:i] in init_dirs),
+                parts,
+            )
+            import_name = ".".join(topmost)
+            if import_name not in import_names_found:
+                import_names_found.append(import_name)
+        return import_names_found
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
@@ -193,11 +219,30 @@ class DepsResolver:
     def associate_dep_with_import(
         self, dep_info: DependencyInfo, import_name: str
     ) -> None:
+        if "." in import_name:
+            # namespace package portion, e.g. google.cloud.storage
+            parts = tuple(import_name.split("."))
+            for imp in self.imports.copy():
+                full = imp.module + imp.name
+                n = min(len(parts), len(full))
+                if full[:n] == parts[:n]:
+                    dep_info.associated_imports.append(imp)
+            return
+
         for imp in self.imports.copy():
             # import <name>, or from <module> import ...
             root = imp.module or imp.name
             if root and root[0] == import_name:
                 dep_info.associated_imports.append(imp)
+
+    @staticmethod
+    def is_namespace_of_record_name(dep_info: DependencyInfo, import_name: str) -> bool:
+        """Return True if import_name is a namespace package parent of a
+        package found via RECORD, e.g. "google" for "google.cloud.storage"."""
+        return any(
+            record_name.startswith(f"{import_name}.")
+            for record_name in dep_info.record_import_names or []
+        )
 
     def resolve(self) -> None:
         """Associate dependency name with import (module) name.
@@ -210,6 +255,10 @@ class DepsResolver:
         for dep_info in self.dependencies:
             if dep_info.top_level_import_names:
                 for top_level_import_name in dep_info.top_level_import_names:
+                    if self.is_namespace_of_record_name(
+                        dep_info, top_level_import_name
+                    ):
+                        continue
                     self.associate_dep_with_import(dep_info, top_level_import_name)
             if dep_info.record_import_names:
                 for record_import_name in dep_info.record_import_names:
