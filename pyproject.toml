@@ -4,11 +4,11 @@ description = 'Identify unused dependencies and avoid a bloated virtual environm
 version = "5.2.1"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
 keywords = []
 authors = [{ name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" }]
 classifiers = [
   # https://pypi.org/classifiers/
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
