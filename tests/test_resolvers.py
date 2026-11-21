@@ -193,6 +193,18 @@ def test_import_names_from_record_lines(lines: list[str], want: list[str]) -> No
             id="single-segment name matches leading segment",
         ),
         pytest.param(
+            ImportInfo(module=("requests",), name=("Session",)),
+            "requests",
+            True,
+            id="single-segment name matches from-import module",
+        ),
+        pytest.param(
+            ImportInfo(module=("requests",), name=("Session",)),
+            "Session",
+            False,
+            id="single-segment name does not match imported symbol",
+        ),
+        pytest.param(
             ImportInfo(module=("requests", "auth"), name=("HTTPBasicAuth",)),
             "requests",
             True,
