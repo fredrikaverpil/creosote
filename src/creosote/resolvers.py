@@ -162,24 +162,24 @@ class DepsResolver:
         modules: list[tuple[tuple[str, ...], str]] = []
         for line in lines:
             *path_dirs, filename = line.split(",")[0].replace("\\", "/").split("/")
+            stem = filename[:-3] if filename.endswith(".py") else filename.split(".")[0]
             if (
                 path_dirs
                 and all(d.isidentifier() for d in path_dirs)
                 and filename.endswith((".py", ".so", ".pyd"))
+                and stem.isidentifier()
             ):
-                modules.append((tuple(path_dirs), filename.split(".")[0]))
+                modules.append((tuple(path_dirs), stem))
         init_dirs = {dirs for dirs, stem in modules if stem == "__init__"}
-        import_names_found: list[str] = []
+        import_names_found: dict[str, None] = {}
         for dirs, stem in modules:
             parts = dirs if stem == "__init__" else (*dirs, stem)
             topmost = next(
                 (parts[:i] for i in range(1, len(parts)) if parts[:i] in init_dirs),
                 parts,
             )
-            import_name = ".".join(topmost)
-            if import_name not in import_names_found:
-                import_names_found.append(import_name)
-        return import_names_found
+            import_names_found[".".join(topmost)] = None
+        return list(import_names_found)
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
