@@ -219,20 +219,11 @@ class DepsResolver:
     def associate_dep_with_import(
         self, dep_info: DependencyInfo, import_name: str
     ) -> None:
-        if "." in import_name:
-            # namespace package portion, e.g. google.cloud.storage
-            parts = tuple(import_name.split("."))
-            for imp in self.imports.copy():
-                full = imp.module + imp.name
-                n = min(len(parts), len(full))
-                if full[:n] == parts[:n]:
-                    dep_info.associated_imports.append(imp)
-            return
-
-        for imp in self.imports.copy():
-            # import <name>, or from <module> import ...
-            root = imp.module or imp.name
-            if root and root[0] == import_name:
+        parts = tuple(import_name.split("."))
+        for imp in self.imports:
+            full = imp.module + imp.name
+            n = min(len(parts), len(full))
+            if n and full[:n] == parts[:n]:
                 dep_info.associated_imports.append(imp)
 
     @staticmethod
