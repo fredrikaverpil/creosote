@@ -1,5 +1,6 @@
 import pathlib
 import re
+from collections import defaultdict
 from pathlib import Path
 
 from loguru import logger
@@ -26,13 +27,17 @@ class DepsResolver:
         venvs: list[str],
     ):
         # full import path -> imports with exactly that path / starting with it
-        self.imports_by_path: dict[tuple[str, ...], list[ImportInfo]] = {}
-        self.imports_by_prefix: dict[tuple[str, ...], list[ImportInfo]] = {}
+        self.imports_by_path: defaultdict[tuple[str, ...], list[ImportInfo]] = (
+            defaultdict(list)
+        )
+        self.imports_by_prefix: defaultdict[tuple[str, ...], list[ImportInfo]] = (
+            defaultdict(list)
+        )
         for imp in imports:
             full = imp.module + imp.name
-            self.imports_by_path.setdefault(full, []).append(imp)
+            self.imports_by_path[full].append(imp)
             for i in range(1, len(full) + 1):
-                self.imports_by_prefix.setdefault(full[:i], []).append(imp)
+                self.imports_by_prefix[full[:i]].append(imp)
         self.dependencies: list[DependencyInfo] = [
             DependencyInfo(name=dep) for dep in dependency_names
         ]
@@ -228,10 +233,10 @@ class DepsResolver:
     ) -> None:
         parts = tuple(import_name.split("."))
         # imports at or below import_name, e.g. google.cloud.storage.Client
-        dep_info.associated_imports.extend(self.imports_by_prefix.get(parts, []))
+        dep_info.associated_imports.extend(self.imports_by_prefix.get(parts, ()))
         # imports of a parent namespace, e.g. google.cloud
         for i in range(1, len(parts)):
-            dep_info.associated_imports.extend(self.imports_by_path.get(parts[:i], []))
+            dep_info.associated_imports.extend(self.imports_by_path.get(parts[:i], ()))
 
     def resolve(self) -> None:
         """Associate dependency name with import (module) name.
