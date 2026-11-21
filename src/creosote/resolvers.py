@@ -25,7 +25,6 @@ class DepsResolver:
         dependency_names: list[str],
         venvs: list[str],
     ):
-        self.imports: list[ImportInfo] = imports
         # full import path -> imports with exactly that path / starting with it
         self.imports_by_path: dict[tuple[str, ...], list[ImportInfo]] = {}
         self.imports_by_prefix: dict[tuple[str, ...], list[ImportInfo]] = {}
