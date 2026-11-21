@@ -876,19 +876,26 @@ def test_django_feature_finds_no_unused_deps(
 
 
 @pytest.mark.parametrize(
-    argnames=["scenario", "dep_in_spec", "has_import"],
+    argnames=["dep_in_spec", "has_import", "want_warning"],
     argvalues=[
         pytest.param(
-            "import_detected",
             True,
             True,
+            "Redundant exclusion 'yolo': import detected in source code",
             id="excluded dep has import detected — would have been found as used",
         ),
         pytest.param(
-            "transitive_dep",
             False,
             False,
+            "Redundant exclusion 'yolo': not found in {deps_filepath} "
+            + "(transitive dependency or typo)",
             id="excluded dep is not in the dep spec — transitive dependency",
+        ),
+        pytest.param(
+            True,
+            False,
+            None,
+            id="excluded dep is in the dep spec and unused — not redundant",
         ),
     ],
 )
@@ -896,21 +903,22 @@ def test_django_feature_finds_no_unused_deps(
 def test_fail_redundant_excludes(  # noqa: PLR0913
     venv_manager: VenvManager,
     capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
-    scenario: str,
     dep_in_spec: bool,
     has_import: bool,
+    want_warning: str | None,
     use_feature: bool,
 ) -> None:
     """Test the fail-redundant-excludes feature.
 
     Covers two cases of a redundant exclusion:
-      - "import_detected": the excluded dep has an import in source, so it
-        would have been found as used regardless.
-      - "transitive_dep": the excluded dep is not in the dependency spec at
-        all (e.g. a transitive dep), so excluding it is pointless.
+      - the excluded dep has an import in source, so it would have been
+        found as used regardless.
+      - the excluded dep is not in the dependency spec at all (e.g. a
+        transitive dep), so excluding it is pointless.
 
     In both cases a warning is always emitted.  Exit code is 1 only when the
-    feature flag is enabled.
+    feature flag is enabled. Excluding an unused dep in the spec is not
+    redundant: no warning, exit code 0.
     """
 
     # arrange
@@ -975,20 +983,10 @@ def test_fail_redundant_excludes(  # noqa: PLR0913
 
     # assert
 
-    if scenario == "import_detected":
-        assert (
-            "Redundant exclusion 'yolo': import detected in source code"
-            in actual_output
-        )
-    elif scenario == "transitive_dep":
-        assert any(
-            "Redundant exclusion 'yolo': not found in" in line
-            and "transitive dependency or typo" in line
-            for line in actual_output
-        )
-    assert "No unused dependencies found! ✨" in actual_output
-
-    if use_feature:
-        assert exit_code == 1
-    else:
-        assert exit_code == 0
+    assert actual_output == [
+        *(["Feature(s) enabled: fail-redundant-excludes"] if use_feature else []),
+        f"Found dependencies in {deps_filepath}: loguru",
+        *([want_warning.format(deps_filepath=deps_filepath)] if want_warning else []),
+        "No unused dependencies found! ✨",
+    ]
+    assert exit_code == (1 if use_feature and want_warning else 0)
