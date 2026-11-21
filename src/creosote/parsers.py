@@ -346,9 +346,9 @@ def get_module_info_from_python_file(
         iter_nodes = ast.walk if include_deferred else ast.iter_child_nodes
         for node in iter_nodes(root):
             if isinstance(node, ast.Import):
-                module = []
+                module: tuple[str, ...] = ()
             elif isinstance(node, ast.ImportFrom):
-                module = node.module.split(".") if node.module else []
+                module = tuple(node.module.split(".")) if node.module else ()
             else:
                 continue
 
@@ -356,7 +356,7 @@ def get_module_info_from_python_file(
                 for n in node.names:
                     yield ImportInfo(
                         module=module,
-                        name=n.name.split("."),
+                        name=tuple(n.name.split(".")),
                         alias=n.asname,
                     )
     if is_notebook:
@@ -383,16 +383,7 @@ def get_module_names_from_code(
         ):
             imports.append(import_info)
 
-    # ImportInfo isn't hashable (list fields), so dedupe on the fields its
-    # __eq__ compares. A list membership check here is quadratic in the
-    # number of imports.
-    seen: set[tuple[tuple[str, ...], tuple[str, ...], str | None]] = set()
-    imports_with_dupes_removed: list[ImportInfo] = []
-    for import_info in imports:
-        key = (tuple(import_info.module), tuple(import_info.name), import_info.alias)
-        if key not in seen:
-            seen.add(key)
-            imports_with_dupes_removed.append(import_info)
+    imports_with_dupes_removed = list(dict.fromkeys(imports))
 
     logger.debug("Imports found in code:")
     for imp in imports_with_dupes_removed:
