@@ -1,3 +1,7 @@
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"
+
 [project]
 name = "creosote"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
@@ -5,6 +9,7 @@ version = "5.2.1"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+license-files = ["LICENSE"]
 keywords = []
 authors = [{ name = "Fredrik Averpil", email = "fredrik.averpil@gmail.com" }]
 classifiers = [
