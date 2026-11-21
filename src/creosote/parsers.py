@@ -383,9 +383,15 @@ def get_module_names_from_code(
         ):
             imports.append(import_info)
 
+    # ImportInfo isn't hashable (list fields), so dedupe on the fields its
+    # __eq__ compares. A list membership check here is quadratic in the
+    # number of imports.
+    seen: set[tuple[tuple[str, ...], tuple[str, ...], str | None]] = set()
     imports_with_dupes_removed: list[ImportInfo] = []
     for import_info in imports:
-        if import_info not in imports_with_dupes_removed:
+        key = (tuple(import_info.module), tuple(import_info.name), import_info.alias)
+        if key not in seen:
+            seen.add(key)
             imports_with_dupes_removed.append(import_info)
 
     logger.debug("Imports found in code:")
