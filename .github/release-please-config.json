@@ -4,7 +4,7 @@
       "release-branch": "main",
       "release-type": "python",
       "include-v-in-tag": true,
-      "pull-request-header": " ## :warning: Manual changes required\n\n * Manual review of the `publish` workflow must be approved to publish to pypi.\n\n",
+      "pull-request-header": " ## :warning: Manual action required after merge\n\n * Manual review of the `publish` workflow must be approved to publish to pypi.\n\n",
       "extra-files": [
         {
           "type": "generic",
