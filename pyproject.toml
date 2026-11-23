@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "creosote"
 description = 'Identify unused dependencies and avoid a bloated virtual environment.'
-version = "5.2.1"
+version = "5.2.2"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
