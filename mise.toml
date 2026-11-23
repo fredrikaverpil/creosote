@@ -57,6 +57,37 @@ fi
 description = "Lint Markdown files, with fixes"
 run = "rumdl check --fix ."
 
+# Renovate
+
+# validate: check renovate.json. dry-run: list the updates Renovate would
+# propose (local only, needs `gh auth`).
+[tasks.renovate]
+description = "Validate renovate.json, or dry-run Renovate's lookups"
+usage = 'arg "<mode>" help="validate or dry-run" { choices "validate" "dry-run" }'
+tools = { node = "26.13.1", "npm:renovate" = { version = "44.255.2", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }, jq = "1.8.2" }
+run = '''
+set -eu
+case "$usage_mode" in
+validate)
+  renovate-config-validator --strict --no-global renovate.json
+  ;;
+dry-run)
+  report=$(mktemp)
+  token=$(gh auth token)
+  RENOVATE_TOKEN=$token GITHUB_COM_TOKEN=$token LOG_LEVEL=error \
+    renovate --platform=local --dry-run=lookup \
+    --report-type=file --report-path="$report"
+  jq -r '
+    .repositories[].packageFiles[][] | .packageFile as $file | .deps[]
+    | . as $dep | .updates[]?
+    | "\($file): \($dep.depName) \($dep.currentValue) -> \(.newValue // .newVersion)"
+      + (if .pendingChecks then " (pending)" else "" end)
+  ' "$report"
+  rm -f "$report"
+  ;;
+esac
+'''
+
 # Tasks that write files run one at a time; read-only checks in parallel.
 [tasks.default]
 description = "Run all checks"

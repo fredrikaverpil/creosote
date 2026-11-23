@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:monthly", "group:allNonMajor"],
+  "labels": ["dependencies"],
+  "minimumReleaseAge": "3 days",
+  "osvVulnerabilityAlerts": true,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/.mise/locks/**",
+    "**/tests/deps_files/**"
+  ],
+  "postUpdateOptions": ["gomodTidy"],
+  "pep621": {
+    "lockFileMaintenance": {
+      "enabled": true,
+      "schedule": ["* 0-3 1 * *"]
+    }
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["requires-python"],
+      "enabled": false
+    },
+    {
+      "description": ".python-version holds the lowest supported Python, raised by hand",
+      "matchManagers": ["pyenv"],
+      "enabled": false
+    },
+    {
+      "description": "Libraries: keep supporting older releases",
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies"],
+      "rangeStrategy": "widen"
+    },
+    {
+      "description": "cmd/govulncheck is not a module; look up the module, whose releases have the timestamps minimumReleaseAge needs",
+      "matchManagers": ["mise"],
+      "matchDepNames": ["go:golang.org/x/vuln/cmd/govulncheck"],
+      "overridePackageName": "golang.org/x/vuln"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/verify-lockfile\\.yml$/"],
+      "matchStrings": [
+        "gh extension install github/gh-actions-lock --pin (?<currentValue>v\\S+)"
+      ],
+      "depNameTemplate": "github/gh-actions-lock",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
