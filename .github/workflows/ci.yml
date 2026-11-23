@@ -29,10 +29,15 @@ jobs:
           - { task: py:deps, os: ubuntu-latest }
           - { task: pre-commit:lint, os: ubuntu-latest }
           - { task: md:lint, os: ubuntu-latest }
+          - { task: actions:lint, os: ubuntu-latest }
     env:
       UV_PYTHON: ${{ matrix.python }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v5
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v5.2.10
+        with:
+          version: 2026.11.10
       - run: mise run ${{ matrix.task }}
       - run: git diff --exit-code
