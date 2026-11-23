@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.2](https://github.com/fredrikaverpil/creosote/compare/v5.2.1...v5.2.2) (2026-11-23)
+
+
+### Bug Fixes
+
+* match import names against the leading import segment only ([#424](https://github.com/fredrikaverpil/creosote/issues/424)) ([bee3499](https://github.com/fredrikaverpil/creosote/commit/bee349956b080220eb7e6a98db3b8910c1afd41c))
+
 ## [5.2.1](https://github.com/fredrikaverpil/creosote/compare/v5.2.0...v5.2.1) (2026-11-21)
 
 
