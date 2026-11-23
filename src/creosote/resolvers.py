@@ -1,6 +1,6 @@
-import os
 import pathlib
 import re
+from collections import defaultdict
 from pathlib import Path
 
 from loguru import logger
@@ -26,7 +26,19 @@ class DepsResolver:
         dependency_names: list[str],
         venvs: list[str],
     ):
-        self.imports: list[ImportInfo] = imports
+        # full import path -> imports with exactly that path / starting with it
+        self.imports_by_path: defaultdict[tuple[str, ...], list[ImportInfo]] = (
+            defaultdict(list)
+        )
+        self.imports_by_prefix: defaultdict[tuple[str, ...], list[ImportInfo]] = (
+            defaultdict(list)
+        )
+        for imp in imports:
+            # from x import * imports x
+            full = imp.module if imp.name == ("*",) else imp.module + imp.name
+            self.imports_by_path[full].append(imp)
+            for i in range(1, len(full) + 1):
+                self.imports_by_prefix[full[:i]].append(imp)
         self.dependencies: list[DependencyInfo] = [
             DependencyInfo(name=dep) for dep in dependency_names
         ]
@@ -135,25 +147,52 @@ class DepsResolver:
                     ) as infile:
                         lines = infile.readlines()
 
-                    import_names_found: list[str] = []
-                    for line in lines:
-                        candidate, _hash, _size = line.split(",")
-                        if candidate.endswith(".py") and "__init__" in candidate:
-                            import_name = candidate.split(os.sep)[0]
-                            if import_name not in import_names_found:
-                                import_names_found.append(import_name)
+                    import_names_found = self.import_names_from_record_lines(lines)
+                    if import_names_found:
+                        dep_info.record_import_names = import_names_found
 
-                            dep_info.record_import_names = import_names_found
-
-                            import_names = ",".join(dep_info.record_import_names)
-                            logger.debug(
-                                f"[{dep_info.name}] found import name "
-                                + f"via RECORD: {import_names} ⭐️"
-                            )
-                            return True
+                        import_names = ",".join(dep_info.record_import_names)
+                        logger.debug(
+                            f"[{dep_info.name}] found import name "
+                            + f"via RECORD: {import_names} ⭐️"
+                        )
+                        return True
 
         logger.debug(f"[{dep_info.name}] did not find dep in a RECORD file")
         return False
+
+    @staticmethod
+    def import_names_from_record_lines(lines: list[str]) -> list[str]:
+        """Return the topmost regular packages listed in a RECORD file.
+
+        Directories without an __init__ module are treated as PEP 420
+        namespace packages, so e.g. google/cloud/storage/__init__.py
+        yields "google.cloud.storage" rather than "google". Modules
+        directly inside a namespace package yield their own path, e.g.
+        opentelemetry/propagators/textmap.py yields
+        "opentelemetry.propagators.textmap".
+        """
+        modules: list[tuple[tuple[str, ...], str]] = []
+        for line in lines:
+            *path_dirs, filename = line.split(",")[0].replace("\\", "/").split("/")
+            stem = filename[:-3] if filename.endswith(".py") else filename.split(".")[0]
+            if (
+                path_dirs
+                and all(d.isidentifier() for d in path_dirs)
+                and filename.endswith((".py", ".so", ".pyd"))
+                and stem.isidentifier()
+            ):
+                modules.append((tuple(path_dirs), stem))
+        init_dirs = {dirs for dirs, stem in modules if stem == "__init__"}
+        import_names_found: dict[str, None] = {}
+        for dirs, stem in modules:
+            parts = dirs if stem == "__init__" else (*dirs, stem)
+            topmost = next(
+                (parts[:i] for i in range(1, len(parts)) if parts[:i] in init_dirs),
+                parts,
+            )
+            import_names_found[".".join(topmost)] = None
+        return list(import_names_found)
 
     def map_dep_to_canonical_name(self, dep_info: DependencyInfo) -> str:
         return self.canonicalize_module_name(dep_info.name)
@@ -193,11 +232,12 @@ class DepsResolver:
     def associate_dep_with_import(
         self, dep_info: DependencyInfo, import_name: str
     ) -> None:
-        for imp in self.imports.copy():
-            # import <name>, or from <module> import ...
-            root = imp.module or imp.name
-            if root and root[0] == import_name:
-                dep_info.associated_imports.append(imp)
+        parts = tuple(import_name.split("."))
+        # imports at or below import_name, e.g. google.cloud.storage.Client
+        dep_info.associated_imports.extend(self.imports_by_prefix.get(parts, ()))
+        # imports of a parent namespace, e.g. google.cloud
+        for i in range(1, len(parts)):
+            dep_info.associated_imports.extend(self.imports_by_path.get(parts[:i], ()))
 
     def resolve(self) -> None:
         """Associate dependency name with import (module) name.
@@ -208,16 +248,23 @@ class DepsResolver:
         the RECORD and a best-guess.
         """
         for dep_info in self.dependencies:
-            if dep_info.top_level_import_names:
-                for top_level_import_name in dep_info.top_level_import_names:
-                    self.associate_dep_with_import(dep_info, top_level_import_name)
-            if dep_info.record_import_names:
-                for record_import_name in dep_info.record_import_names:
-                    self.associate_dep_with_import(dep_info, record_import_name)
+            record_names = dep_info.record_import_names or []
+            fallback_names = list(dep_info.top_level_import_names or [])
             if dep_info.canonicalized_dep_name:
-                self.associate_dep_with_import(
-                    dep_info, dep_info.canonicalized_dep_name
-                )
+                fallback_names.append(dep_info.canonicalized_dep_name)
+
+            import_names = dict.fromkeys(
+                [
+                    *record_names,
+                    *(
+                        name
+                        for name in fallback_names
+                        if not any(r.startswith(f"{name}.") for r in record_names)
+                    ),
+                ]
+            )
+            for import_name in import_names:
+                self.associate_dep_with_import(dep_info, import_name)
 
     def get_unused_dependencies(self) -> None:
         self.unused_deps = [

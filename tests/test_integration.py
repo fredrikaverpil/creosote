@@ -795,6 +795,81 @@ def test_dependency_with_prerelease_version_found(
     assert exit_code == 0
 
 
+@pytest.mark.parametrize(
+    ["with_top_level_txt"],
+    [
+        pytest.param(True, id="with top_level.txt"),
+        pytest.param(False, id="RECORD only"),
+    ],
+)
+def test_namespace_packages_sharing_a_namespace(
+    venv_manager: VenvManager,
+    capsys: CaptureFixture[Any],  # pyright: ignore[reportExplicitAny]
+    with_top_level_txt: bool,
+) -> None:
+    """Tests that PEP 420 namespace portions are attributed to the right dep."""
+
+    # arrange
+    venv_path, site_packages_path = venv_manager.create_venv()
+    for dependency_name, package in [
+        ("google-cloud-storage", "storage"),
+        ("google-cloud-bigquery", "bigquery"),
+    ]:
+        if with_top_level_txt:
+            _ = venv_manager.create_top_level_txt(
+                site_packages_path=site_packages_path,
+                dependency_name=dependency_name,
+                contents=["google"],
+            )
+        _ = venv_manager.create_record(
+            site_packages_path=site_packages_path,
+            dependency_name=dependency_name,
+            contents=[
+                f"google/cloud/{package}/__init__.py,sha256=x,1",
+                f"google/cloud/{package}/client.py,sha256=x,1",
+            ],
+        )
+    deps_filepath = venv_manager.create_deps_file(
+        relative_filepath="pyproject.toml",
+        contents=[
+            "[project]",
+            "dependencies = [",
+            '"google-cloud-storage",',
+            '"google-cloud-bigquery",',
+            "]",
+        ],
+    )
+    source_file = venv_manager.create_source_file(
+        relative_filepath="src/main.py",
+        contents=["from google.cloud import storage"],
+    )
+    args = [
+        "--venv",
+        str(venv_path),
+        "--path",
+        str(source_file),
+        "--deps-file",
+        str(deps_filepath),
+        "--section",
+        "project.dependencies",
+        "--format",
+        "no-color",
+    ]
+
+    # act
+    exit_code = cli.main(args)
+    actual_output = capsys.readouterr().err.splitlines()
+
+    # assert
+    assert actual_output == [
+        f"Found dependencies in {deps_filepath}: "
+        + "google-cloud-bigquery, google-cloud-storage",
+        "Oh no, bloated venv! 🤢 🪣",
+        "Unused dependencies found: google-cloud-bigquery",
+    ]
+    assert exit_code == 1
+
+
 @pytest.mark.parametrize("use_django_settings_arg", [True, False])
 def test_django_feature_finds_no_unused_deps(
     venv_manager: VenvManager,
