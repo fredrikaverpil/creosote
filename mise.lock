@@ -2,6 +2,53 @@
 
 lockfile_version = 3
 
+[[tools."aqua:zizmorcore/zizmor"]]
+version = "1.32.0"
+backend = "aqua:zizmorcore/zizmor"
+specifiers = ["1.32.0"]
+
+[tools."aqua:zizmorcore/zizmor"."platforms.linux-arm64"]
+checksum = "sha256:cb152b207f815116d7fa1c1ee4614f61578803351395052908095e79adfd9fd0"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541931"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.linux-arm64-musl"]
+checksum = "sha256:cb152b207f815116d7fa1c1ee4614f61578803351395052908095e79adfd9fd0"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541931"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.linux-x64"]
+checksum = "sha256:bb110cc765eca9cd7efb2e284a956be5974c60027b0970f16397d86208a9957b"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541932"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.linux-x64-musl"]
+checksum = "sha256:bb110cc765eca9cd7efb2e284a956be5974c60027b0970f16397d86208a9957b"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541932"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.macos-arm64"]
+checksum = "sha256:6efed18c4539a663fd3c851a2be9533fd8456c4e646d9416206da059154a0d3c"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541933"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.macos-x64"]
+checksum = "sha256:6983143c719ada6845a69cc4dd2bacc215f971662fecd8bbd2678388e5ce5969"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541930"
+provenance = "github-attestations"
+
+[tools."aqua:zizmorcore/zizmor"."platforms.windows-x64"]
+checksum = "sha256:d284a16e09d9df4ce2c000357e7b59bd531be093bea5718a1ce225b449b59d49"
+url = "https://github.com/zizmorcore/zizmor/releases/download/v1.32.0/zizmor-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/703541929"
+provenance = "github-attestations"
+
 [[tools.jq]]
 version = "1.8.2"
 backend = "aqua:jqlang/jq"

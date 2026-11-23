@@ -11,14 +11,18 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: release-please config
         id: release-please-config
         run: |

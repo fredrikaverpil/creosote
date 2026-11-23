@@ -5,6 +5,7 @@ minimum_release_age = "3d"
 [tools]
 rumdl = "0.2.52"
 uv = "0.13.1"
+"aqua:zizmorcore/zizmor" = "1.32.0"
 
 [hooks]
 enter = { task = "py:sync" }
@@ -57,6 +58,12 @@ fi
 description = "Lint Markdown files, with fixes"
 run = "rumdl check --fix ."
 
+# GitHub Actions
+
+[tasks."actions:lint"]
+description = "Audit GitHub Actions workflows"
+run = "zizmor --offline ."
+
 # Renovate
 
 # validate: check renovate.json. dry-run: list the updates Renovate would
@@ -95,5 +102,5 @@ run = [
   { task = "py:format" },
   { task = "md:lint" },
   { task = "py:lint" },
-  { tasks = ["py:typecheck", "py:test", "py:deps", "pre-commit:lint"] },
+  { tasks = ["py:typecheck", "py:test", "py:deps", "pre-commit:lint", "actions:lint"] },
 ]
