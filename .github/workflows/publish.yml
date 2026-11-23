@@ -17,6 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v5
+        with:
+          version: 2026.11.10
 
       - name: build package
         run: mise run py:build
